@@ -1,0 +1,72 @@
+		<h2> <a href="http://www.georss.org/">Location</a></h2>
+		<table width="100%" cellpadding="3" cellspacing="3">
+			<thead>
+
+				<tr>
+					<th scope="col" align=left>Name</th>
+					<th scope="col" colspan=3 align=left>Address</th>
+					<th scope="col" colspan=3 align=left></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+
+					<td width=15%> 
+						<input size="10" type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="locname" id="locname" />
+					</td> 
+					<td width=50%> 
+						<input size="50" type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="addr" id="addr" onKeyPress="return checkEnter(event);"/>
+					</td> 
+					<td width=20%> 
+						<a href='#' onclick='geocode();return false;' title='Geocode this address' id='geocode'>Geocode</a>
+						<input type="hidden" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geometry" id="geometry" />
+						<input type="hidden" value="" name="location_id" id="location_id" />
+					</td>
+				</tr>
+			</tbody>
+			</table>
+			<p>
+				<table width="30%" cellpadding="3" cellspacing="3" style="float:right;">
+					<thead>
+
+						<tr>
+							<th scope="col" align=left>Saved Locations</th>
+
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><label for="geopress_select"> 
+							    <select id="geopress_select" onchange="geopress_loadsaved(this);showLocation();"><option value="">--choose one--</option>
+							    <TMPL_VAR NAME=SAVED_LOCATIONS>
+							</td>
+						</tr>
+						<tr><td width=20%> <a href="#" onclick="geopress_resetMap();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
+					</tbody>
+				</table><div id="geo_map" class="mapstraction" style="width: 400px; height: 250px; "></div>
+				<!-- GeoPress Map -->
+				<script type="text/javascript"> //<![CDATA[ 
+				
+                // @todo - make this use a Mapstraction geocoder or geocoder independent
+                var geocoder = new GClientGeocoder();
+                
+				geopress_addEvent(window,'load', function() { 
+					geo_map = new Mapstraction("geo_map","google"); 
+					var myPoint = new LatLonPoint(<TMPL_IF NAME=NEW_ENTRY>20,-20</TMPL_IF><TMPL_ELSE><TMPL_VAR NAME=LOCATION_GEOMETRY></TMPL_ELSE>);
+					geo_map.addControls({
+						pan: 1,
+						zoom: 'small',
+						overview: false,
+						scale: 1,
+						map_type: 1
+					});
+					geo_map.setCenterAndZoom(myPoint,8);
+					<TMPL_IF NAME=NEW_LOCATION>geo_map.setCenterAndZoom(myPoint,1);</TMPL_IF>
+                    var marker = new Marker(myPoint);
+                    marker.setInfoBubble("<TMPL_VAR NAME=LOCATION_NAME>");
+                    geo_map.addMarker(marker);	
+					geo_map.setMapType(Mapstraction.HYBRID);
+				});
+				// ]]> 
+				</script><!-- end GeoPress Map -->
+				<br/>

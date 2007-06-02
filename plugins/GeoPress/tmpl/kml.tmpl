@@ -1,0 +1,34 @@
+<$MTHTTPContentType type="application/vnd.google-earth.kml+xml kml"$><?xml version="1.0" encoding="<$MTPublishCharset$>"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+   <Document>
+      <title><$MTBlogName remove_html="1" encode_xml="1"$></title>
+      <Metadata>
+          <link><$MTBlogURL$></link>
+          <description><$MTBlogDescription remove_html="1" encode_xml="1"$></description>
+          <language><$MTBlogLanguage ietf="1"$></language>
+          <copyright>Copyright <$MTDate format="%Y"$></copyright>
+          <lastBuildDate><MTEntries lastn="1"><$MTEntryDate format_name="rfc822"$></MTEntries></lastBuildDate>
+          <generator>http://www.sixapart.com/movabletype/</generator>
+          <docs>http://blogs.law.harvard.edu/tech/rss</docs> 
+           <$MTGeoRSS_Channel$>
+      </Metadata>
+      <MTEntries lastn="15">
+      <Placemark>
+         <name><$MTEntryTitle remove_html="1" encode_xml="1"$></name>
+         <description><$MTEntryBody encode_xml="1" convert_breaks="0"$></description>
+         <Metadata>
+             <link><$MTEntryPermalink encode_xml="1"$></link>
+             <guid><$MTEntryPermalink encode_xml="1"$></guid>
+            <MTEntryCategories>
+              <category domain="http://www.sixapart.com/ns/types#category"><$MTCategoryLabel remove_html="1" encode_xml="1"$></category>
+            </MTEntryCategories>
+            <MTEntryIfTagged><MTEntryTags>
+              <category domain="http://www.sixapart.com/ns/types#tag"><$MTTagName remove_html="1" encode_xml="1"$></category>
+            </MTEntryTags></MTEntryIfTagged>
+         </Metadata>
+         <TimeStamp><when><$MTEntryDate format_name="rfc822"$></when></TimeStamp>
+          <$MTKML_Entry$>
+      </Placemark>
+      </MTEntries>
+   </Document>
+</kml>
