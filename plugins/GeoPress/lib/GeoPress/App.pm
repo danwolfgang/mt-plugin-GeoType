@@ -81,9 +81,7 @@ sub configure_map {
 	my $sytem_config = $plugin->get_config_hash('system');
 	my $config = $plugin->get_config_hash('blog:' . $blog_id);
 	my $apppath = $app->{__path} || "";
-	my $spath = $app->{cfg}->StaticWebPath || $apppath;
 	my $map_param = { };
-	$map_param->{static_uri} = $spath;
 
 	# Build up the keys
 	my $google_api_key = $sytem_config->{google_api_key};	
@@ -156,9 +154,7 @@ sub list_locations {
 	my $system_config = $plugin->get_config_hash('system');
 	my $config = $plugin->get_config_hash('blog:' . $blog_id);
 	my $apppath = $app->{__path} || "";
-	my $spath = $app->{cfg}->StaticWebPath || $apppath;
 	my $map_param = { };
-	$map_param->{static_uri} = $spath;
 
 	# Build up the keys
 	my $google_api_key = $system_config->{google_api_key};	
