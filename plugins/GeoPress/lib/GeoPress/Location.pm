@@ -24,12 +24,6 @@ __PACKAGE__->install_properties({
     primary_key => 'id',
 });
 
-# sub get_all_locations {
-# 	my $blog_id = shift;
-# 
-# 	my $locations = GeoPress::Location->load({ blog_id => $blog_id });
-#   return $locations;
-# }
 sub get_location_for_entry {
 	my $entry = shift;
 
@@ -58,70 +52,6 @@ sub entry_location {
         return $location->location;
     }
     return "";
-}
-
-
-sub save_location {
-	my ($callback, $obj, $original) = @_;
-
-	use MT::App;
-	my $app = MT::App->instance;
-	# my $entry_id = $app->{query}->param('id');
-	my $blog_id = $original->blog_id;
-	my $entry_id = $original->id;
-	
-	# no need to test if these already exist - get_by_key will create them if they don't
-	my $entry_location = GeoPress::EntryLocation->get_by_key({entry_id => $entry_id, blog_id => $blog_id});
-
-	# if( $entry_location ) {
-	# 	$location = GeoPress::Location->new;
-	# 	$entry_location = GeoPress::EntryLocation->new;
-	# }
-	# else {
-	# }
-	
-	# my $location = GeoPress::Location->new;
-	
-  my $location_name = $app->{query}->param('locname');
-  my $location_addr = $app->{query}->param('addr');
-  my $geometry = $app->{query}->param('geometry');
-
-	if($location_addr eq "") {
-		return;
-	}
-	my $location = GeoPress::Location->get_by_key({ location => $location_addr});		
-	$location->blog_id($blog_id);
-	$location->location($location_addr);
-	$location->name($location_name);
-	$location->geometry($geometry);
-	$location->visible(1);
-	$location->save or die "Saving location failed: ", $location->errstr;
-	  
-	$entry_location->location_id($location->id);
-	$entry_location->save or die "Saving entry_location failed: ", $entry_location->errstr;
-	
-	
-	# 	my $xml = MTAmazon3::Util::CallAmazon("ListLookup",$app->{mmanager_cfg},{
-	#     ListId        => $wishlist,
-	#     ProductPage   => $current_page,
-	#     ListType      => 'WishList',
-	#     ResponseGroup => 'ListItems,ItemAttributes',
-	# });
-	# my $results = XMLin($xml);
-	# 
-	# if (my $msg = $results->{Lists}->{Request}->{Errors}->{Error}->{Message}) {
-	#     $app->{message} = $msg;
-	#     return search($app);
-	# }	
-	
-	 # or
-	#     return $callback->error("Error adding location: " . $location->errstr);
-	#     };
-
-	# Useful bits
-	# $obj->blog_id;
-	# $obj->text;
-	# $obj->text($text);
 }
 
 # sub geocode {

@@ -47,7 +47,7 @@ use vars qw( $VERSION );
 $VERSION = 1.01; 
 
 
-	my $plugin = new MT::Plugin::GeoPress({
+	my $plugin = MT::Plugin::GeoPress->new ({
     name => "GeoPress",
 		key => "GeoPress",
     version => $VERSION,
@@ -59,7 +59,7 @@ $VERSION = 1.01;
 	  config_link => 'geopress.cgi',
 	  config_template => 'config.tmpl',
 		schema_version => 1.01,
-    settings => new MT::PluginSettings([
+    settings => MT::PluginSettings->new ([
         ['google_api_key', 	{Default => 'GOOGLE_API_KEY', Scope => 'system'}],
         ['yahoo_api_key', 	{Default => 'YAHOO_API_KEY', Scope => 'system'}],
         ['microsoft_map', 	{Default => 0, Scope => 'system'}],
@@ -83,6 +83,8 @@ $VERSION = 1.01;
 	 	object_classes => [ 'GeoPress::Location', 'GeoPress::EntryLocation' ],
 		callbacks    => {
 			'MT::App::CMS::AppTemplateSource.edit_entry' => \&_edit_entry,
+            'MT::App::CMS::AppTemplateSource.blog-left-nav' => \&left_nav,
+            'CMSPostSave.entry' => \&save_location,
 		},
 		template_tags => {
 			'GeoPressCoords' => \&GeoPress::Location::entry_coords,
@@ -105,50 +107,13 @@ $VERSION = 1.01;
 	MT->add_plugin($plugin);
 
 sub instance { $plugin; }
-
-# Callback to actually store the specified location to the database.
-MT::Entry->add_callback("post_save", 
-			5, 
-			$plugin, 
-			\&GeoPress::Location::save_location);
 			
-# Adds the utilities sidebar link to configure geopress
-MT->add_callback("AppTemplateSource.blog-left-nav",
-		 10,
-		 $plugin,
-		 \&left_nav);
 sub left_nav {
     my ($eh, $app, $tmpl) = @_;
     my $slug = <<END_TMPL;
 <li><a style="background-image: url(<TMPL_VAR NAME=STATIC_URI>images/nav_icons/color/plugins.gif);" <TMPL_IF NAME=NAV_MEDIAMANAGER>class="here"</TMPL_IF> id="nav-mmanager" title="<MT_TRANS phrase="GeoPress">" href="<TMPL_UNLESS NAME=GPSCRIPT_URL><TMPL_VAR NAME=SCRIPT_PATH>plugins/GeoPress/</TMPL_UNLESS>geopress.cgi?__mode=view&amp;blog_id=<TMPL_VAR NAME=BLOG_ID><TMPL_VAR NAME=CONTEXT_URI>"><MT_TRANS phrase="GeoPress"></a></li>
 END_TMPL
     $$tmpl =~ s/(<li><MT_TRANS phrase=\"Utilities\">\n<ul class=\"sub\">)/$1$slug/;
-}
-	
-#
-# Get a named template from the tmpl directory - from MTMaps
-#
-use HTML::Template;
-use Cwd;
-my $cwd = '';
-{
-    my($bad);
-    local $SIG{__WARN__} = sub { $bad++ };
-    eval { $cwd = Cwd::getcwd() };
-    if ($bad || $@) {
-        eval { $cwd = Cwd::cwd() };
-        if ($@ && $@ !~ /Insecure \$ENV{PATH}/) {
-            die $@;
-        }
-    }
-}
-sub pluginDir() {
-  return $cwd."/plugins/GeoPress";
-}
-sub getTemplate {
-  my ($t) = @_;
-  my $file = pluginDir()."/tmpl/".$t;
-  return HTML::Template->new(filename => $file);
 }
 
 # Creates an actual map for an entry
@@ -162,7 +127,7 @@ sub entry_map {
  	my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
 	if ($location && $location->geometry ne "") {
-		my $tmpl = getTemplate("map.tmpl");
+		my $tmpl = $plugin->load_tmpl("map.tmpl");
 		$tmpl->param(default_map_format => $config->{default_map_format});
 		$tmpl->param(map_width => $config->{map_width});
 		$tmpl->param(map_height => $config->{map_height});
@@ -266,14 +231,10 @@ sub _geopress_headers {
   	$config = $plugin->get_config_hash('system');
 	}
 
-	my $tmpl = getTemplate("geopress_header.tmpl");
+	my $tmpl = $plugin->load_tmpl("geopress_header.tmpl");
 
 	use MT::App;
 	my $app = MT::App->instance;
-
-    my $apppath = $app->{__path} || "";
-    my $spath = $app->{cfg}->StaticWebPath || $apppath;
-    $tmpl->param(static_uri => $spath);
 
 	$tmpl->param(geopress_version => $VERSION);
 	# Build up the keys
@@ -311,7 +272,7 @@ sub _edit_entry {
 		my $location_geometry = $location->geometry;
 
 		my $header = _geopress_headers;
-		my $tmpl = getTemplate("geopress_edit.tmpl");
+		my $tmpl = $plugin->load_tmpl("geopress_edit.tmpl");
 
 		my $saved_locations = "";
 		my @locations = GeoPress::Location->load({ blog_id => $blog->id });
@@ -339,5 +300,66 @@ sub _edit_entry {
 	}
 	$$tmpl =~ s/($old)/$new\n$1\n/;
 }
+
+sub save_location {
+	my ($callback, $app, $obj, $original) = @_;
+
+	my $blog_id = $original->blog_id;
+	my $entry_id = $original->id;
+	
+	# no need to test if these already exist - get_by_key will create them if they don't
+	my $entry_location = GeoPress::EntryLocation->get_by_key({entry_id => $entry_id, blog_id => $blog_id});
+
+	# if( $entry_location ) {
+	# 	$location = GeoPress::Location->new;
+	# 	$entry_location = GeoPress::EntryLocation->new;
+	# }
+	# else {
+	# }
+	
+	# my $location = GeoPress::Location->new;
+	
+  my $location_name = $app->{query}->param('locname');
+  my $location_addr = $app->{query}->param('addr');
+  my $geometry = $app->{query}->param('geometry');
+
+	if($location_addr eq "") {
+		return;
+	}
+	my $location = GeoPress::Location->get_by_key({ location => $location_addr});		
+	$location->blog_id($blog_id);
+	$location->location($location_addr);
+	$location->name($location_name);
+	$location->geometry($geometry);
+	$location->visible(1);
+	$location->save or die "Saving location failed: ", $location->errstr;
+	  
+	$entry_location->location_id($location->id);
+	$entry_location->save or die "Saving entry_location failed: ", $entry_location->errstr;
+	
+	
+	# 	my $xml = MTAmazon3::Util::CallAmazon("ListLookup",$app->{mmanager_cfg},{
+	#     ListId        => $wishlist,
+	#     ProductPage   => $current_page,
+	#     ListType      => 'WishList',
+	#     ResponseGroup => 'ListItems,ItemAttributes',
+	# });
+	# my $results = XMLin($xml);
+	# 
+	# if (my $msg = $results->{Lists}->{Request}->{Errors}->{Error}->{Message}) {
+	#     $app->{message} = $msg;
+	#     return search($app);
+	# }	
+	
+	 # or
+	#     return $callback->error("Error adding location: " . $location->errstr);
+	#     };
+
+	# Useful bits
+	# $obj->blog_id;
+	# $obj->text;
+	# $obj->text($text);
+}
+
 
 1;
