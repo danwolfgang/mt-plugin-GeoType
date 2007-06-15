@@ -208,7 +208,7 @@ XML
 	}
 	elsif ($georss_format eq "w3c") {
 		my @coords = split(/,/, $geometry);
-	 	$georss_entry = qq{<geo:lat>@coords[0]</geo:lat><geo:long>@coords[1]</geo:long>};
+	 	$georss_entry = qq{<geo:lat>$coords[0]</geo:lat><geo:long>$coords[1]</geo:long>};
 	}
 	return $georss_entry;
 }
