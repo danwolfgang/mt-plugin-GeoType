@@ -87,8 +87,8 @@ $VERSION = 1.01;
             'CMSPostSave.entry' => \&save_location,
 		},
 		template_tags => {
-			'GeoPressCoords' => \&GeoPress::Location::entry_coords,
-			'GeoPressLocation' => \&GeoPress::Location::entry_location,
+			'GeoPressCoords' => \&entry_coords,
+			'GeoPressLocation' => \&entry_location,
 			'GeoPressMap' => \&entry_map,
 			'GeoPressHeader' =>\&_geopress_headers,
 			'GeoRSS_Namespace' =>\&_geopress_georss_ns,
@@ -122,7 +122,7 @@ sub entry_map {
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
 	
-	my $location = GeoPress::Location::get_location_for_entry($entry);
+	my $location = get_location_for_entry($entry);
 
  	my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
@@ -183,7 +183,7 @@ sub _geopress_georss_entry {
 
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
-	my $location = GeoPress::Location::get_location_for_entry($entry);
+	my $location = get_location_for_entry($entry);
   my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
 	my $georss_enable = $config->{georss_enable};		
@@ -239,10 +239,10 @@ sub _geopress_headers {
 	$tmpl->param(geopress_version => $VERSION);
 	# Build up the keys
 	my $google_api_key = $config->{google_api_key};	
-	if($google_api_key) { $tmpl->param(google_api_key => $google_api_key); }
+	if($google_api_key && $google_api_key ne 'GOOGLE_API_KEY') { $tmpl->param(google_api_key => $google_api_key); }
 
 	my $yahoo_api_key = $config->{yahoo_api_key};	
-	if($yahoo_api_key)  {$tmpl->param(yahoo_api_key => $yahoo_api_key); }
+	if($yahoo_api_key && $yahoo_api_key ne 'YAHOO_API_KEY')  {$tmpl->param(yahoo_api_key => $yahoo_api_key); }
 
 	my $microsoft_map = $config->{microsoft_map};	
 	if($microsoft_map)  {$tmpl->param(microsoft_map => $microsoft_map); }
@@ -359,6 +359,36 @@ sub save_location {
 	# $obj->blog_id;
 	# $obj->text;
 	# $obj->text($text);
+}
+
+sub get_location_for_entry {
+	my $entry = shift;
+
+	my $entry_location = GeoPress::EntryLocation->get_by_key({entry_id => $entry->id});
+	my $location = GeoPress::Location->get_by_key({ id => $entry_location->location_id });		
+    return $location;
+}
+sub entry_coords {
+    my $ctx = shift;
+    my $entry = $ctx->stash('entry');
+    my $location = get_location_for_entry($entry);
+
+    if ($location) {
+        return $location->geometry;
+    }
+    return "";
+
+}
+
+sub entry_location {
+    my $ctx = shift;
+    my $entry = $ctx->stash('entry');
+    my $location = get_location_for_entry($entry);
+
+    if ($location) {
+        return $location->location;
+    }
+    return "";
 }
 
 
