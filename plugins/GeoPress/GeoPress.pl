@@ -37,77 +37,82 @@
 package MT::Plugin::GeoPress; 
 use base qw(MT::Plugin);
 use strict;
+use warnings;
 
 use MT;
 use GeoPress::Location;
 use GeoPress::EntryLocation;
 
-# @MT::Plugin::GeoPress::ISA = qw(MT::Plugin);
 use vars qw( $VERSION );
 $VERSION = 1.01; 
 
-
-	my $plugin = MT::Plugin::GeoPress->new ({
-    name => "GeoPress",
-		key => "GeoPress",
-    version => $VERSION,
+my $plugin = MT::Plugin::GeoPress->new ({
+    name        => "GeoPress",
+	key         => "GeoPress",
+    version     => $VERSION,
     description => "<MT_TRANS phrase=\"GeoPress allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth.<br\><br\>GeoPress settings are on a per-blog setting, so you'll need to set this up in each weblog you administer. Use the 'GeoPress' link in the left sidebar under 'Utilities' to configure your Map defaults and Locations.\">",
     author_name => "Andrew Turner",
     author_link => "http://highearthorbit.com/",
     plugin_link => "http://georss.org/geopress/",
-		doc_link    => "http://georss.org/geopress/",
-	  config_link => 'geopress.cgi',
-	  config_template => 'config.tmpl',
-		schema_version => 1.01,
-    settings => MT::PluginSettings->new ([
-        ['google_api_key', 	{Default => 'GOOGLE_API_KEY', Scope => 'system'}],
-        ['yahoo_api_key', 	{Default => 'YAHOO_API_KEY', Scope => 'system'}],
-        ['microsoft_map', 	{Default => 0, Scope => 'system'}],
-        ['google_api_key', 	{Default => 'GOOGLE_API_KEY', Scope => 'blog'}],
-        ['yahoo_api_key', 	{Default => 'YAHOO_API_KEY', Scope => 'blog'}],
-        ['microsoft_map', 	{Default => 0, Scope => 'blog'}],
-        ['georss_format', 	{Default => 'simple', Scope => 'blog'}],
-        ['georss_enable', 	{Default => 1, Scope => 'blog'}],
-        ['map_width', 			{Default => '200', Scope => 'blog'}],
-        ['map_height', 			{Default => '200', Scope => 'blog'}],
-        ['default_map_format', 		{Default => 'google', Scope => 'blog'}],
-        ['default_map_type', 			{Default => 'HYBRID', Scope => 'blog'}],
-        ['map_controls_pan', 			{Default => 1, Scope => 'blog'}],
-        ['map_controls_map_type', {Default => 1, Scope => 'blog'}],
-        ['map_controls_zoom', 		{Default => "small", Scope => 'blog'}],
-        ['map_controls_overview', {Default => 0, Scope => 'blog'}],
-        ['map_controls_scale', 		{Default => 1, Scope => 'blog'}],
-        ['default_add_map', 			{Default => 'all', Scope => 'blog'}],
-        ['default_zoom_level', 		{Default => 11, Scope => 'blog'}],
-	    ]),
-	 	object_classes => [ 'GeoPress::Location', 'GeoPress::EntryLocation' ],
-		callbacks    => {
+	doc_link    => "http://georss.org/geopress/",
+
+	schema_version => 1.01,
+ 	object_classes => [ 'GeoPress::Location', 'GeoPress::EntryLocation' ],
+	
+	config_link     => 'geopress.cgi',
+	config_template => 'config.tmpl',
+    settings        => MT::PluginSettings->new ([
+        [ 'google_api_key', 	    { Default => 'GOOGLE_API_KEY',  Scope => 'system' } ],
+        [ 'yahoo_api_key', 	        { Default => 'YAHOO_API_KEY',   Scope => 'system' } ],
+        [ 'microsoft_map', 	        { Default => 0,                 Scope => 'system' } ],
+        [ 'google_api_key', 	    { Default => 'GOOGLE_API_KEY',  Scope => 'blog' } ],
+        [ 'yahoo_api_key', 	        { Default => 'YAHOO_API_KEY',   Scope => 'blog' } ],
+        [ 'microsoft_map', 	        { Default => 0,                 Scope => 'blog' } ],
+        [ 'georss_format', 	        { Default => 'simple',          Scope => 'blog' } ],
+        [ 'georss_enable', 	        { Default => 1,                 Scope => 'blog' } ],
+        [ 'map_width', 		        { Default => '200',             Scope => 'blog' } ],
+        [ 'map_height', 		    { Default => '200',             Scope => 'blog' } ],
+        [ 'default_map_format', 	{ Default => 'google',          Scope => 'blog' } ],
+        [ 'default_map_type', 		{ Default => 'HYBRID',          Scope => 'blog' } ],
+        [ 'map_controls_pan', 		{ Default => 1,                 Scope => 'blog' } ],
+        [ 'map_controls_map_type',  { Default => 1,                 Scope => 'blog' } ],
+        [ 'map_controls_zoom', 		{ Default => "small",           Scope => 'blog' } ],
+        [ 'map_controls_overview',  { Default => 0,                 Scope => 'blog' } ],
+        [ 'map_controls_scale', 	{ Default => 1,                 Scope => 'blog' } ],
+        [ 'default_add_map', 		{ Default => 'all',             Scope => 'blog' } ],
+        [ 'default_zoom_level', 	{ Default => 11,                Scope => 'blog' } ],
+	]),
+	
+	callbacks    => {
 			'MT::App::CMS::AppTemplateSource.edit_entry' => \&_edit_entry,
             'MT::App::CMS::AppTemplateSource.blog-left-nav' => \&left_nav,
-            'CMSPostSave.entry' => \&save_location,
-		},
-		template_tags => {
-			'GeoPressCoords' => \&entry_coords,
-			'GeoPressLocation' => \&entry_location,
-			'GeoPressMap' => \&entry_map,
-			'GeoPressHeader' =>\&_geopress_headers,
-			'GeoRSS_Namespace' =>\&_geopress_georss_ns,
-			'GeoRSS_Channel' =>\&_geopress_georss_channel,
-			'GeoRSS_Entry' =>\&_geopress_georss_entry,
-		},
+            'CMSPostSave.entry' => \&post_save_entry,
+	},
+	
+	template_tags => {
+			'GeoPressCoords' => \&geo_press_coords_tag,
+			'GeoPressLocation' => \&geo_press_location_tag,
+			'GeoPressMap' => \&geo_press_map_tag,
+			'GeoPressHeader' =>\&geo_press_header_tag,
+			'GeoRSS_Namespace' =>\&geo_rss_namespace_tag,
+			'GeoRSS_Channel' =>\&geo_rss_channel_tag,
+			'GeoRSS_Entry' =>\&geo_rss_entry_tag,
+	},
+	
     app_action_links => {
         'MT::App::CMS' => {   # application the action applies to
             'blog' => {
-                link => 'geopress.cgi',
+                link => 'geopress.cgi?__mode=view',
                 link_text => 'Edit GeoPress Locations'
             },
         }
     }
-	});
-	MT->add_plugin($plugin);
+});
+
+MT->add_plugin($plugin);
 
 sub instance { $plugin; }
-			
+	
 sub left_nav {
     my ($eh, $app, $tmpl) = @_;
     my $slug = <<END_TMPL;
@@ -117,7 +122,7 @@ END_TMPL
 }
 
 # Creates an actual map for an entry
-sub entry_map {
+sub geo_press_map_tag {
 	my $ctx = shift;
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
@@ -139,20 +144,18 @@ sub entry_map {
 	return "";
 }
 		
-sub _geopress_georss_ns {
+sub geo_rss_namespace_tag {
     my $ctx = shift;
-	use MT::App;
-
 	my $blog_id = $ctx->stash('blog_id');
-  my $config = $plugin->get_config_hash('blog:' . $blog_id);	
+    my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
 	my $georss_enable = $config->{georss_enable};		
-	if( ! $georss_enable ) {
+	if ( ! $georss_enable ) {
 		return "";
 	}
 	
 	my $georss_format = $config->{georss_format};	
-	if($georss_format eq "simple") {
+	if ($georss_format eq "simple") {
 		return qq{ xmlns:georss="http://www.georss.org/georss"};
 	}
 	elsif ($georss_format eq "gml") {
@@ -162,11 +165,11 @@ sub _geopress_georss_ns {
 	 	return qq{ xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"};
 	}
 }	
-sub _geopress_georss_channel {
+
+sub geo_rss_channel_tag {
     my $ctx = shift;
-	use MT::App;
 	my $blog_id = $ctx->stash('blog_id');
-  my $config = $plugin->get_config_hash('blog:' . $blog_id);	
+    my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 	my $georss_format = $config->{georss_format};	
 
 	my $georss_enable = $config->{georss_enable};		
@@ -176,34 +179,33 @@ sub _geopress_georss_channel {
 	
 	return "";
 }
-sub _geopress_georss_entry {
-    my $ctx = shift;
-	use MT::App;
 
+sub geo_rss_entry_tag {
+    my $ctx = shift;
 
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
 	my $location = get_location_for_entry($entry);
-  my $config = $plugin->get_config_hash('blog:' . $blog_id);	
+    my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
 	my $georss_enable = $config->{georss_enable};		
-	if( ! $georss_enable ) {
+	if ( ! $georss_enable ) {
 		return "";
 	}
 	
 	my $georss_format = $config->{georss_format};	
 	my $georss_entry;
 	my $geometry = $location->geometry;
-	if($georss_format eq "simple") {
+	if ($georss_format eq "simple") {
 	 	$georss_entry = qq{<georss:point>$geometry</georss:point>};
 	}
 	elsif ($georss_format eq "gml") {
 	 	$georss_entry =<<XML;
 <georss:where>
-			<gml:Point>
-				<gml:pos>$geometry</gml:pos>
-			</gml:Point>
-		</georss:where>
+    <gml:Point>
+		<gml:pos>$geometry</gml:pos>
+	</gml:Point>
+</georss:where>
 XML
 	}
 	elsif ($georss_format eq "w3c") {
@@ -215,150 +217,97 @@ XML
 
 # Tag to add the necessary mapping headers 
 #TODO - figure out how to have this get included automatically
-sub _geopress_headers {
-  my $ctx = shift;
-	my $blog_id;
-	my $config;
-	if(defined $ctx) {
-		$blog_id = $ctx->stash('blog_id');
-  	$config = $plugin->get_config_hash('blog:' . $blog_id);
-	}
-	else {
-		# We're in the admin interface, get things differently
-		use MT::App;
-		my $app = MT::App->instance;
-		$blog_id = $app->blog->id;
-  	$config = $plugin->get_config_hash('system');
-	}
-
+sub geo_press_header_tag {
+    my ($ctx) = @_;
+    
+    my $blog;
+    if ($ctx) {
+        $blog = $ctx->stash ('blog');
+    }
+    else {
+        require MT::App;
+        $blog = MT::App->instance->blog;
+    }
 	my $tmpl = $plugin->load_tmpl("geopress_header.tmpl");
-
-	use MT::App;
-	my $app = MT::App->instance;
 
 	$tmpl->param(geopress_version => $VERSION);
 	# Build up the keys
-	my $google_api_key = $config->{google_api_key};	
-	if($google_api_key && $google_api_key ne 'GOOGLE_API_KEY') { $tmpl->param(google_api_key => $google_api_key); }
+	my $google_api_key = $plugin->get_google_api_key ($blog);
+	if ($google_api_key && $google_api_key ne 'GOOGLE_API_KEY') { $tmpl->param(google_api_key => $google_api_key); }
 
-	my $yahoo_api_key = $config->{yahoo_api_key};	
-	if($yahoo_api_key && $yahoo_api_key ne 'YAHOO_API_KEY')  {$tmpl->param(yahoo_api_key => $yahoo_api_key); }
+	my $yahoo_api_key = $plugin->get_yahoo_api_key ($blog);
+	if ($yahoo_api_key && $yahoo_api_key ne 'YAHOO_API_KEY')  {$tmpl->param(yahoo_api_key => $yahoo_api_key); }
 
-	my $microsoft_map = $config->{microsoft_map};	
-	if($microsoft_map)  {$tmpl->param(microsoft_map => $microsoft_map); }
+	my $microsoft_map = $plugin->get_config_value ('microsoft_map', 'blog:' . $blog->id);
+	if ($microsoft_map)  {$tmpl->param(microsoft_map => $microsoft_map); }
 
 	$tmpl->output;
 }
 
 # Creates the Edit form when writing an entry
 sub _edit_entry {
-   my ($cb, $app, $tmpl) = @_;
+    my ($cb, $app, $tmpl) = @_;
 	my $blog = $app->blog;
-  my $config = $plugin->get_config_hash('system');
-	my $google_api_key = $config->{google_api_key};
-	my $yahoo_api_key = $config->{yahoo_api_key};
+    my $config = $plugin->get_config_hash('system');
+	my $google_api_key = $plugin->get_google_api_key ($blog);
+	my $yahoo_api_key = $plugin->get_yahoo_api_key ($blog);
 	my $microsoft_map = $config->{microsoft_map};
 	
 	my ($old, $new);
 	$old = qq{<TMPL_IF NAME=DISP_PREFS_SHOW_EXCERPT>};
-	$old = quotemeta($old);
+    # $old = quotemeta($old);
 		
-	if($google_api_key ne "GOOGLE_API_KEY" || $yahoo_api_key ne "YAHOO_API_KEY" || $microsoft_map ne 0) {
-		my $entry_id = $app->{query}->param('id');
-		my $entrylocation = GeoPress::EntryLocation->get_by_key({entry_id => $entry_id});
-		my $location = GeoPress::Location->get_by_key({ id => $entrylocation->location_id });
+	if ($google_api_key ne "GOOGLE_API_KEY" || $yahoo_api_key ne "YAHOO_API_KEY" || $microsoft_map ne 0) {
+		my $entry_id = $app->param('id');
+		my $entrylocation = GeoPress::EntryLocation->get_by_key ({entry_id => $entry_id});
+		my $location = GeoPress::Location->get_by_key ({ id => $entrylocation->location_id });
 		my $location_name = $location->name;
 		my $location_addr = $location->location;
 		my $location_geometry = $location->geometry;
 
-		my $header = _geopress_headers;
-		my $tmpl = $plugin->load_tmpl("geopress_edit.tmpl");
+		my $header = geo_press_header_tag;
+		my $tmpl = $plugin->load_tmpl("geopress_edit.tmpl") or return $cb->error ("Error loading template: ", $plugin->errstr);
 
 		my $saved_locations = "";
-		my @locations = GeoPress::Location->load({ blog_id => $blog->id });
-		foreach $location(@locations) {
-			if( $location->visible) {
-				$saved_locations = $saved_locations . "<option value=\"" . $location->location . "\">" . $location->name . "</option>";
-				# $saved_locations = $saved_locations . qq{<option value="test">test</option>};
-			}
-		}
+		my @locations = grep { $_->visible } GeoPress::Location->load ({ blog_id => $blog->id });
+		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => $_->name } } @locations ] );
 
-		if( !$location_geometry) {
-			$tmpl->param(new_location => 1);
-			# $location_geometry = "20, -20";
-		}
-		else {
-			
-		}
+        $tmpl->param ( new_location => 1 ) if (!$location_geometry);
+
 		$tmpl->param(saved_locations => $saved_locations);
 		$tmpl->param(location_addr => $location_addr);
 		$tmpl->param(location_name => $location_name);
 		$tmpl->param(location_geometry => $location_geometry);
 		$new = $header.($tmpl->output);
 	} else {
-		$new = "To Enable GeoPress, add the appropriate mapping library keys in your settings.";
+		$new = "<p>To Enable GeoPress, add the appropriate mapping library keys in your settings.</p>";
 	}
-	$$tmpl =~ s/($old)/$new\n$1\n/;
+	$$tmpl =~ s/\Q$old\E/$new\n$old\n/;
 }
 
-sub save_location {
+sub post_save_entry {
 	my ($callback, $app, $obj, $original) = @_;
 
-	my $blog_id = $original->blog_id;
-	my $entry_id = $original->id;
+    return unless ($app->param ('geopress_addr'));
+
+	my $blog_id = $obj->blog_id;
+	my $entry_id = $obj->id;
 	
 	# no need to test if these already exist - get_by_key will create them if they don't
-	my $entry_location = GeoPress::EntryLocation->get_by_key({entry_id => $entry_id, blog_id => $blog_id});
+	my $entry_location = GeoPress::EntryLocation->get_by_key ({ entry_id => $entry_id, blog_id => $blog_id });
 
-	# if( $entry_location ) {
-	# 	$location = GeoPress::Location->new;
-	# 	$entry_location = GeoPress::EntryLocation->new;
-	# }
-	# else {
-	# }
-	
-	# my $location = GeoPress::Location->new;
-	
-  my $location_name = $app->{query}->param('locname');
-  my $location_addr = $app->{query}->param('addr');
-  my $geometry = $app->{query}->param('geometry');
+    my $location_name = $app->param('geopress_locname');
+    my $location_addr = $app->param('geopress_addr');
+    my $geometry = $app->param('geopress_geometry');
 
-	if($location_addr eq "") {
-		return;
-	}
-	my $location = GeoPress::Location->get_by_key({ location => $location_addr});		
-	$location->blog_id($blog_id);
-	$location->location($location_addr);
+	my $location = GeoPress::Location->get_by_key ({ location => $location_addr, blog_id => $blog_id });		
 	$location->name($location_name);
 	$location->geometry($geometry);
 	$location->visible(1);
-	$location->save or die "Saving location failed: ", $location->errstr;
+	$location->save or return $callback->error ("Saving location failed: ", $location->errstr);
 	  
 	$entry_location->location_id($location->id);
-	$entry_location->save or die "Saving entry_location failed: ", $entry_location->errstr;
-	
-	
-	# 	my $xml = MTAmazon3::Util::CallAmazon("ListLookup",$app->{mmanager_cfg},{
-	#     ListId        => $wishlist,
-	#     ProductPage   => $current_page,
-	#     ListType      => 'WishList',
-	#     ResponseGroup => 'ListItems,ItemAttributes',
-	# });
-	# my $results = XMLin($xml);
-	# 
-	# if (my $msg = $results->{Lists}->{Request}->{Errors}->{Error}->{Message}) {
-	#     $app->{message} = $msg;
-	#     return search($app);
-	# }	
-	
-	 # or
-	#     return $callback->error("Error adding location: " . $location->errstr);
-	#     };
-
-	# Useful bits
-	# $obj->blog_id;
-	# $obj->text;
-	# $obj->text($text);
+	$entry_location->save or return $callback->error ("Saving entry_location failed: ", $entry_location->errstr);
 }
 
 sub get_location_for_entry {
@@ -368,28 +317,46 @@ sub get_location_for_entry {
 	my $location = GeoPress::Location->get_by_key({ id => $entry_location->location_id });		
     return $location;
 }
-sub entry_coords {
+
+sub geo_press_coords_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
     my $location = get_location_for_entry($entry);
 
-    if ($location) {
-        return $location->geometry;
-    }
-    return "";
-
+    return $location ? $location->geometry : "";
 }
 
-sub entry_location {
+sub geo_press_location_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
     my $location = get_location_for_entry($entry);
 
-    if ($location) {
-        return $location->location;
-    }
-    return "";
+    return $location ? $location->location : "";
 }
 
+sub get_google_api_key {
+    my $plugin = shift;
+    my ($blog) = @_;
+    
+    return $plugin->_get_api_key ($blog, 'google');
+}
+
+sub get_yahoo_api_key {
+    my $plugin = shift;
+    my ($blog) = @_;
+    
+    return $plugin->_get_api_key ($blog, 'yahoo');
+}
+
+
+sub _get_api_key {
+    my $plugin = shift;
+    my ($blog, $key) = @_;
+    
+    my $system_value = $plugin->get_config_value ($key . '_api_key', 'system');
+    my $blog_value   = $plugin->get_config_value ($key . '_api_key', 'blog:' . $blog->id);
+    
+    return $blog_value && $blog_value ne uc($key . '_api_key') ? $blog_value : $system_value;
+}
 
 1;

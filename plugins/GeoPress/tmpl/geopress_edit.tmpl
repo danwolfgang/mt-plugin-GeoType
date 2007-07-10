@@ -1,4 +1,6 @@
-		<h2> <a href="http://www.georss.org/">Location</a></h2>
+<div class="field">
+    <div class="field-header"><label>Location</label></div>
+    <div class="field-wrapper">
 		<table width="100%" cellpadding="3" cellspacing="3">
 			<thead>
 
@@ -12,15 +14,15 @@
 				<tr>
 
 					<td width=15%> 
-						<input size="10" type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="locname" id="locname" />
+						<input size="10" type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="geopress_locname" id="geopress_locname" />
 					</td> 
 					<td width=50%> 
-						<input size="50" type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="addr" id="addr" onKeyPress="return checkEnter(event);"/>
+						<input size="50" type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="geopress_addr" id="geopress_addr" onKeyPress="return checkEnter(event);"/>
 					</td> 
 					<td width=20%> 
-						<a href='#' onclick='geocode();return false;' title='Geocode this address' id='geocode'>Geocode</a>
-						<input type="hidden" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geometry" id="geometry" />
-						<input type="hidden" value="" name="location_id" id="location_id" />
+						<a href='#' onclick="geocode('geopress_addr', 'geopress_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a>
+						<input type="hidden" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geopress_geometry" id="geopress_geometry" />
+						<input type="hidden" value="" name="geopress_location_id" id="geopress_location_id" />
 					</td>
 				</tr>
 			</tbody>
@@ -37,8 +39,11 @@
 					<tbody>
 						<tr>
 							<td><label for="geopress_select"> 
-							    <select id="geopress_select" onchange="geopress_loadsaved(this);showLocation();"><option value="">--choose one--</option>
-							    <TMPL_VAR NAME=SAVED_LOCATIONS>
+							    <select id="geopress_select" onchange="geopress_loadsaved(this, 'geopress_addr', 'geopress_locname');showLocation('geopress_geometry', 'geopress_geometry');"><option value="">--choose one--</option>
+							        <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
+							        <option value="<TMPL_VAR NAME=LOCATION_VALUE>"><TMPL_VAR NAME=LOCATION_NAME></option>
+							        </TMPL_LOOP>
+							    </select>
 							</td>
 						</tr>
 						<tr><td width=20%> <a href="#" onclick="geopress_resetMap();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
@@ -51,8 +56,7 @@
                 var geocoder = new GClientGeocoder();
                 
 				geopress_addEvent(window,'load', function() { 
-					geo_map = new Mapstraction("geo_map","google"); 
-					var myPoint = new LatLonPoint(<TMPL_IF NAME=NEW_ENTRY>20,-20</TMPL_IF><TMPL_ELSE><TMPL_VAR NAME=LOCATION_GEOMETRY></TMPL_ELSE>);
+					geo_map = new Mapstraction("geo_map","google");
 					geo_map.addControls({
 						pan: 1,
 						zoom: 'small',
@@ -60,13 +64,15 @@
 						scale: 1,
 						map_type: 1
 					});
-					geo_map.setCenterAndZoom(myPoint,8);
-					<TMPL_IF NAME=NEW_LOCATION>geo_map.setCenterAndZoom(myPoint,1);</TMPL_IF>
-                    var marker = new Marker(myPoint);
-                    marker.setInfoBubble("<TMPL_VAR NAME=LOCATION_NAME>");
-                    geo_map.addMarker(marker);	
 					geo_map.setMapType(Mapstraction.HYBRID);
 				});
+				<TMPL_UNLESS NAME=NEW_LOCATION>
+				geopress_addEvent(window, 'load', function() { showLocation('geopress_geometry', 'geopress_geometry'); });
+				<TMPL_ELSE>
+				geopress_addEvent(window, 'load', function() { geopress_resetMap(); });
+				</TMPL_UNLESS>
 				// ]]> 
 				</script><!-- end GeoPress Map -->
 				<br/>
+	</div>
+</div>

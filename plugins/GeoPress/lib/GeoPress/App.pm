@@ -126,24 +126,25 @@ sub save_locations {
     my $q = $app->{query};
 
     my $blog_id = $q->param('blog_id');
-		my $plugin = MT::Plugin::GeoPress->instance;
-		my %param;
-		my @params = $q->param;
+	my $plugin = MT::Plugin::GeoPress->instance;
+	my %param;
+	my @params = $q->param;
 
-		my $index = 0;
-		while($index lt $q->param('num_locations')) {
-			my $locid = $q->param('locid['.$index.']');
-			my $location = GeoPress::Location->get_by_key({ id => $locid });		
-			$location->location( $q->param('locaddr['.$index.']') );
-			$location->name( $q->param('locname['.$index.']') );
-			$location->geometry( $q->param('location_geometry['.$index.']') );
-			$location->visible( $q->param('locvisible['.$index.']')  ? 1 : 0 ); 
-			$location->save or die "Saving location failed: ", $location->errstr;
-			$index++;
-		}
+	my $index = 0;
+	while($index < $q->param('num_locations')) {
+		my $locid = $q->param('locid['.$index.']');
+		my $location = GeoPress::Location->get_by_key({ id => $locid });		
+		$location->location( $q->param('locaddr['.$index.']') );
+		$location->name( $q->param('locname['.$index.']') );
+		$location->geometry( $q->param('location_geometry['.$index.']') );
+		$location->visible( $q->param('locvisible['.$index.']')  ? 1 : 0 ); 
+		$location->save or die "Saving location failed: ", $location->errstr;
+		$index++;
+	}
  
-		list_locations($app);
+	list_locations($app);
 }
+
 sub list_locations {
 	my $app = shift;
 	my $q = $app->{query};
@@ -157,11 +158,11 @@ sub list_locations {
 	my $map_param = { };
 
 	# Build up the keys
-	my $google_api_key = $system_config->{google_api_key};	
-	if($google_api_key) { $map_param->{google_api_key} = $google_api_key; }
+	my $google_api_key = $config && $config->{google_api_key} && $config->{google_api_key} ne 'GOOGLE_API_KEY' ? $config->{google_api_key} : $system_config->{google_api_key};	
+	if($google_api_key && $google_api_key ne 'GOOGLE_API_KEY') { $map_param->{google_api_key} = $google_api_key; }
 
-	my $yahoo_api_key = $system_config->{yahoo_api_key};	
-	if($yahoo_api_key)  {$map_param->{yahoo_api_key} = $yahoo_api_key; }
+	my $yahoo_api_key = $config && $config->{yahoo_api_key} && $config->{yahoo_api_key} ne 'YAHOO_API_KEY' ? $config->{yahoo_api_key} : $system_config->{yahoo_api_key};	
+	if($yahoo_api_key && $yahoo_api_key ne 'YAHOO_API_KEY')  {$map_param->{yahoo_api_key} = $yahoo_api_key; }
 
 	my $microsoft_map = $system_config->{microsoft_map};	
 	if($microsoft_map)  {$map_param->{microsoft_map} = $microsoft_map; }

@@ -39,12 +39,13 @@ function addPointToMap(point) {
 }
 function returnObjById( id )
 {
+    var returnVar;
     if (document.getElementById)
-        var returnVar = document.getElementById(id);
+        returnVar = document.getElementById(id);
     else if (document.all)
-        var returnVar = document.all[id];
+        returnVar = document.all[id];
     else if (document.layers)
-        var returnVar = document.layers[id];
+        returnVar = document.layers[id];
     return returnVar;
 }
 
@@ -107,7 +108,7 @@ var gPoint;
 // setMapPoint() handles a user clicking on a map
 function setMapPoint(point) {
 	//document.forms[0].addr	
-	returnObjById('addr').value = "[" + point + "]";
+    returnObjById('addr').value = "[" + point + "]";
 	geo_map.removeAllMarkers();
 	addPointToMap(point);
 }
@@ -130,13 +131,19 @@ function geopress_addEvent(obj, evType, fn){
 }
 
 // Handles loading a saved address
-function geopress_loadsaved(oSel) { 
+function geopress_loadsaved(oSel, addr_element, locname_element) { 
+
+   if ( ! addr_element )
+      addr_element = 'addr';
+      
+   if ( ! locname_element )
+      locname_element = 'locname';
 
    var addr = oSel.options[oSel.selectedIndex].value;
    var name = oSel.options[oSel.selectedIndex].text;
    
-   addrobj = document.getElementById("addr");
-   locnameobj = document.getElementById("locname");
+   addrobj = returnObjById(addr_element);
+   locnameobj = returnObjById(locname_element);
    addrobj.value = addr;
    locnameobj.value = name;
 
