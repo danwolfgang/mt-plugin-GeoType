@@ -12,7 +12,6 @@ use GeoPress::EntryLocation;
 sub init {
 	my $app = shift;
 	$app->SUPER::init(@_) or return;
-	#GeoPress::Util::debug("Initializing GeoPress Location Manager");
 	$app->add_methods(
 		'view'              => \&list_locations,
 		'map'              => \&configure_map,
@@ -26,32 +25,6 @@ sub init {
 	$app;
 
 }
-
-#
-# Get a named template from the tmpl directory - from MTMaps
-#
-# use HTML::Template;
-# use Cwd;
-# my $cwd = '';
-# {
-#     my($bad);
-#     local $SIG{__WARN__} = sub { $bad++ };
-#     eval { $cwd = Cwd::getcwd() };
-#     if ($bad || $@) {
-#         eval { $cwd = Cwd::cwd() };
-#         if ($@ && $@ !~ /Insecure \$ENV{PATH}/) {
-#             die $@;
-#         }
-#     }
-# }
-# sub pluginDir() {
-#   return $cwd."/plugins/GeoPress";
-# }
-# sub getTemplate {
-#   my ($t) = @_;
-#   my $file = pluginDir()."/tmpl/".$t;
-#   return HTML::Template->new(filename => $file);
-# }
 
 sub save_configure_map {
     my $app = shift;
@@ -78,17 +51,15 @@ sub configure_map {
 	my $param = { };
 
 	my $blog_id = $q->param('blog_id');
+	my $blog = $app->blog;
 	my $sytem_config = $plugin->get_config_hash('system');
 	my $config = $plugin->get_config_hash('blog:' . $blog_id);
 	my $apppath = $app->{__path} || "";
 	my $map_param = { };
 
 	# Build up the keys
-	my $google_api_key = $sytem_config->{google_api_key};	
-	if($google_api_key) { $map_param->{google_api_key} = $google_api_key }
-
-	my $yahoo_api_key = $sytem_config->{yahoo_api_key};	
-	if($yahoo_api_key)  {$map_param->{yahoo_api_key} = $yahoo_api_key; }
+    $map_param->{google_api_key} = $plugin->get_google_api_key ($blog);
+    $map_param->{yahoo_api_key} = $plugin->get_yahoo_api_key ($blog);
 
 	my $microsoft_map = $sytem_config->{microsoft_map};	
 	if($microsoft_map)  {$map_param->{microsoft_map} = $microsoft_map; }
@@ -152,17 +123,15 @@ sub list_locations {
 	my $param = { };
 
 	my $blog_id = $q->param('blog_id');
+	my $blog = $app->blog;
 	my $system_config = $plugin->get_config_hash('system');
 	my $config = $plugin->get_config_hash('blog:' . $blog_id);
 	my $apppath = $app->{__path} || "";
 	my $map_param = { };
 
 	# Build up the keys
-	my $google_api_key = $config && $config->{google_api_key} && $config->{google_api_key} ne 'GOOGLE_API_KEY' ? $config->{google_api_key} : $system_config->{google_api_key};	
-	if($google_api_key && $google_api_key ne 'GOOGLE_API_KEY') { $map_param->{google_api_key} = $google_api_key; }
-
-	my $yahoo_api_key = $config && $config->{yahoo_api_key} && $config->{yahoo_api_key} ne 'YAHOO_API_KEY' ? $config->{yahoo_api_key} : $system_config->{yahoo_api_key};	
-	if($yahoo_api_key && $yahoo_api_key ne 'YAHOO_API_KEY')  {$map_param->{yahoo_api_key} = $yahoo_api_key; }
+	$map_param->{google_api_key} = $plugin->get_google_api_key ($blog);
+	$map_param->{yahoo_api_key} = $plugin->get_yahoo_api_key ($blog);
 
 	my $microsoft_map = $system_config->{microsoft_map};	
 	if($microsoft_map)  {$map_param->{microsoft_map} = $microsoft_map; }
