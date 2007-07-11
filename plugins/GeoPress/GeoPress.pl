@@ -232,11 +232,8 @@ sub geo_press_header_tag {
 
 	$tmpl->param(geopress_version => $VERSION);
 	# Build up the keys
-	my $google_api_key = $plugin->get_google_api_key ($blog);
-	if ($google_api_key && $google_api_key ne 'GOOGLE_API_KEY') { $tmpl->param(google_api_key => $google_api_key); }
-
-	my $yahoo_api_key = $plugin->get_yahoo_api_key ($blog);
-	if ($yahoo_api_key && $yahoo_api_key ne 'YAHOO_API_KEY')  {$tmpl->param(yahoo_api_key => $yahoo_api_key); }
+    $tmpl->param (google_api_key => $plugin->get_google_api_key ($blog));
+    $tmpl->param (yahoo_api_key => $plugin->get_yahoo_api_key ($blog));
 
 	my $microsoft_map = $plugin->get_config_value ('microsoft_map', 'blog:' . $blog->id);
 	if ($microsoft_map)  {$tmpl->param(microsoft_map => $microsoft_map); }
@@ -257,7 +254,7 @@ sub _edit_entry {
 	$old = qq{<TMPL_IF NAME=DISP_PREFS_SHOW_EXCERPT>};
     # $old = quotemeta($old);
 		
-	if ($google_api_key ne "GOOGLE_API_KEY" || $yahoo_api_key ne "YAHOO_API_KEY" || $microsoft_map ne 0) {
+	if ($google_api_key || $yahoo_api_key || $microsoft_map ne 0) {
 		my $entry_id = $app->param('id');
 		my $entrylocation = GeoPress::EntryLocation->get_by_key ({entry_id => $entry_id});
 		my $location = GeoPress::Location->get_by_key ({ id => $entrylocation->location_id });
