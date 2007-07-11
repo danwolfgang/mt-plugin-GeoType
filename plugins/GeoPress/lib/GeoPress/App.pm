@@ -1,14 +1,12 @@
 package GeoPress::App;
 use strict;
+use warnings;
 
-use MT::App;
-@GeoPress::App::ISA = qw( MT::App );
+use base qw( MT::App );
 
-use MT::App::CMS;
 use GeoPress::Location;
 use GeoPress::EntryLocation;
 
-# Useful tutorial: http://www.movalog.com/archives/plugins/walkthrough/movable-type-plugin-walkthrough-interfaces
 sub init {
 	my $app = shift;
 	$app->SUPER::init(@_) or return;
@@ -22,8 +20,10 @@ sub init {
 		);
 	$app->{default_mode} = 'map';
 	$app->{requires_login} = 1;
+	
+	$app->{ plugin } = MT::Plugin::GeoPress->instance;
+	
 	$app;
-
 }
 
 sub save_configure_map {
@@ -31,30 +31,27 @@ sub save_configure_map {
     my $q = $app->{query};
 
     my $blog_id = $q->param('blog_id');
-		my $plugin = MT::Plugin::GeoPress->instance;
-		my %param;
-		my @params = $q->param;
+	my %param;
+	my @params = $q->param;
     foreach (@params) {
          next if $_ =~ m/^(__mode|return_args|plugin_sig|magic_token|blog_id)$/;
          $param{$_} = $q->param($_);
      }
-     if ($plugin) {
-         $plugin->save_config(\%param, $blog_id ? 'blog:' . $blog_id : 'system');
-     }
+
+     $app->{ plugin }->save_config(\%param, $blog_id ? 'blog:' . $blog_id : 'system');
  
-		configure_map($app);
+	 configure_map($app);
 }
 sub configure_map {
 	my $app = shift;
 	my $q = $app->{query};
-	my $plugin = MT::Plugin::GeoPress->instance;
+	my $plugin = $app->{ plugin };
 	my $param = { };
 
 	my $blog_id = $q->param('blog_id');
 	my $blog = $app->blog;
 	my $sytem_config = $plugin->get_config_hash('system');
 	my $config = $plugin->get_config_hash('blog:' . $blog_id);
-	my $apppath = $app->{__path} || "";
 	my $map_param = { };
 
 	# Build up the keys
@@ -97,7 +94,7 @@ sub save_locations {
     my $q = $app->{query};
 
     my $blog_id = $q->param('blog_id');
-	my $plugin = MT::Plugin::GeoPress->instance;
+	my $plugin = $app->{ plugin };
 	my %param;
 	my @params = $q->param;
 
@@ -119,14 +116,13 @@ sub save_locations {
 sub list_locations {
 	my $app = shift;
 	my $q = $app->{query};
-	my $plugin = MT::Plugin::GeoPress->instance;
+	my $plugin = $app->{ plugin };
 	my $param = { };
 
 	my $blog_id = $q->param('blog_id');
 	my $blog = $app->blog;
 	my $system_config = $plugin->get_config_hash('system');
 	my $config = $plugin->get_config_hash('blog:' . $blog_id);
-	my $apppath = $app->{__path} || "";
 	my $map_param = { };
 
 	# Build up the keys
@@ -168,7 +164,6 @@ sub list_locations {
 	$param->{num_locations} = $i;
 	$param->{location_table}[0]{object_loop} = \@data;
 	# $app->load_itemset_actions('location', $param->{location_table}[0]);
-
 
 	my $tmpl = $app->build_page('list.tmpl', $param);
 
