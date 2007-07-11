@@ -7,17 +7,17 @@ use base qw( MT::App );
 use GeoPress::Location;
 use GeoPress::EntryLocation;
 
+use Data::Dumper;
+
 sub init {
 	my $app = shift;
 	$app->SUPER::init(@_) or return;
 	$app->add_methods(
 		'view'              => \&list_locations,
-		'map'              => \&configure_map,
-		'save_map' 			 => \&save_configure_map,
-		'save_locations' 			 => \&save_locations,
-		'widget'            => \&create_widget,
-		'save_widget'       => \&save_widget,
-		);
+		'map'               => \&configure_map,
+		'save_map'          => \&save_configure_map,
+		'save_locations'    => \&save_locations,
+	);
 	$app->{default_mode} = 'map';
 	$app->{requires_login} = 1;
 	
@@ -62,14 +62,9 @@ sub configure_map {
 	if($microsoft_map)  {$map_param->{microsoft_map} = $microsoft_map; }
 	my $map_tmpl = $app->build_page('geopress_header.tmpl', $map_param);
 
-	$param->{blog_id} = $blog_id;
-	$param->{can_post} = 1;
-	$param->{has_posting_label} = 1;
-	$app->add_breadcrumb('Main Menu', $app->{mt_url});
-	$app->add_breadcrumb('GeoPress', $app->uri('mode' => 'map', args => { 'text' => $param->{text}} ));
-	$app->add_breadcrumb('Configure Maps');
-	$param->{breadcrumbs} = $app->{breadcrumbs};
-	$param->{breadcrumbs}[-1]{is_last} = 1;
+    $app->{breadcrumbs} = [];
+    $app->add_breadcrumb('GeoPress', $app->uri('mode' => 'map', args => { 'text' => $param->{text}} ));
+    $app->add_breadcrumb('Configure Maps');
 
 	# Get all of the plugin config options
 	foreach (keys %$config){
@@ -133,14 +128,9 @@ sub list_locations {
 	if($microsoft_map)  {$map_param->{microsoft_map} = $microsoft_map; }
 	my $map_tmpl = $app->build_page('geopress_header.tmpl', $map_param);
 
-	$param->{blog_id} = $blog_id;
-	$param->{can_post} = 1;
-	$param->{has_posting_label} = 1;
-	$app->add_breadcrumb('Main Menu', $app->{mt_url});
-	$app->add_breadcrumb('GeoPress', $app->uri('mode' => 'map', args => { 'text' => $param->{text}} ));
-	$app->add_breadcrumb('Edit Locations');
-	$param->{breadcrumbs} = $app->{breadcrumbs};
-	$param->{breadcrumbs}[-1]{is_last} = 1;
+    $app->{breadcrumbs} = [];
+    $app->add_breadcrumb('GeoPress', $app->uri('mode' => 'map', args => { 'text' => $param->{text}} ));
+    $app->add_breadcrumb('Edit Locations');
 
 	# 
 	# my $data = $app->build_location_table( param => \%param );
@@ -149,14 +139,14 @@ sub list_locations {
 	my @data;
 	my @locations = GeoPress::Location->load({ blog_id => $blog_id });
 	my $i = 0;
-	foreach $GeoPress::App::location(@locations) {
+	foreach my $location (@locations) {
 		my $row = {
 			location_index => $i,
-			location_id => $GeoPress::App::location->id,
-			location_name => $GeoPress::App::location->name,
-			location_location => $GeoPress::App::location->location,
-			location_geometry => $GeoPress::App::location->geometry,
-			location_visible => $GeoPress::App::location->visible
+			location_id => $location->id,
+			location_name => $location->name,
+			location_location => $location->location,
+			location_geometry => $location->geometry,
+			location_visible => $location->visible
 		};
 		$i++;
 		push @data, $row;
@@ -173,5 +163,16 @@ sub list_locations {
 	$tmpl =~ s/($old)/$map_tmpl\n$1\n/;
 	return $tmpl;
 }
+
+sub build_page {
+    require MT::App::CMS;
+    MT::App::CMS::build_page (@_);
+}
+
+sub is_authorized {
+    require MT::App::CMS;
+    MT::App::CMS::is_authorized (@_);
+}
+
 
 1;
