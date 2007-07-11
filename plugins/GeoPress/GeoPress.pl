@@ -356,7 +356,7 @@ sub _get_api_key {
     my $system_value = $plugin->get_config_value ($key . '_api_key', 'system');
     my $blog_value   = $plugin->get_config_value ($key . '_api_key', 'blog:' . $blog->id);
     
-    return $blog_value && $blog_value ne uc($key . '_api_key') ? $blog_value : $system_value;
+    return $blog_value && $blog_value ne uc($key . '_api_key') ? $blog_value : $system_value ne uc($key . '_api_key') ? $system_value : undef;
 }
 
 1;
