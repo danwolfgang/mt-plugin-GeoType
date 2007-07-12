@@ -60,19 +60,15 @@ my $plugin = MT::Plugin::GeoPress->new ({
  	object_classes => [ 'GeoPress::Location', 'GeoPress::EntryLocation' ],
 	
 	config_link     => 'geopress.cgi',
-	config_template => 'config.tmpl',
+	system_config_template  => 'config.tmpl',
+	blog_config_template    => 'blog_config.tmpl',
     settings        => MT::PluginSettings->new ([
         [ 'google_api_key', 	    { Default => 'GOOGLE_API_KEY',  Scope => 'system' } ],
-        [ 'yahoo_api_key', 	        { Default => 'YAHOO_API_KEY',   Scope => 'system' } ],
-        [ 'microsoft_map', 	        { Default => 0,                 Scope => 'system' } ],
         [ 'google_api_key', 	    { Default => 'GOOGLE_API_KEY',  Scope => 'blog' } ],
-        [ 'yahoo_api_key', 	        { Default => 'YAHOO_API_KEY',   Scope => 'blog' } ],
-        [ 'microsoft_map', 	        { Default => 0,                 Scope => 'blog' } ],
         [ 'georss_format', 	        { Default => 'simple',          Scope => 'blog' } ],
         [ 'georss_enable', 	        { Default => 1,                 Scope => 'blog' } ],
         [ 'map_width', 		        { Default => '200',             Scope => 'blog' } ],
         [ 'map_height', 		    { Default => '200',             Scope => 'blog' } ],
-        [ 'default_map_format', 	{ Default => 'google',          Scope => 'blog' } ],
         [ 'default_map_type', 		{ Default => 'HYBRID',          Scope => 'blog' } ],
         [ 'map_controls_pan', 		{ Default => 1,                 Scope => 'blog' } ],
         [ 'map_controls_map_type',  { Default => 1,                 Scope => 'blog' } ],
@@ -233,10 +229,6 @@ sub geo_press_header_tag {
 	$tmpl->param(geopress_version => $VERSION);
 	# Build up the keys
     $tmpl->param (google_api_key => $plugin->get_google_api_key ($blog));
-    $tmpl->param (yahoo_api_key => $plugin->get_yahoo_api_key ($blog));
-
-	my $microsoft_map = $plugin->get_config_value ('microsoft_map', 'blog:' . $blog->id);
-	if ($microsoft_map)  {$tmpl->param(microsoft_map => $microsoft_map); }
 
 	$tmpl->output;
 }
@@ -247,14 +239,11 @@ sub _edit_entry {
 	my $blog = $app->blog;
     my $config = $plugin->get_config_hash('system');
 	my $google_api_key = $plugin->get_google_api_key ($blog);
-	my $yahoo_api_key = $plugin->get_yahoo_api_key ($blog);
-	my $microsoft_map = $config->{microsoft_map};
 	
 	my ($old, $new);
 	$old = qq{<TMPL_IF NAME=DISP_PREFS_SHOW_EXCERPT>};
-    # $old = quotemeta($old);
 		
-	if ($google_api_key || $yahoo_api_key || $microsoft_map ne 0) {
+	if ($google_api_key) {
 		my $entry_id = $app->param('id');
 		my $entrylocation = GeoPress::EntryLocation->get_by_key ({entry_id => $entry_id});
 		my $location = GeoPress::Location->get_by_key ({ id => $entrylocation->location_id });
@@ -337,14 +326,6 @@ sub get_google_api_key {
     
     return $plugin->_get_api_key ($blog, 'google');
 }
-
-sub get_yahoo_api_key {
-    my $plugin = shift;
-    my ($blog) = @_;
-    
-    return $plugin->_get_api_key ($blog, 'yahoo');
-}
-
 
 sub _get_api_key {
     my $plugin = shift;

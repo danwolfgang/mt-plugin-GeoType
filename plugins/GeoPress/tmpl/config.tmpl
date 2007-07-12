@@ -1,6 +1,6 @@
 
 <div class="setting">
-    <p>Welcome to GeoPress. To begin using GeoPress, please obtain and enter a GoogleMaps and Yahoo AppID as shown below. You can customize your default map view using the "GeoPress" button to the left. Or just go and start writing your posts!</p>
+    <p>Welcome to GeoPress. To begin using GeoPress, please obtain and enter a GoogleMaps as shown below. You can customize your default map view using the "GeoPress" button to the left. Or just go and start writing your posts!</p>
     <h2>Map</h2>
     <table width="100%" cellspacing="2" cellpadding="5" class="editform">			
         <tr valign="top"> 
@@ -12,66 +12,5 @@
                 </div>
             </td> 
         </tr> 
-        <tr valign="top"> 
-            <th scope="row">Yahoo AppID:</th> 
-            <td>
-                <input name="yahoo_api_key" type="text" id="yahoo_api_key" style="width: 95%" value="<TMPL_VAR NAME=YAHOO_API_KEY ESCAPE=HTML>" size="45" />
-                <br />
-                <a href="http://api.search.yahoo.com/webservices/register_application" title="Yahoo! Developer Registration">Yahoo! Developer Registration</a>
-
-            </td> 
-        </tr>
-        <tr valign="top"> 
-            <th scope="row">Microsoft Maps:</th> 
-            <td>
-                <input value="1" type="checkbox" name="microsoft_map" id="microsoft_map" <TMPL_IF NAME=MICROSOFT_MAP>checked="checked"</TMPL_IF> />
-            </td> 
-        </tr>	        	
-        <tr valign="top">
-            <th scope="row">Add Maps:</th>
-            <td>
-                Automatically add a map after posts? <br/>
-                <select name="default_add_map" id="default_add_map">
-                    <option value='none' <TMPL_IF NAME=DEFAULT_ADD_MAP_NONE>selected='selected'</TMPL_IF>>I'll do it myself, thanks</option>
-                    <option value='single' <TMPL_IF NAME=DEFAULT_ADD_MAP_SINGLE>selected='selected'</TMPL_IF>>Only on single post pages</option>
-                    <option value='all' <TMPL_IF NAME=DEFAULT_ADD_MAP_ALL>selected='selected'</TMPL_IF>>Give me everything .. any post, any page</option>						</select>
-                </td>
-            </tr>
-        </table>
-        <table width="100%" cellspacing="2" cellpadding="5" class="editform">
-
-            <h2>GeoRSS Feeds</h2>
-            <tr valign="top">
-                <th width="33%" scope="row">GeoRSS Feeds:</th>
-                <td>
-                    <label for="georss_enable">
-                        <input name="georss_enable" type="checkbox" id="georss_enable" value="true" <TMPL_IF NAME=GEORSS_ENABLE>checked="checked"</TMPL_IF> /> Enable GeoRSS tags in feeds</label>
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row">Feed Format:</th>
-                    <td>
-                        <select name="georss_format" id="georss_format">
-                            <option value='simple' <TMPL_IF NAME=GEORSS_FORMAT_SIMPLE>selected='selected'</TMPL_IF>>Simple &lt;georss:point&gt;</option>
-                            <option value='gml' <TMPL_IF NAME=GEORSS_FORMAT_GML>selected='selected'</TMPL_IF>>GML &lt;gml:pos&gt;</option>
-                            <option value='w3c' <TMPL_IF NAME=GEORSS_FORMAT_W3C>selected='selected'</TMPL_IF>>W3C &lt;geo:lat&gt;</option>
-    					</select><br/>
-                            The format of your syndication feeds (Simple is recommended) 
-                        </td>
-                    </tr>
-                </table>
-
-<!-- MovableType save_config will erase any missing parameters -->
-<input type="hidden" id="map_width" name="map_width" value="<TMPL_VAR NAME=MAP_WIDTH>"/>
-<input type="hidden" id="map_height" name="map_height" value="<TMPL_VAR NAME=MAP_HEIGHT>"/>
-<input type="hidden" id="default_map_format" name="default_map_format" value="<TMPL_VAR NAME=DEFAULT_MAP_FORMAT>"/>
-<input type="hidden" id="default_map_type" name="default_map_type" value="<TMPL_VAR NAME=DEFAULT_MAP_TYPE>"/>
-<input type="hidden" id="map_controls_pan" name="map_controls_pan" value="<TMPL_VAR NAME=MAP_CONTROLS_PAN>"/>
-<input type="hidden" id="map_controls_map_type" name="map_controls_map_type" value="<TMPL_VAR NAME=MAP_CONTROLS_MAP_TYPE>"/>
-<input type="hidden" id="map_controls_zoom" name="map_controls_zoom" value="<TMPL_VAR NAME=MAP_CONTROLS_ZOOM>"/>
-<input type="hidden" id="map_controls_overview" name="map_controls_overview" value="<TMPL_VAR NAME=MAP_CONTROLS_OVERVIEW>"/>
-<input type="hidden" id="map_controls_scale" name="map_controls_scale" value="<TMPL_VAR NAME=MAP_CONTROLS_SCALE>"/>
-<input type="hidden" id="default_add_map" name="default_add_map" value="<TMPL_VAR NAME=DEFAULT_ADD_MAP>"/>
-<input type="hidden" id="default_zoom_level" name="default_zoom_level" value="<TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>"/>
-        
-            </div>
+    </table>
+</div>
