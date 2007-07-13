@@ -6,29 +6,29 @@
 
 				<tr>
 					<th scope="col" align=left>Name</th>
-					<th scope="col" colspan=3 align=left>Address</th>
-					<th scope="col" colspan=3 align=left></th>
+					<th scope="col" align=left>Address</th>
+					<th scope="col" align=left>Lat/Long</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
 
 					<td width=15%> 
-						<input size="10" type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="geopress_locname" id="geopress_locname" />
+						<input type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="geopress_locname" id="geopress_locname" />
 					</td> 
-					<td width=50%> 
-						<input size="50" type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="geopress_addr" id="geopress_addr" onKeyPress="return checkEnter(event);"/>
+					<td width=40%> 
+						<input type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="geopress_addr" id="geopress_addr"/>
 					</td> 
+					<td width=10%>
+					    <input type="text" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geopress_geometry" id="geopress_geometry" />
 					<td width=20%> 
 						<a href='#' onclick="geocode('geopress_addr', 'geopress_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a>
-						<input type="hidden" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geopress_geometry" id="geopress_geometry" />
-						<input type="hidden" value="" name="geopress_location_id" id="geopress_location_id" />
 					</td>
 				</tr>
 			</tbody>
 			</table>
 			<p>
-				<table width="30%" cellpadding="3" cellspacing="3" style="float:right;">
+				<table width="30%" cellpadding="3" cellspacing="3">
 					<thead>
 
 						<tr>
@@ -39,7 +39,7 @@
 					<tbody>
 						<tr>
 							<td><label for="geopress_select"> 
-							    <select id="geopress_select" onchange="geopress_loadsaved(this, 'geopress_addr', 'geopress_locname');showLocation('geopress_geometry', 'geopress_geometry');"><option value="">--choose one--</option>
+							    <select id="geopress_select" onchange="load_saved();"><option value="">--choose one--</option>
 							        <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
 							        <option value="<TMPL_VAR NAME=LOCATION_VALUE>"><TMPL_VAR NAME=LOCATION_NAME></option>
 							        </TMPL_LOOP>
@@ -48,31 +48,86 @@
 						</tr>
 						<tr><td width=20%> <a href="#" onclick="geopress_resetMap();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
 					</tbody>
-				</table><div id="geo_map" class="mapstraction" style="width: 400px; height: 250px; "></div>
+				</table><div id="geo_map" style="width: <TMPL_VAR NAME=MAP_WIDTH>px; height: <TMPL_VAR NAME=MAP_HEIGHT>px; "></div>
 				<!-- GeoPress Map -->
 				<script type="text/javascript"> //<![CDATA[ 
-				
-                // @todo - make this use a Mapstraction geocoder or geocoder independent
-                var geocoder = new GClientGeocoder();
-                
-				geopress_addEvent(window,'load', function() { 
-					geo_map = new Mapstraction("geo_map","google");
-					geo_map.addControls({
-						pan: 1,
-						zoom: 'small',
-						overview: false,
-						scale: 1,
-						map_type: 1
-					});
-					geo_map.setMapType(Mapstraction.HYBRID);
-				});
-				<TMPL_UNLESS NAME=NEW_LOCATION>
-				geopress_addEvent(window, 'load', function() { showLocation('geopress_geometry', 'geopress_geometry'); });
-				<TMPL_ELSE>
-				geopress_addEvent(window, 'load', function() { geopress_resetMap(); });
-				</TMPL_UNLESS>
-				// ]]> 
-				</script><!-- end GeoPress Map -->
+
+var map;
+function load () {
+    map = new GMap2(getByID('geo_map'));    
+    <TMPL_IF NAME=LOCATION_GEOMETRY>
+    var marker = new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' });
+
+    map.setCenter (new GLatLng(<TMPL_VAR NAME=LOCATION_GEOMETRY>), <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);    
+    map.addOverlay (marker);
+    <TMPL_ELSE>
+    map.setCenter (new GLatLng(0, 0));
+    </TMPL_IF>
+    
+    <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>
+    map.addControl (new GOverviewMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_SCALE>
+    map.addControl (new GScaleControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_MAP_TYPE>
+    map.addControl (new GMapTypeControl());
+    </TMPL_IF>
+    
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_SMALL>
+    map.addControl (new GSmallZoomControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_MEDIUM>
+    map.addControl (new GSmallMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_LARGE>
+    map.addControl (new GLargeMapControl());
+    </TMPL_IF>
+}
+
+function addAddressToMap(response) {
+    map.clearOverlays();
+    if (!response || response.Status.code != 200) {
+        alert("Sorry, we were unable to geocode that address");
+    } else {
+        place = response.Placemark[0];
+        point = new GLatLng(place.Point.coordinates[1],
+                            place.Point.coordinates[0]);
+        map.setCenter (point, <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
+        marker = new GMarker(point, { title: getByID('geopress_locname').value });
+        map.addOverlay(marker);
+        marker.openInfoWindowHtml(place.address);
+
+        getByID('geopress_geometry').value = place.Point.coordinates[1] + "," + place.Point.coordinates[0];
+  }
+}
+
+var geocoder;
+function geocode () {
+    if (! geocoder) {
+        geocoder = new GClientGeocoder();
+    }
+    var address = getByID('geopress_addr').value;
+    geocoder.getLocations (address, addAddressToMap);
+}
+
+function load_saved () {
+    var select = getByID('geopress_select');
+    
+    if (select.options[select.selectedIndex].value == "") {
+        return;
+    }
+    
+    getByID('geopress_locname').value = select.options[select.selectedIndex].text;
+    getByID('geopress_addr').value    = select.options[select.selectedIndex].value;
+    
+    geocode();
+    
+    select.selectedIndex = 0;
+}
+
+TC.attachLoadEvent (load);
+                </script><!-- end GeoPress Map -->
 				<br/>
 	</div>
 </div>

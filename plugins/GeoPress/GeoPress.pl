@@ -252,7 +252,7 @@ sub _edit_entry {
 		my $location_geometry = $location->geometry;
 
 		my $header = geo_press_header_tag;
-		my $tmpl = $plugin->load_tmpl("geopress_edit.tmpl") or return $cb->error ("Error loading template: ", $plugin->errstr);
+		my $tmpl = $plugin->load_tmpl("geopress_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
 
 		my $saved_locations = "";
 		my @locations = grep { $_->visible } GeoPress::Location->load ({ blog_id => $blog->id });
@@ -264,6 +264,19 @@ sub _edit_entry {
 		$tmpl->param(location_addr => $location_addr);
 		$tmpl->param(location_name => $location_name);
 		$tmpl->param(location_geometry => $location_geometry);
+		
+		$tmpl->param ( default_zoom_level => $plugin->get_config_value ('default_zoom_level', 'blog:' . $blog->id) );
+		$tmpl->param ( default_map_type => $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id) );
+		$tmpl->param ( map_width => $plugin->get_config_value ('map_width', 'blog:' . $blog->id) );
+		$tmpl->param ( map_height => $plugin->get_config_value ('map_height', 'blog:' . $blog->id) );
+		
+        $tmpl->param ( map_controls_overview => $plugin->get_config_value ('map_controls_overview', 'blog:' . $blog->id) );
+        $tmpl->param ( map_controls_scale => $plugin->get_config_value ('map_controls_scale', 'blog:' . $blog->id) );
+        $tmpl->param ( map_controls_map_type => $plugin->get_config_value ('map_controls_map_type', 'blog:' . $blog->id) );
+        
+        my $zoom = $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog->id);
+        $tmpl->param ( "map_controls_zoom_$zoom" => 1 );
+		
 		$new = $header.($tmpl->output);
 	} else {
 		$new = "<p>To Enable GeoPress, add the appropriate mapping library keys in your settings.</p>";
@@ -272,7 +285,7 @@ sub _edit_entry {
 }
 
 sub post_save_entry {
-	my ($callback, $app, $obj, $original) = @_;
+	my ($callback, $app, $obj) = @_;
 
     return unless ($app->param ('geopress_addr'));
 

@@ -74,13 +74,13 @@ function update_map () {
     var map_type = getByID ('default_map_type').options[getByID ('default_map_type').selectedIndex].value;
     var new_map_type;
     
-    if (map_type == "ROAD") {
+    if (map_type == "G_NORMAL_MAP") {
         new_map_type = G_NORMAL_MAP;
     }
-    else if (map_type == "SATELLITE") {
+    else if (map_type == "G_SATELLITE_MAP") {
         new_map_type = G_SATELLITE_MAP;
     }
-    else if (map_type == "HYBRID") {
+    else if (map_type == "G_HYBRID_MAP") {
         new_map_type = G_HYBRID_MAP;
     }
 
@@ -182,9 +182,9 @@ TC.attachBeforeUnloadEvent (GUnload);
 <div class="setting grouped">
     <div class="label"><label for="default_map_type">Default Map Type: </label></div>
     <div class="field"><select name='default_map_type' id='default_map_type' onchange='update_map()'>
-        <option value='ROAD' <TMPL_IF NAME=DEFAULT_MAP_TYPE_ROAD> selected='selected'</TMPL_IF>>Road</option>
-        <option value='SATELLITE' <TMPL_IF NAME=DEFAULT_MAP_TYPE_SATELLITE> selected='selected'</TMPL_IF>>Satellite</option>
-        <option value='HYBRID' <TMPL_IF NAME=DEFAULT_MAP_TYPE_HYBRID> selected='selected'</TMPL_IF>>Hybrid</option>
+        <option value='G_NORMAL_MAP' <TMPL_IF NAME=DEFAULT_MAP_TYPE_G_NORMAL_MAPD> selected='selected'</TMPL_IF>>Road</option>
+        <option value='G_SATELLITE_MAP' <TMPL_IF NAME=DEFAULT_MAP_TYPE_G_SATELLITE_MAP> selected='selected'</TMPL_IF>>Satellite</option>
+        <option value='G_HYBRID_MAP' <TMPL_IF NAME=DEFAULT_MAP_TYPE_G_HYBRID_MAP> selected='selected'</TMPL_IF>>Hybrid</option>
     </select>		
     </div>
 </div>
