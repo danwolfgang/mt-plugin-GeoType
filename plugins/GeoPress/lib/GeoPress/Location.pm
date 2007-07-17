@@ -22,4 +22,18 @@ __PACKAGE__->install_properties({
     },
     datasource => 'location',
     primary_key => 'id',
+    
+    child_classes => [ 'GeoPress::EntryLocation' ],
 });
+
+sub remove {
+    my $location = shift;
+    
+    require MT::Request;
+    my $r = MT::Request->instance;
+    my @objs = GeoPress::EntryLocation->load ({ location_id => $location->id });
+    $r->cache ('entry_location_objs', [ @objs ]);
+    
+    $location->remove_children ({ key => 'location_id' });
+    $location->SUPER::remove (@_);
+}

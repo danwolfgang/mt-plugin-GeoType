@@ -18,4 +18,5 @@ __PACKAGE__->install_properties({
     },
     datasource => 'entrylocation',
     primary_key => 'id',
+    child_of    => 'MT::Entry',
 });

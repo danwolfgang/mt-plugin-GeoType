@@ -1,0 +1,120 @@
+<TMPL_INCLUDE NAME=header.tmpl>
+<TMPL_INCLUDE NAME=geopress_header.tmpl>
+<p>Listing geopress_locations</p>
+<script type="text/javascript">
+<!--
+var tableSelect;
+function init()
+{
+	// setup
+	tableSelect = new TC.TableSelect( "selector" );
+	tableSelect.rowSelect = true;
+}
+TC.attachLoadEvent( init );
+// -->
+</script>
+<form method="post" action="<TMPL_VAR NAME=SCRIPT_URL>" onsubmit="return this['__mode'] ? true : false">
+    <input type="hidden" name="__mode" value="<TMPL_IF NAME=IS_POWER_EDIT>save_entries</TMPL_IF>" />
+    <input type="hidden" name="_type" value="geopress_location" />
+    <input type="hidden" name="blog_id" value="<TMPL_VAR NAME=BLOG_ID>" />
+    <input type="hidden" name="offset" value="<TMPL_VAR NAME=OFFSET>" />
+    <input type="hidden" name="limit" value="<TMPL_VAR NAME=LIMIT>" />
+    <input type="hidden" name="filter_args" value="<TMPL_VAR NAME=FILTER_ARGS>" />
+    <input type="hidden" name="return_args" value="<TMPL_VAR NAME=RETURN_ARGS ESCAPE=HTML>" />
+    <input type="hidden" name="magic_token" value="<TMPL_VAR NAME=MAGIC_TOKEN>" />
+    <input type="hidden" name="action_name" value="" />
+    <input type="hidden" name="itemset_action_input" value="" />
+
+<TMPL_IF NAME=POSITION_ACTIONS_TOP>
+<div class="list-actions">
+<div class="button-bar">
+    <input type="button" onclick="doRemoveItems(this.form, 'geopress_location', 'geopress_locations')" name="delete_locations" value="<MT_TRANS phrase="Delete">" accesskey="x" title="<MT_TRANS phrase="Delete selected locations (x)">" />
+</div>
+<div class="button-bar-alt">
+<TMPL_INCLUDE NAME="itemset_action_widget.tmpl">
+</div>
+</div>
+</TMPL_IF>
+<div class="list" id="selector">    
+<table cellspacing="0" class="<TMPL_IF NAME=VIEW_EXPANDED>expanded<TMPL_ELSE>compact</TMPL_IF>">
+    <thead>
+        <tr>
+            <th class="cb"><input type="checkbox" name="id-head" value="all" class="select" /></th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Visible</th>
+            <th>Entries</th>
+        </tr>
+
+    </thead>
+    <tbody>	    
+        <TMPL_LOOP NAME="OBJECT_LOOP">
+        <tr class="<TMPL_IF __ODD__>odd<TMPL_ELSE>even</TMPL_IF>">
+            <td class="cb"><input type="checkbox" name="id" value="<TMPL_VAR NAME=LOCATION_ID>" class="select" /></td>
+            <input type="hidden" name="locid[<TMPL_VAR NAME=LOCATION_ID>]" value="<TMPL_VAR NAME=LOCATION_ID>"/>
+            <input type="hidden" id="location_geometry-<TMPL_VAR NAME=LOCATION_ID>" name="location_geometry[<TMPL_VAR NAME=LOCATION_ID>]" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>"/>
+            <td><TMPL_VAR NAME=LOCATION_NAME></td>
+            <td><TMPL_VAR NAME=LOCATION_ADDRESS></td>
+            <td><TMPL_IF LOCATION_VISIBLE>Yes<TMPL_ELSE>No</TMPL_IF></td>
+            <td><TMPL_VAR NAME=ENTRIES_COUNT></td>
+        </tr>
+        </TMPL_LOOP>
+    </tbody>
+</table>
+</div>
+<TMPL_IF NAME=POSITION_ACTIONS_BOTTOM>
+<div class="list-actions">
+<div class="button-bar">
+    <input type="button" onclick="doRemoveItems(this.form, 'geopress_location', 'geopress_locations')" name="delete_locations" value="<MT_TRANS phrase="Delete">" accesskey="x" title="<MT_TRANS phrase="Delete selected locations (x)">" />
+</div>
+<div class="button-bar-alt">
+<TMPL_INCLUDE NAME="itemset_action_widget.tmpl">
+</div>
+</div>
+</TMPL_IF>
+
+<div id="geo_map" style="height: <TMPL_VAR NAME=MAP_HEIGHT>px; width: <TMPL_VAR NAME=MAP_WIDTH>px; margin: 5px auto"></div>
+
+<script type="text/javascript">
+// <!--
+
+
+var map;
+function load () {
+    map = new GMap2(getByID('geo_map'));    
+    
+    map.setCenter (new GLatLng(0, 0), <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
+    <TMPL_LOOP NAME=OBJECT_LOOP>    
+    map.addOverlay (new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' }));
+    </TMPL_LOOP>
+    
+    <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>
+    map.addControl (new GOverviewMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_SCALE>
+    map.addControl (new GScaleControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_MAP_TYPE>
+    map.addControl (new GMapTypeControl());
+    </TMPL_IF>
+    
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_SMALL>
+    map.addControl (new GSmallZoomControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_MEDIUM>
+    map.addControl (new GSmallMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_LARGE>
+    map.addControl (new GLargeMapControl());
+    </TMPL_IF>
+}
+
+TC.attachLoadEvent (load);
+
+// -->
+</script> 
+
+</form>
+</div>
+
+<TMPL_INCLUDE NAME=footer.tmpl>

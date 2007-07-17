@@ -43,6 +43,8 @@ use MT;
 use GeoPress::Location;
 use GeoPress::EntryLocation;
 
+use Data::Dumper;
+
 use vars qw( $VERSION );
 $VERSION = 1.01; 
 
@@ -83,6 +85,8 @@ my $plugin = MT::Plugin::GeoPress->new ({
 			'MT::App::CMS::AppTemplateSource.edit_entry' => \&_edit_entry,
             'MT::App::CMS::AppTemplateSource.blog-left-nav' => \&left_nav,
             'CMSPostSave.entry' => \&post_save_entry,
+            
+            'CMSPostDelete.geopress_location'   => \&post_delete_location,
 	},
 	
 	template_tags => {
@@ -95,6 +99,12 @@ my $plugin = MT::Plugin::GeoPress->new ({
 			'GeoRSS_Entry' =>\&geo_rss_entry_tag,
 	},
 	
+	app_methods => {
+	   'MT::App::CMS'  => {
+	       'geotype_list_locations'  => \&list_locations,
+	   },
+	},
+	
     app_action_links => {
         'MT::App::CMS' => {   # application the action applies to
             'blog' => {
@@ -102,20 +112,88 @@ my $plugin = MT::Plugin::GeoPress->new ({
                 link_text => 'Edit GeoPress Locations'
             },
         }
+    },
+    
+    app_itemset_actions => {
+        'MT::App::CMS'  => [
+            map {
+                { type    => 'geopress_locations', %{$_}, },
+                { type    => 'geopress_location', %{$_}, }
+            } (
+                {
+                    key => 'geopress_location_visible',
+                    label   => 'Make location(s) vislble',
+                    code    => \&visible_locations,
+                },
+                {
+                    key => 'geopress_locations_invisible',
+                    label   => 'Make location(s) not visible',
+                    code    => \&invisible_locations,
+                }
+            ),
+        ],
+    },
+    
+    init_app    => {
+        'MT::App::CMS'  => \&init_cms,
     }
 });
 
 MT->add_plugin($plugin);
+
+sub visible_locations {
+    my $app = shift;
+    my @ids = $app->param ('id');
+    require GeoPress::Location;
+    map {
+        my $loc = GeoPress::Location->load ($_);
+        $loc->visible (1);
+        $loc->save or return $app->error ("Error saving location: " . $loc->errstr);
+    } @ids;
+    
+    $app->call_return;
+}
+
+sub invisible_locations {
+    my $app = shift;
+    my @ids = $app->param ('id');
+    require GeoPress::Location;
+    map {
+        my $loc = GeoPress::Location->load ($_);
+        $loc->visible (0);
+        $loc->save or return $app->error ("Error saving location: " . $loc->errstr);
+    } @ids;
+    
+    $app->call_return;    
+}
+
+sub post_delete_location {
+    my ($cb, $app, $obj) = @_;
+    
+    require MT::Request;
+    my $r = MT::Request->instance;
+    my $entry_locations = $r->cache ('entry_location_objs') || [];
+
+    $app->rebuild_entry (Entry => $_->entry_id, BuildDependencies => 1) foreach (@$entry_locations);
+}
+
 
 sub instance { $plugin; }
 	
 sub left_nav {
     my ($eh, $app, $tmpl) = @_;
     my $slug = <<END_TMPL;
-<li><a style="background-image: url(<TMPL_VAR NAME=STATIC_URI>images/nav_icons/color/plugins.gif);" <TMPL_IF NAME=NAV_MEDIAMANAGER>class="here"</TMPL_IF> id="nav-mmanager" title="<MT_TRANS phrase="GeoPress">" href="<TMPL_UNLESS NAME=GPSCRIPT_URL><TMPL_VAR NAME=SCRIPT_PATH>plugins/GeoPress/</TMPL_UNLESS>geopress.cgi?__mode=view&amp;blog_id=<TMPL_VAR NAME=BLOG_ID><TMPL_VAR NAME=CONTEXT_URI>"><MT_TRANS phrase="GeoPress"></a></li>
+<li><a style="background-image: url(<TMPL_VAR NAME=STATIC_URI>images/nav_icons/color/plugins.gif);" <TMPL_IF NAME=NAV_MEDIAMANAGER>class="here"</TMPL_IF> id="nav-mmanager" title="<MT_TRANS phrase="GeoPress">" href="<TMPL_VAR NAME=MT_URL>?__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>"><MT_TRANS phrase="GeoPress"></a></li>
 END_TMPL
     $$tmpl =~ s/(<li><MT_TRANS phrase=\"Utilities\">\n<ul class=\"sub\">)/$1$slug/;
 }
+
+sub init_cms {
+    my $plugin = shift;
+    my $app = shift;
+    $app->register_type ('geopress_location', 'GeoPress::Location');
+}
+
 
 # Creates an actual map for an entry
 sub geo_press_map_tag {
@@ -348,6 +426,49 @@ sub _get_api_key {
     my $blog_value   = $plugin->get_config_value ($key . '_api_key', 'blog:' . $blog->id);
     
     return $blog_value && $blog_value ne uc($key . '_api_key') ? $blog_value : $system_value ne uc($key . '_api_key') ? $system_value : undef;
+}
+
+sub list_locations {
+    my ($app) = @_;
+    
+    $app->{breadcrumbs} = [];
+    $app->add_breadcrumb ('GeoPress: List Locations');
+    
+    return $app->listing ({
+        Type    => 'geopress_location',
+        Terms   => {
+            blog_id => $app->blog->id
+        },
+        Code    => sub {
+            my ($obj, $row) = @_;
+            $row->{location_visible} = $obj->visible;
+            $row->{location_id} = $obj->id;
+            $row->{location_name} = $obj->name;
+            $row->{location_address} = $obj->location;
+            $row->{location_geometry} = $obj->geometry;
+            
+            require GeoPress::EntryLocation;
+            $row->{entries_count} = GeoPress::EntryLocation->count ({ location_id => $obj->id });
+            
+        },
+        Template    => $plugin->load_tmpl ('list_geopress_location.tmpl'),
+        Params  => {
+            quick_search    => 0,
+            google_api_key  => $plugin->get_google_api_key ($app->blog),
+            map_height      => $plugin->get_config_value ('map_height', 'blog:'. $app->blog->id),
+            map_width       => $plugin->get_config_value ('map_width', 'blog:' . $app->blog->id),
+            default_zoom_level => $plugin->get_config_value ('default_zoom_level', 'blog:' . $app->blog->id),
+            default_map_type => $plugin->get_config_value ('default_map_type', 'blog:' . $app->blog->id),
+    		map_width => $plugin->get_config_value ('map_width', 'blog:' . $app->blog->id),
+    		map_height => $plugin->get_config_value ('map_height', 'blog:' . $app->blog->id),
+
+            map_controls_overview => $plugin->get_config_value ('map_controls_overview', 'blog:' . $app->blog->id),
+            map_controls_scale => $plugin->get_config_value ('map_controls_scale', 'blog:' . $app->blog->id),
+            map_controls_map_type => $plugin->get_config_value ('map_controls_map_type', 'blog:' . $app->blog->id),
+            "map_controls_zoom_" .$plugin->get_config_value ('map_controls_zoom', 'blog:' . $app->blog->id) => 1,
+    		
+        },
+    });
 }
 
 1;
