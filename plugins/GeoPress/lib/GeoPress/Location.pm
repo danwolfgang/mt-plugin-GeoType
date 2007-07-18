@@ -1,10 +1,8 @@
-package GeoPress::Location;
+package GeoType::Location;
 use strict;
 
-use GeoPress::EntryLocation;
-
 use base qw(MT::Object);
-@GeoPress::Location::ISA = qw( MT::Object );
+use GeoType::EntryLocation;
 
 __PACKAGE__->install_properties({
 	column_defs => {
@@ -23,7 +21,7 @@ __PACKAGE__->install_properties({
     datasource => 'location',
     primary_key => 'id',
     
-    child_classes => [ 'GeoPress::EntryLocation' ],
+    child_classes => [ 'GeoType::EntryLocation' ],
 });
 
 sub remove {
@@ -31,7 +29,7 @@ sub remove {
     
     require MT::Request;
     my $r = MT::Request->instance;
-    my @objs = GeoPress::EntryLocation->load ({ location_id => $location->id });
+    my @objs = GeoType::EntryLocation->load ({ location_id => $location->id });
     $r->cache ('entry_location_objs', [ @objs ]);
     
     $location->remove_children ({ key => 'location_id' });

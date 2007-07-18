@@ -34,34 +34,33 @@
 #-------------------------------------------------------------------------------
 #
 
-package MT::Plugin::GeoPress; 
+package MT::Plugin::GeoType; 
 use base qw(MT::Plugin);
 use strict;
 use warnings;
 
 use MT;
-use GeoPress::Location;
-use GeoPress::EntryLocation;
+use GeoType::Location;
+use GeoType::EntryLocation;
 
 use Data::Dumper;
 
 use vars qw( $VERSION );
 $VERSION = 1.01; 
 
-my $plugin = MT::Plugin::GeoPress->new ({
-    name        => "GeoPress",
-	key         => "GeoPress",
+my $plugin = MT::Plugin::GeoType->new ({
+    name        => "GeoType",
+	key         => "GeoType",
     version     => $VERSION,
-    description => "<MT_TRANS phrase=\"GeoPress allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth.<br\><br\>GeoPress settings are on a per-blog setting, so you'll need to set this up in each weblog you administer. Use the 'GeoPress' link in the left sidebar under 'Utilities' to configure your Map defaults and Locations.\">",
+    description => "<MT_TRANS phrase=\"GeoType allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth.<br\><br\>GeoType settings are on a per-blog setting, so you'll need to set this up in each weblog you administer. Use the 'GeoType' link in the left sidebar under 'Utilities' to configure your Map defaults and Locations.\">",
     author_name => "Andrew Turner",
     author_link => "http://highearthorbit.com/",
     plugin_link => "http://georss.org/geopress/",
 	doc_link    => "http://georss.org/geopress/",
 
 	schema_version => 1.01,
- 	object_classes => [ 'GeoPress::Location', 'GeoPress::EntryLocation' ],
+ 	object_classes => [ 'GeoType::Location', 'GeoType::EntryLocation' ],
 	
-	config_link     => 'geopress.cgi',
 	system_config_template  => 'config.tmpl',
 	blog_config_template    => 'blog_config.tmpl',
     settings        => MT::PluginSettings->new ([
@@ -86,14 +85,14 @@ my $plugin = MT::Plugin::GeoPress->new ({
             'MT::App::CMS::AppTemplateSource.blog-left-nav' => \&left_nav,
             'CMSPostSave.entry' => \&post_save_entry,
             
-            'CMSPostDelete.geopress_location'   => \&post_delete_location,
+            'CMSPostDelete.geotype_location'   => \&post_delete_location,
 	},
 	
 	template_tags => {
-			'GeoPressCoords' => \&geo_press_coords_tag,
-			'GeoPressLocation' => \&geo_press_location_tag,
-			'GeoPressMap' => \&geo_press_map_tag,
-			'GeoPressHeader' =>\&geo_press_header_tag,
+			'GeoTypeCoords' => \&geo_type_coords_tag,
+			'GeoTypeLocation' => \&geo_type_location_tag,
+			'GeoTypeMap' => \&geo_type_map_tag,
+			'GeoTypeHeader' =>\&geo_type_header_tag,
 			'GeoRSS_Namespace' =>\&geo_rss_namespace_tag,
 			'GeoRSS_Channel' =>\&geo_rss_channel_tag,
 			'GeoRSS_Entry' =>\&geo_rss_entry_tag,
@@ -105,28 +104,28 @@ my $plugin = MT::Plugin::GeoPress->new ({
 	   },
 	},
 	
-    app_action_links => {
-        'MT::App::CMS' => {   # application the action applies to
-            'blog' => {
-                link => 'geopress.cgi?__mode=view',
-                link_text => 'Edit GeoPress Locations'
-            },
-        }
-    },
+    # app_action_links => {
+    #     'MT::App::CMS' => {   # application the action applies to
+    #         'blog' => {
+    #             link => 'geopress.cgi?__mode=view',
+    #             link_text => 'Edit GeoPress Locations'
+    #         },
+    #     }
+    # },
     
     app_itemset_actions => {
         'MT::App::CMS'  => [
             map {
-                { type    => 'geopress_locations', %{$_}, },
-                { type    => 'geopress_location', %{$_}, }
+                { type    => 'geotype_locations', %{$_}, },
+                { type    => 'geotype_location', %{$_}, }
             } (
                 {
-                    key => 'geopress_location_visible',
+                    key => 'geotype_location_visible',
                     label   => 'Make location(s) vislble',
                     code    => \&visible_locations,
                 },
                 {
-                    key => 'geopress_locations_invisible',
+                    key => 'geotype_locations_invisible',
                     label   => 'Make location(s) not visible',
                     code    => \&invisible_locations,
                 }
@@ -144,9 +143,9 @@ MT->add_plugin($plugin);
 sub visible_locations {
     my $app = shift;
     my @ids = $app->param ('id');
-    require GeoPress::Location;
+    require GeoType::Location;
     map {
-        my $loc = GeoPress::Location->load ($_);
+        my $loc = GeoType::Location->load ($_);
         $loc->visible (1);
         $loc->save or return $app->error ("Error saving location: " . $loc->errstr);
     } @ids;
@@ -157,9 +156,9 @@ sub visible_locations {
 sub invisible_locations {
     my $app = shift;
     my @ids = $app->param ('id');
-    require GeoPress::Location;
+    require GeoType::Location;
     map {
-        my $loc = GeoPress::Location->load ($_);
+        my $loc = GeoType::Location->load ($_);
         $loc->visible (0);
         $loc->save or return $app->error ("Error saving location: " . $loc->errstr);
     } @ids;
@@ -183,7 +182,7 @@ sub instance { $plugin; }
 sub left_nav {
     my ($eh, $app, $tmpl) = @_;
     my $slug = <<END_TMPL;
-<li><a style="background-image: url(<TMPL_VAR NAME=STATIC_URI>images/nav_icons/color/plugins.gif);" <TMPL_IF NAME=NAV_MEDIAMANAGER>class="here"</TMPL_IF> id="nav-mmanager" title="<MT_TRANS phrase="GeoPress">" href="<TMPL_VAR NAME=MT_URL>?__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>"><MT_TRANS phrase="GeoPress"></a></li>
+<li><a style="background-image: url(<TMPL_VAR NAME=STATIC_URI>images/nav_icons/color/plugins.gif);" <TMPL_IF NAME=NAV_MEDIAMANAGER>class="here"</TMPL_IF> id="nav-mmanager" title="<MT_TRANS phrase="GeoType">" href="<TMPL_VAR NAME=MT_URL>?__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>"><MT_TRANS phrase="GeoType"></a></li>
 END_TMPL
     $$tmpl =~ s/(<li><MT_TRANS phrase=\"Utilities\">\n<ul class=\"sub\">)/$1$slug/;
 }
@@ -191,7 +190,7 @@ END_TMPL
 sub init_cms {
     my $plugin = shift;
     my $app = shift;
-    $app->register_type ('geopress_location', 'GeoPress::Location');
+    $app->register_type ('geotype_location', 'GeoType::Location');
 }
 
 
@@ -302,9 +301,9 @@ sub geo_press_header_tag {
         require MT::App;
         $blog = MT::App->instance->blog;
     }
-	my $tmpl = $plugin->load_tmpl("geopress_header.tmpl");
+	my $tmpl = $plugin->load_tmpl("geotype_header.tmpl");
 
-	$tmpl->param(geopress_version => $VERSION);
+	$tmpl->param(geotype_version => $VERSION);
 	# Build up the keys
     $tmpl->param (google_api_key => $plugin->get_google_api_key ($blog));
 
@@ -323,17 +322,17 @@ sub _edit_entry {
 		
 	if ($google_api_key) {
 		my $entry_id = $app->param('id');
-		my $entrylocation = GeoPress::EntryLocation->get_by_key ({entry_id => $entry_id});
-		my $location = GeoPress::Location->get_by_key ({ id => $entrylocation->location_id });
+		my $entrylocation = GeoType::EntryLocation->get_by_key ({entry_id => $entry_id});
+		my $location = GeoType::Location->get_by_key ({ id => $entrylocation->location_id });
 		my $location_name = $location->name;
 		my $location_addr = $location->location;
 		my $location_geometry = $location->geometry;
 
 		my $header = geo_press_header_tag;
-		my $tmpl = $plugin->load_tmpl("geopress_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
+		my $tmpl = $plugin->load_tmpl("geotype_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
 
 		my $saved_locations = "";
-		my @locations = grep { $_->visible } GeoPress::Location->load ({ blog_id => $blog->id });
+		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
 		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => $_->name } } @locations ] );
 
         $tmpl->param ( new_location => 1 ) if (!$location_geometry);
@@ -357,7 +356,7 @@ sub _edit_entry {
 		
 		$new = $header.($tmpl->output);
 	} else {
-		$new = "<p>To Enable GeoPress, add the appropriate mapping library keys in your settings.</p>";
+		$new = "<p>To Enable GeoType, add the appropriate mapping library keys in your settings.</p>";
 	}
 	$$tmpl =~ s/\Q$old\E/$new\n$old\n/;
 }
@@ -365,19 +364,19 @@ sub _edit_entry {
 sub post_save_entry {
 	my ($callback, $app, $obj) = @_;
 
-    return unless ($app->param ('geopress_addr'));
+    return unless ($app->param ('geotype_addr'));
 
 	my $blog_id = $obj->blog_id;
 	my $entry_id = $obj->id;
 	
 	# no need to test if these already exist - get_by_key will create them if they don't
-	my $entry_location = GeoPress::EntryLocation->get_by_key ({ entry_id => $entry_id, blog_id => $blog_id });
+	my $entry_location = GeoType::EntryLocation->get_by_key ({ entry_id => $entry_id, blog_id => $blog_id });
 
-    my $location_name = $app->param('geopress_locname');
-    my $location_addr = $app->param('geopress_addr');
-    my $geometry = $app->param('geopress_geometry');
+    my $location_name = $app->param('geotype_locname');
+    my $location_addr = $app->param('geotype_addr');
+    my $geometry = $app->param('geotype_geometry');
 
-	my $location = GeoPress::Location->get_by_key ({ location => $location_addr, blog_id => $blog_id });		
+	my $location = GeoType::Location->get_by_key ({ location => $location_addr, blog_id => $blog_id });		
 	$location->name($location_name);
 	$location->geometry($geometry);
 	$location->visible(1);
@@ -390,8 +389,8 @@ sub post_save_entry {
 sub get_location_for_entry {
 	my $entry = shift;
 
-	my $entry_location = GeoPress::EntryLocation->get_by_key({entry_id => $entry->id});
-	my $location = GeoPress::Location->get_by_key({ id => $entry_location->location_id });		
+	my $entry_location = GeoType::EntryLocation->get_by_key({entry_id => $entry->id});
+	my $location = GeoType::Location->get_by_key({ id => $entry_location->location_id });		
     return $location;
 }
 
@@ -432,10 +431,10 @@ sub list_locations {
     my ($app) = @_;
     
     $app->{breadcrumbs} = [];
-    $app->add_breadcrumb ('GeoPress: List Locations');
+    $app->add_breadcrumb ('GeoType: List Locations');
     
     return $app->listing ({
-        Type    => 'geopress_location',
+        Type    => 'geotype_location',
         Terms   => {
             blog_id => $app->blog->id
         },
@@ -447,11 +446,11 @@ sub list_locations {
             $row->{location_address} = $obj->location;
             $row->{location_geometry} = $obj->geometry;
             
-            require GeoPress::EntryLocation;
-            $row->{entries_count} = GeoPress::EntryLocation->count ({ location_id => $obj->id });
+            require GeoType::EntryLocation;
+            $row->{entries_count} = GeoType::EntryLocation->count ({ location_id => $obj->id });
             
         },
-        Template    => $plugin->load_tmpl ('list_geopress_location.tmpl'),
+        Template    => $plugin->load_tmpl ('list_geotype_location.tmpl'),
         Params  => {
             quick_search    => 0,
             google_api_key  => $plugin->get_google_api_key ($app->blog),

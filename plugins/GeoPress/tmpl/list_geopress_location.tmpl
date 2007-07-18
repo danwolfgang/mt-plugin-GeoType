@@ -1,6 +1,6 @@
 <TMPL_INCLUDE NAME=header.tmpl>
-<TMPL_INCLUDE NAME=geopress_header.tmpl>
-<p>Listing geopress_locations</p>
+<TMPL_INCLUDE NAME=geotype_header.tmpl>
+<p>Listing geotype_locations</p>
 <script type="text/javascript">
 <!--
 var tableSelect;
@@ -15,7 +15,7 @@ TC.attachLoadEvent( init );
 </script>
 <form method="post" action="<TMPL_VAR NAME=SCRIPT_URL>" onsubmit="return this['__mode'] ? true : false">
     <input type="hidden" name="__mode" value="<TMPL_IF NAME=IS_POWER_EDIT>save_entries</TMPL_IF>" />
-    <input type="hidden" name="_type" value="geopress_location" />
+    <input type="hidden" name="_type" value="geotype_location" />
     <input type="hidden" name="blog_id" value="<TMPL_VAR NAME=BLOG_ID>" />
     <input type="hidden" name="offset" value="<TMPL_VAR NAME=OFFSET>" />
     <input type="hidden" name="limit" value="<TMPL_VAR NAME=LIMIT>" />
@@ -28,7 +28,7 @@ TC.attachLoadEvent( init );
 <TMPL_IF NAME=POSITION_ACTIONS_TOP>
 <div class="list-actions">
 <div class="button-bar">
-    <input type="button" onclick="doRemoveItems(this.form, 'geopress_location', 'geopress_locations')" name="delete_locations" value="<MT_TRANS phrase="Delete">" accesskey="x" title="<MT_TRANS phrase="Delete selected locations (x)">" />
+    <input type="button" onclick="doRemoveItems(this.form, 'geotype_location', 'geotype_locations')" name="delete_locations" value="<MT_TRANS phrase="Delete">" accesskey="x" title="<MT_TRANS phrase="Delete selected locations (x)">" />
 </div>
 <div class="button-bar-alt">
 <TMPL_INCLUDE NAME="itemset_action_widget.tmpl">
@@ -65,7 +65,7 @@ TC.attachLoadEvent( init );
 <TMPL_IF NAME=POSITION_ACTIONS_BOTTOM>
 <div class="list-actions">
 <div class="button-bar">
-    <input type="button" onclick="doRemoveItems(this.form, 'geopress_location', 'geopress_locations')" name="delete_locations" value="<MT_TRANS phrase="Delete">" accesskey="x" title="<MT_TRANS phrase="Delete selected locations (x)">" />
+    <input type="button" onclick="doRemoveItems(this.form, 'geotype_location', 'geotype_locations')" name="delete_locations" value="<MT_TRANS phrase="Delete">" accesskey="x" title="<MT_TRANS phrase="Delete selected locations (x)">" />
 </div>
 <div class="button-bar-alt">
 <TMPL_INCLUDE NAME="itemset_action_widget.tmpl">

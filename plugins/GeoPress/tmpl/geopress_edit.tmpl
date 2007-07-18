@@ -14,15 +14,15 @@
 				<tr>
 
 					<td width=15%> 
-						<input type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="geopress_locname" id="geopress_locname" />
+						<input type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="geotype_locname" id="geotype_locname" />
 					</td> 
 					<td width=40%> 
-						<input type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="geopress_addr" id="geopress_addr"/>
+						<input type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="geotype_addr" id="geotype_addr"/>
 					</td> 
 					<td width=10%>
-					    <input type="text" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geopress_geometry" id="geopress_geometry" />
+					    <input type="text" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geotype_geometry" id="geotype_geometry" />
 					<td width=20%> 
-						<a href='#' onclick="geocode('geopress_addr', 'geopress_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a>
+						<a href='#' onclick="geocode('geotype_addr', 'geotype_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a>
 					</td>
 				</tr>
 			</tbody>
@@ -38,18 +38,17 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><label for="geopress_select"> 
-							    <select id="geopress_select" onchange="load_saved();"><option value="">--choose one--</option>
+							<td><label for="geotype_select"> 
+							    <select id="geotype_select" onchange="load_saved();"><option value="">--choose one--</option>
 							        <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
 							        <option value="<TMPL_VAR NAME=LOCATION_VALUE>"><TMPL_VAR NAME=LOCATION_NAME></option>
 							        </TMPL_LOOP>
 							    </select>
 							</td>
 						</tr>
-						<tr><td width=20%> <a href="#" onclick="geopress_resetMap();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
+						<tr><td width=20%> <a href="#" onclick="geotype_resetMap();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
 					</tbody>
 				</table><div id="geo_map" style="width: <TMPL_VAR NAME=MAP_WIDTH>px; height: <TMPL_VAR NAME=MAP_HEIGHT>px; "></div>
-				<!-- GeoPress Map -->
 				<script type="text/javascript"> //<![CDATA[ 
 
 var map;
@@ -94,11 +93,11 @@ function addAddressToMap(response) {
         point = new GLatLng(place.Point.coordinates[1],
                             place.Point.coordinates[0]);
         map.setCenter (point, <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
-        marker = new GMarker(point, { title: getByID('geopress_locname').value });
+        marker = new GMarker(point, { title: getByID('geotype_locname').value });
         map.addOverlay(marker);
         marker.openInfoWindowHtml(place.address);
 
-        getByID('geopress_geometry').value = place.Point.coordinates[1] + "," + place.Point.coordinates[0];
+        getByID('geotype_geometry').value = place.Point.coordinates[1] + "," + place.Point.coordinates[0];
   }
 }
 
@@ -107,19 +106,19 @@ function geocode () {
     if (! geocoder) {
         geocoder = new GClientGeocoder();
     }
-    var address = getByID('geopress_addr').value;
+    var address = getByID('geotype_addr').value;
     geocoder.getLocations (address, addAddressToMap);
 }
 
 function load_saved () {
-    var select = getByID('geopress_select');
+    var select = getByID('geotype_select');
     
     if (select.options[select.selectedIndex].value == "") {
         return;
     }
     
-    getByID('geopress_locname').value = select.options[select.selectedIndex].text;
-    getByID('geopress_addr').value    = select.options[select.selectedIndex].value;
+    getByID('geotype_locname').value = select.options[select.selectedIndex].text;
+    getByID('geotype_addr').value    = select.options[select.selectedIndex].value;
     
     geocode();
     
@@ -127,7 +126,6 @@ function load_saved () {
 }
 
 TC.attachLoadEvent (load);
-                </script><!-- end GeoPress Map -->
-				<br/>
+                </script>
 	</div>
 </div>

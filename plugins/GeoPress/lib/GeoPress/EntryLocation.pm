@@ -1,8 +1,7 @@
-package GeoPress::EntryLocation;
+package GeoType::EntryLocation;
 use strict;
 
 use base qw(MT::Object);
-@GeoPress::EntryLocation::ISA = qw( MT::Object );
 
 __PACKAGE__->install_properties({
 	column_defs => {
