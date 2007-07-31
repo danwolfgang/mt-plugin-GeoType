@@ -104,15 +104,6 @@ my $plugin = MT::Plugin::GeoType->new ({
 	   },
 	},
 	
-    # app_action_links => {
-    #     'MT::App::CMS' => {   # application the action applies to
-    #         'blog' => {
-    #             link => 'geopress.cgi?__mode=view',
-    #             link_text => 'Edit GeoPress Locations'
-    #         },
-    #     }
-    # },
-    
     app_itemset_actions => {
         'MT::App::CMS'  => [
             map {
