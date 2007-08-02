@@ -98,6 +98,10 @@ my $plugin = MT::Plugin::GeoType->new ({
 			'GeoRSS_Entry' =>\&geo_rss_entry_tag,
 	},
 	
+	conditional_tags    => {
+	        'GeoTypeIfLocation'  => \&geo_type_if_location,
+	},
+	
 	app_methods => {
 	   'MT::App::CMS'  => {
 	       'geotype_list_locations'  => \&list_locations,
@@ -409,6 +413,10 @@ sub geo_type_location_tag {
     my $location = get_location_for_entry($entry);
 
     return $location ? $location->location : "";
+}
+
+sub geo_type_if_location_tag  {
+    return geo_type_location_tag (@_);
 }
 
 sub get_google_api_key {
