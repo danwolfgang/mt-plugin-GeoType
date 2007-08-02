@@ -186,7 +186,7 @@ sub init_cms {
 
 
 # Creates an actual map for an entry
-sub geo_press_map_tag {
+sub geo_type_map_tag {
 	my $ctx = shift;
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
@@ -200,9 +200,19 @@ sub geo_press_map_tag {
 		$tmpl->param(default_map_format => $config->{default_map_format});
 		$tmpl->param(map_width => $config->{map_width});
 		$tmpl->param(map_height => $config->{map_height});
-		$tmpl->param(geometry => $location->geometry);
+		$tmpl->param(location_geometry => $location->geometry);
 		$tmpl->param(location_name => $location->name);
 		$tmpl->param(map_id => $entry->id);
+		
+		$tmpl->param (default_zoom_level => $config->{default_zoom_level});
+		$tmpl->param (default_map_type   => $config->{default_map_type});
+		$tmpl->param ( map_controls_overview => $plugin->get_config_value ('map_controls_overview', 'blog:' . $blog_id) );
+        $tmpl->param ( map_controls_scale => $plugin->get_config_value ('map_controls_scale', 'blog:' . $blog_id) );
+        $tmpl->param ( map_controls_map_type => $plugin->get_config_value ('map_controls_map_type', 'blog:' . $blog_id) );
+        
+        my $zoom = $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog_id);
+        $tmpl->param ( "map_controls_zoom_$zoom" => 1 );
+        
 		return $tmpl->output;
 	}
 	return "";
@@ -281,7 +291,7 @@ XML
 
 # Tag to add the necessary mapping headers 
 #TODO - figure out how to have this get included automatically
-sub geo_press_header_tag {
+sub geo_type_header_tag {
     my ($ctx) = @_;
     
     my $blog;
@@ -319,7 +329,7 @@ sub _edit_entry {
 		my $location_addr = $location->location;
 		my $location_geometry = $location->geometry;
 
-		my $header = geo_press_header_tag;
+		my $header = geo_type_header_tag;
 		my $tmpl = $plugin->load_tmpl("geotype_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
 
 		my $saved_locations = "";
@@ -385,7 +395,7 @@ sub get_location_for_entry {
     return $location;
 }
 
-sub geo_press_coords_tag {
+sub geo_type_coords_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
     my $location = get_location_for_entry($entry);
@@ -393,7 +403,7 @@ sub geo_press_coords_tag {
     return $location ? $location->geometry : "";
 }
 
-sub geo_press_location_tag {
+sub geo_type_location_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
     my $location = get_location_for_entry($entry);

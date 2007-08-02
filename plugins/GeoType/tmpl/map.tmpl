@@ -1,21 +1,35 @@
 <!-- GeoPress Map -->
-<div id="geo_map<TMPL_VAR NAME=MAP_ID>" class="mapstraction" style="width: <TMPL_VAR NAME=MAP_WIDTH>px; height: <TMPL_VAR NAME=MAP_HEIGHT>px; float: left;"></div>
+<div id="geo_map_<TMPL_VAR NAME=MAP_ID>" style="width: <TMPL_VAR NAME=MAP_WIDTH>px; height: <TMPL_VAR NAME=MAP_HEIGHT>px; float: left;"></div>
 <script type="text/javascript"> //<![CDATA[ 
-geopress_addEvent(window,'load', function() { 
-	geo_map<TMPL_VAR NAME=MAP_ID> = new Mapstraction("geo_map<TMPL_VAR NAME=MAP_ID>","<TMPL_VAR NAME=DEFAULT_MAP_FORMAT>"); 
-	var myPoint<TMPL_VAR NAME=MAP_ID> = new LatLonPoint(<TMPL_VAR NAME=GEOMETRY>);
-	geo_map<TMPL_VAR NAME=MAP_ID>.addControls({
-		pan: 1,
-		zoom: 'small',
-		overview: false,
-		scale: 1,
-		map_type: 1
-	});
-    geo_map<TMPL_VAR NAME=MAP_ID>.setCenterAndZoom(myPoint<TMPL_VAR NAME=MAP_ID>,10);
-    var marker<TMPL_VAR NAME=MAP_ID> = new Marker(myPoint<TMPL_VAR NAME=MAP_ID>);
-    marker<TMPL_VAR NAME=MAP_ID>.setInfoBubble("<TMPL_VAR NAME=LOCATION_NAME>");
-    geo_map<TMPL_VAR NAME=MAP_ID>.addMarker(marker<TMPL_VAR NAME=MAP_ID>);	
-    geo_map<TMPL_VAR NAME=MAP_ID>.setMapType(Mapstraction.HYBRID);
+var geo_map_<TMPL_VAR NAME=MAP_ID>;
+TC.attachLoadEvent (function() {
+    geo_map_<TMPL_VAR NAME=MAP_ID> = new GMap2 (getByID ('geo_map_<TMPL_VAR NAME=MAP_ID>'));
+
+    var marker = new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' });
+
+    geo_map_<TMPL_VAR NAME=MAP_ID>.setCenter (new GLatLng(<TMPL_VAR NAME=LOCATION_GEOMETRY>), <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);    
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addOverlay (marker);
+
+    <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addControl (new GOverviewMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_SCALE>
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addControl (new GScaleControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_MAP_TYPE>
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addControl (new GMapTypeControl());
+    </TMPL_IF>
+    
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_SMALL>
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addControl (new GSmallZoomControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_MEDIUM>
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addControl (new GSmallMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_LARGE>
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addControl (new GLargeMapControl());
+    </TMPL_IF>
+
 });
 // ]]> 
 </script><!-- end GeoPress Map -->
