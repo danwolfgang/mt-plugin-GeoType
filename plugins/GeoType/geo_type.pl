@@ -307,6 +307,7 @@ sub geo_type_header_tag {
         $blog = MT::App->instance->blog;
     }
 	my $tmpl = $plugin->load_tmpl("geotype_header.tmpl");
+	$tmpl->param (template_context => defined $ctx);
 
 	$tmpl->param(geotype_version => $VERSION);
 	# Build up the keys
