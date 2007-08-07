@@ -70,7 +70,7 @@ my $plugin = MT::Plugin::GeoType->new ({
         [ 'georss_enable', 	        { Default => 1,                 Scope => 'blog' } ],
         [ 'map_width', 		        { Default => '200',             Scope => 'blog' } ],
         [ 'map_height', 		    { Default => '200',             Scope => 'blog' } ],
-        [ 'default_map_type', 		{ Default => 'HYBRID',          Scope => 'blog' } ],
+        [ 'default_map_type', 		{ Default => 'G_HYBRID_MAP',    Scope => 'blog' } ],
         [ 'map_controls_pan', 		{ Default => 1,                 Scope => 'blog' } ],
         [ 'map_controls_map_type',  { Default => 1,                 Scope => 'blog' } ],
         [ 'map_controls_zoom', 		{ Default => "small",           Scope => 'blog' } ],
