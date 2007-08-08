@@ -83,7 +83,7 @@ var map;
 function load () {
     map = new GMap2(getByID('geo_map'));    
     
-    map.setCenter (new GLatLng(0, 0), <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
+    map.setCenter (new GLatLng(0, 0), 0, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
     <TMPL_LOOP NAME=OBJECT_LOOP>    
     map.addOverlay (new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' }));
     </TMPL_LOOP>
