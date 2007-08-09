@@ -1,30 +1,38 @@
 <div class="field">
     <div class="field-header"><label>Location</label></div>
     <div class="field-wrapper">
+        
 		<table width="100%" cellpadding="3" cellspacing="3">
-			<thead>
-
-				<tr>
-					<th scope="col" align=left>Name</th>
-					<th scope="col" align=left>Address</th>
-					<th scope="col" align=left>Lat/Long</th>
-				</tr>
-			</thead>
 			<tbody>
-				<tr>
-
-					<td width=15%> 
-						<input type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="geotype_locname" id="geotype_locname" />
-					</td> 
-					<td width=40%> 
-						<input type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="geotype_addr" id="geotype_addr"/>
-					</td> 
-					<td width=10%>
-					    <input type="text" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geotype_geometry" id="geotype_geometry" />
-					<td width=20%> 
-						<a href='#' onclick="geocode('geotype_addr', 'geotype_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a>
-					</td>
+			    <tr>
+			        <th align="left">Name</th>
+			        <td rowspan="5"><a href='#' onclick="geocode('geotype_addr', 'geotype_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a></td>
+			    </tr>
+			    <tr>
+			        <td><input type="text" name="geotype_locname" id="geotype_locname" value="<TMPL_VAR NAME=LOCATION_NAME ESCAPE=HTML>" maxlength="255" style="width: 316px"/></td>
 				</tr>
+				<tr>
+				    <th align="left">Address</th>
+				</tr>
+				<tr>
+				    <td><input type="text" name="geotype_addr" id="geotype_addr" value="<TMPL_VAR NAME=LOCATION_ADDR ESCAPE=HTML>" maxlength="255" style="width: 316px"/></td>
+				</tr>
+				<tr>
+				    <td>Lat/Long: <span id="geotype_lat_long"><TMPL_VAR NAME=LOCATION_GEOMETRY></span><input type="hidden" name="geotype_geometry" id="geotype_geometry" value="<TMPL_VAR NAME=LOCATION_GEOMETRY ESCAPE=HTML>" /></td>
+				</tr>
+                <!-- <tr>
+                    <td width=15%> 
+                        <input type="text" value="<TMPL_VAR NAME=LOCATION_NAME>" name="geotype_locname" id="geotype_locname" />
+                    </td> 
+                    <td width=40%> 
+                        <input type="text" value="<TMPL_VAR NAME=LOCATION_ADDR>" name="geotype_addr" id="geotype_addr"/>
+                    </td> 
+                    <td width=10%>
+                        <input type="text" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>" name="geotype_geometry" id="geotype_geometry" />
+                    <td width=20%> 
+                        <a href='#' onclick="geocode('geotype_addr', 'geotype_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a>
+                    </td>
+                </tr> -->
 			</tbody>
 			</table>
 			<p>
@@ -98,6 +106,8 @@ function addAddressToMap(response) {
         marker.openInfoWindowHtml(place.address);
 
         getByID('geotype_geometry').value = place.Point.coordinates[1] + "," + place.Point.coordinates[0];
+        getByID('geotype_lat_long').innerHTML = '';
+        getByID('geotype_lat_long').innerHTML = place.Point.coordinates[1] + ", " + place.Point.coordinates[0];
   }
 }
 
