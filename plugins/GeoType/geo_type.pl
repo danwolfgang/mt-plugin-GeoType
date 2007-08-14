@@ -195,17 +195,23 @@ sub geo_type_map_tag {
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
 	
-	my $location = get_location_for_entry($entry);
+	my @locations = get_locations_for_entry($entry);
 
  	my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
-	if ($location && $location->geometry ne "") {
+	if (scalar @locations) {
 		my $tmpl = $plugin->load_tmpl("map.tmpl");
 		$tmpl->param(default_map_format => $config->{default_map_format});
 		$tmpl->param(map_width => $config->{map_width});
 		$tmpl->param(map_height => $config->{map_height});
-		$tmpl->param(location_geometry => $location->geometry);
-		$tmpl->param(location_name => $location->name);
+		
+		my $i = 1;
+		$tmpl->param ( location_loop => [ map {
+		    { location_name => $_->name, location_geometry => $_->geometry, location_ord => $i++ }
+		} @locations ]);
+		
+        # $tmpl->param(location_geometry => $location->geometry);
+        # $tmpl->param(location_name => $location->name);
 		$tmpl->param(map_id => $entry->id);
 		
 		$tmpl->param (default_zoom_level => $config->{default_zoom_level});
@@ -263,7 +269,7 @@ sub geo_rss_entry_tag {
 
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
-	my $location = get_location_for_entry($entry);
+	my $location = get_locations_for_entry($entry);
     my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
 	my $georss_enable = $config->{georss_enable};		
@@ -328,26 +334,38 @@ sub _edit_entry {
 		
 	if ($google_api_key) {
 		my $entry_id = $app->param('id');
-		my $entrylocation = GeoType::EntryLocation->get_by_key ({entry_id => $entry_id});
-		my $location = GeoType::Location->get_by_key ({ id => $entrylocation->location_id });
-		my $location_name = $location->name;
-		my $location_addr = $location->location;
-		my $location_geometry = $location->geometry;
-
+		my @entry_locations = GeoType::EntryLocation->load ({ entry_id => $entry_id });
+		
+		push @entry_locations, undef while (scalar @entry_locations < 5);
+		
+		my @location_loop;
+		foreach my $id (0 .. 4) {
+		    my $location;
+		    $location = GeoType::Location->load ($entry_locations[$id]->location_id) if ($entry_locations[$id]);
+		    if ($location) {
+		        push @location_loop, {
+		            location_ord    => $id + 1,
+		            location_id     => $entry_locations[$id]->id,
+		            location_name   => $location->name,
+		            location_addr   => $location->location,
+		            location_geometry   => $location->geometry,
+		        };
+		    }
+		    else {
+		        push @location_loop, {
+		            location_ord    => $id + 1,
+		        };
+		    }
+		    
+		}
+		
 		my $header = geo_type_header_tag;
 		my $tmpl = $plugin->load_tmpl("geotype_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
+		$tmpl->param ( location_loop => \@location_loop );
 
-		my $saved_locations = "";
 		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
 		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => $_->name } } @locations ] );
 
-        $tmpl->param ( new_location => 1 ) if (!$location_geometry);
-
-		$tmpl->param(saved_locations => $saved_locations);
-		$tmpl->param(location_addr => $location_addr);
-		$tmpl->param(location_name => $location_name);
-		$tmpl->param(location_geometry => $location_geometry);
-		
 		$tmpl->param ( default_zoom_level => $plugin->get_config_value ('default_zoom_level', 'blog:' . $blog->id) );
 		$tmpl->param ( default_map_type => $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id) );
 		$tmpl->param ( map_width => $plugin->get_config_value ('map_width', 'blog:' . $blog->id) );
@@ -370,40 +388,65 @@ sub _edit_entry {
 sub post_save_entry {
 	my ($callback, $app, $obj) = @_;
 
-    return unless ($app->param ('geotype_addr'));
-
 	my $blog_id = $obj->blog_id;
 	my $entry_id = $obj->id;
-	
-	# no need to test if these already exist - get_by_key will create them if they don't
-	my $entry_location = GeoType::EntryLocation->get_by_key ({ entry_id => $entry_id, blog_id => $blog_id });
 
-    my $location_name = $app->param('geotype_locname');
-    my $location_addr = $app->param('geotype_addr');
-    my $geometry = $app->param('geotype_geometry');
+    require GeoType::EntryLocation;
+    foreach my $num (1 .. 5) {
+        my $entry_location;
+        if (my $id = $app->param ("geotype_location_id_$num")) {
+            $entry_location = GeoType::EntryLocation->load ($id);
+        }
+        else {
+            $entry_location = GeoType::EntryLocation->new;
+            $entry_location->entry_id ($entry_id);
+            $entry_location->blog_id ($blog_id);
+        }
+        
+        if (!$app->param ("geotype_addr_$num") && $entry_location->id) {
+            # We need to check for a removed location
+            # In that case, there is a location id present, but no location
+            
+            $entry_location->remove or return $callback->error ("Error removing entry location: " . $entry_location->errstr);
+        }
+        
+        # at this point, we've handled the removed location case,
+        # so only continue if there actually is something there
+        next unless ($app->param ("geotype_addr_$num"));
 
-	my $location = GeoType::Location->get_by_key ({ location => $location_addr, blog_id => $blog_id });		
-	$location->name($location_name);
-	$location->geometry($geometry);
-	$location->visible(1);
-	$location->save or return $callback->error ("Saving location failed: ", $location->errstr);
-	  
-	$entry_location->location_id($location->id);
-	$entry_location->save or return $callback->error ("Saving entry_location failed: ", $entry_location->errstr);
+        my $location_name = $app->param("geotype_locname_$num");
+        my $location_addr = $app->param("geotype_addr_$num");
+        my $geometry = $app->param("geotype_geometry_$num");
+
+    	my $location = GeoType::Location->get_by_key ({ location => $location_addr, blog_id => $blog_id });		
+    	$location->name($location_name);
+    	$location->geometry($geometry);
+    	$location->visible(1);
+    	$location->save or return $callback->error ("Saving location failed: ", $location->errstr);
+    	
+    	$entry_location->location_id($location->id);
+        $entry_location->save or return $callback->error ("Saving entry_location failed: ", $entry_location->errstr);
+    }
+
 }
 
-sub get_location_for_entry {
+sub get_locations_for_entry {
 	my $entry = shift;
 
-	my $entry_location = GeoType::EntryLocation->get_by_key({entry_id => $entry->id});
-	my $location = GeoType::Location->get_by_key({ id => $entry_location->location_id });		
-    return $location;
+    my @entry_locations = GeoType::EntryLocation->load ({ entry_id => $entry->id });
+    my @locations;
+    
+    foreach my $entry_location (@entry_locations) {
+        my $location = GeoType::Location->load ($entry_location->location_id);
+        push @locations, $location if ($location);
+    }
+    return @locations;
 }
 
 sub geo_type_coords_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
-    my $location = get_location_for_entry($entry);
+    my $location = get_locations_for_entry($entry);
 
     return $location ? $location->geometry : "";
 }
@@ -411,7 +454,7 @@ sub geo_type_coords_tag {
 sub geo_type_location_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
-    my $location = get_location_for_entry($entry);
+    my $location = get_locations_for_entry($entry);
 
     return $location ? $location->location : "";
 }

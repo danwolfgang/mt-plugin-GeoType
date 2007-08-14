@@ -5,10 +5,12 @@ var geo_map_<TMPL_VAR NAME=MAP_ID>;
 TC.attachLoadEvent (function() {
     geo_map_<TMPL_VAR NAME=MAP_ID> = new GMap2 (getByID ('geo_map_<TMPL_VAR NAME=MAP_ID>'));
 
-    var marker = new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' });
+    <TMPL_LOOP NAME=LOCATION_LOOP>
+    var marker_<TMPL_VAR NAME=LOCATION_ORD> = new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' });
 
     geo_map_<TMPL_VAR NAME=MAP_ID>.setCenter (new GLatLng(<TMPL_VAR NAME=LOCATION_GEOMETRY>), <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);    
-    geo_map_<TMPL_VAR NAME=MAP_ID>.addOverlay (marker);
+    geo_map_<TMPL_VAR NAME=MAP_ID>.addOverlay (marker_<TMPL_VAR NAME=LOCATION_ORD>);
+    </TMPL_LOOP>
 
     <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>
     geo_map_<TMPL_VAR NAME=MAP_ID>.addControl (new GOverviewMapControl());

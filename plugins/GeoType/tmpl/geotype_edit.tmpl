@@ -4,59 +4,75 @@
         
 		<table width="100%" cellpadding="3" cellspacing="3">
 			<tbody>
+			    <TMPL_LOOP NAME=LOCATION_LOOP>
+			    <input type="hidden" name="geotype_location_id_<TMPL_VAR NAME=LOCATION_ORD>" value="<TMPL_VAR NAME=LOCATION_ID ESCAPE=HTML>" />
 			    <tr>
 			        <th align="left">Name</th>
-			        <td rowspan="5"><a href='#' onclick="geocode('geotype_addr', 'geotype_geometry');return false;" title='Geocode this address' id='geocode'>Geocode</a></td>
+			        <td rowspan="5"><a href='#' onclick="geocode(<TMPL_VAR NAME=LOCATION_ORD>, 'geotype_addr_<TMPL_VAR NAME=LOCATION_ORD>', 'geotype_geometry_<TMPL_VAR NAME=LOCATION_ORD>');return false;" title='Geocode this address' id='geocode'>Geocode</a></td>
 			    </tr>
 			    <tr>
-			        <td><input type="text" name="geotype_locname" id="geotype_locname" value="<TMPL_VAR NAME=LOCATION_NAME ESCAPE=HTML>" maxlength="255" style="width: 316px"/></td>
+			        <td><input type="text" name="geotype_locname_<TMPL_VAR NAME=LOCATION_ORD>" id="geotype_locname_<TMPL_VAR NAME=LOCATION_ORD>" value="<TMPL_VAR NAME=LOCATION_NAME ESCAPE=HTML>" maxlength="255" style="width: 316px"/></td>
 				</tr>
 				<tr>
 				    <th align="left">Address</th>
 				</tr>
 				<tr>
-				    <td><input type="text" name="geotype_addr" id="geotype_addr" value="<TMPL_VAR NAME=LOCATION_ADDR ESCAPE=HTML>" maxlength="255" style="width: 316px"/></td>
+				    <td><input type="text" name="geotype_addr_<TMPL_VAR NAME=LOCATION_ORD>" id="geotype_addr_<TMPL_VAR NAME=LOCATION_ORD>" value="<TMPL_VAR NAME=LOCATION_ADDR ESCAPE=HTML>" maxlength="255" style="width: 316px"/></td>
 				</tr>
 				<tr>
-				    <td>Lat/Long: <span id="geotype_lat_long"><TMPL_VAR NAME=LOCATION_GEOMETRY></span><input type="hidden" name="geotype_geometry" id="geotype_geometry" value="<TMPL_VAR NAME=LOCATION_GEOMETRY ESCAPE=HTML>" /></td>
+				    <td>Lat/Long: <span id="geotype_lat_long_<TMPL_VAR NAME=LOCATION_ORD>"><TMPL_VAR NAME=LOCATION_GEOMETRY></span><input type="hidden" name="geotype_geometry_<TMPL_VAR NAME=LOCATION_ORD>" id="geotype_geometry_<TMPL_VAR NAME=LOCATION_ORD>" value="<TMPL_VAR NAME=LOCATION_GEOMETRY ESCAPE=HTML>" /></td>
 				</tr>
+				<tr>
+					<th scope="col" align=left>Saved Locations</th>
+				</tr>
+				<tr>
+					<td><label for="geotype_select_<TMPL_VAR NAME=LOCATION_ORD>"> 
+					    <select id="geotype_select_<TMPL_VAR NAME=LOCATION_ORD>" onchange="load_saved(<TMPL_VAR NAME=LOCATION_ORD>);"><option value="">--choose one--</option>
+					        <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
+					        <option value="<TMPL_VAR NAME=LOCATION_VALUE>"><TMPL_VAR NAME=LOCATION_NAME></option>
+					        </TMPL_LOOP>
+					    </select>
+					</td>
+				</tr>
+				</TMPL_LOOP>
 			</tbody>
 			</table>
 			<p>
 				<table width="30%" cellpadding="3" cellspacing="3">
-					<thead>
+                    <!-- <thead>
 
-						<tr>
-							<th scope="col" align=left>Saved Locations</th>
+                        <tr>
+                            <th scope="col" align=left>Saved Locations</th>
 
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td><label for="geotype_select"> 
-							    <select id="geotype_select" onchange="load_saved();"><option value="">--choose one--</option>
-							        <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
-							        <option value="<TMPL_VAR NAME=LOCATION_VALUE>"><TMPL_VAR NAME=LOCATION_NAME></option>
-							        </TMPL_LOOP>
-							    </select>
-							</td>
-						</tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><label for="geotype_select"> 
+                                <select id="geotype_select" onchange="load_saved();"><option value="">--choose one--</option>
+                                    <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
+                                    <option value="<TMPL_VAR NAME=LOCATION_VALUE>"><TMPL_VAR NAME=LOCATION_NAME></option>
+                                    </TMPL_LOOP>
+                                </select>
+                            </td>
+                        </tr> -->
 						<tr><td width=20%> <a href="#" onclick="geotype_resetMap();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
-					</tbody>
+                    <!-- </tbody> -->
 				</table><div id="geo_map" style="width: <TMPL_VAR NAME=MAP_WIDTH>px; height: <TMPL_VAR NAME=MAP_HEIGHT>px; "></div>
 				<script type="text/javascript"> //<![CDATA[ 
 
 var map;
+var marker_1, marker_2, marker_3, marker_4, marker_5;
 function load () {
-    map = new GMap2(getByID('geo_map'));    
+    map = new GMap2(getByID('geo_map'));
+    <TMPL_LOOP NAME=LOCATION_LOOP>
     <TMPL_IF NAME=LOCATION_GEOMETRY>
-    var marker = new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' });
+    marker_<TMPL_VAR NAME=LOCATION_ORD> = new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' });
 
     map.setCenter (new GLatLng(<TMPL_VAR NAME=LOCATION_GEOMETRY>), <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);    
-    map.addOverlay (marker);
-    <TMPL_ELSE>
-    map.setCenter (new GLatLng(0, 0));
+    map.addOverlay (marker_<TMPL_VAR NAME=LOCATION_ORD>);
     </TMPL_IF>
+    </TMPL_LOOP>
     
     <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>
     map.addControl (new GOverviewMapControl());
@@ -79,8 +95,8 @@ function load () {
     </TMPL_IF>
 }
 
-function addAddressToMap(response) {
-    map.clearOverlays();
+function addAddressToMap(id, response) {
+    // map.clearOverlays();
     if (!response || response.Status.code != 200) {
         if (response) {
             switch (response.Status.code) {
@@ -114,36 +130,35 @@ function addAddressToMap(response) {
         point = new GLatLng(place.Point.coordinates[1],
                             place.Point.coordinates[0]);
         map.setCenter (point, <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
-        marker = new GMarker(point, { title: getByID('geotype_locname').value });
-        map.addOverlay(marker);
-        marker.openInfoWindowHtml(place.address);
+        eval ("map.removeOverlay (marker_" + id + ");marker_" + id + " = new GMarker(point, { title: getByID('geotype_locname_' + id).value });map.addOverlay(marker_" + id +             
+            ");marker_" + id + ".openInfoWindowHtml(place.address);");
 
-        getByID('geotype_geometry').value = place.Point.coordinates[1] + "," + place.Point.coordinates[0];
-        getByID('geotype_lat_long').innerHTML = '';
-        getByID('geotype_lat_long').innerHTML = place.Point.coordinates[1] + ", " + place.Point.coordinates[0];
+        getByID('geotype_geometry_' + id).value = place.Point.coordinates[1] + "," + place.Point.coordinates[0];
+        getByID('geotype_lat_long_' + id).innerHTML = '';
+        getByID('geotype_lat_long_' + id).innerHTML = place.Point.coordinates[1] + ", " + place.Point.coordinates[0];
   }
 }
 
 var geocoder;
-function geocode () {
+function geocode (id) {
     if (! geocoder) {
         geocoder = new GClientGeocoder();
     }
-    var address = getByID('geotype_addr').value;
-    geocoder.getLocations (address, addAddressToMap);
+    var address = getByID('geotype_addr_' + id).value;
+    geocoder.getLocations (address, function (response) { addAddressToMap (id, response) });
 }
 
-function load_saved () {
-    var select = getByID('geotype_select');
+function load_saved (id) {
+    var select = getByID('geotype_select_' + id);
     
     if (select.options[select.selectedIndex].value == "") {
         return;
     }
     
-    getByID('geotype_locname').value = select.options[select.selectedIndex].text;
-    getByID('geotype_addr').value    = select.options[select.selectedIndex].value;
+    getByID('geotype_locname_' + id).value = select.options[select.selectedIndex].text;
+    getByID('geotype_addr_' + id).value    = select.options[select.selectedIndex].value;
     
-    geocode();
+    geocode(id);
     
     select.selectedIndex = 0;
 }
