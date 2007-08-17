@@ -336,10 +336,10 @@ sub _edit_entry {
 		my $entry_id = $app->param('id');
 		my @entry_locations = GeoType::EntryLocation->load ({ entry_id => $entry_id });
 		
-		push @entry_locations, undef while (scalar @entry_locations < 5);
+#		push @entry_locations, undef while (scalar @entry_locations < 5);
 		
 		my @location_loop;
-		foreach my $id (0 .. 4) {
+		foreach my $id (0 .. $#entry_locations) {
 		    my $location;
 		    $location = GeoType::Location->load ($entry_locations[$id]->location_id) if ($entry_locations[$id]);
 		    if ($location) {
@@ -361,7 +361,7 @@ sub _edit_entry {
 		
 		my $header = geo_type_header_tag;
 		my $tmpl = $plugin->load_tmpl("geotype_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
-		$tmpl->param ( location_loop => \@location_loop );
+		$tmpl->param ( location_num => $#location_loop, location_loop => \@location_loop );
 
 		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
 		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => $_->name } } @locations ] );
