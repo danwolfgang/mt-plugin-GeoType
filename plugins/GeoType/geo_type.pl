@@ -53,10 +53,8 @@ my $plugin = MT::Plugin::GeoType->new ({
 	key         => "GeoType",
     version     => $VERSION,
     description => "<MT_TRANS phrase=\"GeoType allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth.<br\><br\>GeoType settings are on a per-blog setting, so you'll need to set this up in each weblog you administer. Use the 'GeoType' link in the left sidebar under 'Utilities' to configure your Map defaults and Locations.\">",
-    author_name => "Andrew Turner",
-    author_link => "http://highearthorbit.com/",
-    plugin_link => "http://georss.org/geopress/",
-	doc_link    => "http://georss.org/geopress/",
+    author_name => "Apperceptive, LLC",
+    author_link => "http://apperceptive.com/",
 
 	schema_version => 1.01,
  	object_classes => [ 'GeoType::Location', 'GeoType::EntryLocation' ],
@@ -99,7 +97,7 @@ my $plugin = MT::Plugin::GeoType->new ({
 	},
 	
 	conditional_tags    => {
-	        'GeoTypeIfLocation'  => \&geo_type_if_location,
+	        'GeoTypeIfLocation'  => \&geo_type_if_location_tag,
 	},
 	
 	app_methods => {
@@ -336,8 +334,6 @@ sub _edit_entry {
 		my $entry_id = $app->param('id');
 		my @entry_locations = GeoType::EntryLocation->load ({ entry_id => $entry_id });
 		
-#		push @entry_locations, undef while (scalar @entry_locations < 5);
-		
 		my @location_loop;
 		foreach my $id (0 .. $#entry_locations) {
 		    my $location;
@@ -446,7 +442,7 @@ sub get_locations_for_entry {
 sub geo_type_coords_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
-    my $location = get_locations_for_entry($entry);
+    my ($location) = get_locations_for_entry($entry);
 
     return $location ? $location->geometry : "";
 }
@@ -454,7 +450,7 @@ sub geo_type_coords_tag {
 sub geo_type_location_tag {
     my $ctx = shift;
     my $entry = $ctx->stash('entry');
-    my $location = get_locations_for_entry($entry);
+    my ($location) = get_locations_for_entry($entry);
 
     return $location ? $location->location : "";
 }
