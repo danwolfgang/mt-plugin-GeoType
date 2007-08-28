@@ -310,14 +310,27 @@ sub geo_type_header_tag {
         require MT::App;
         $blog = MT::App->instance->blog;
     }
-	my $tmpl = $plugin->load_tmpl("geotype_header.tmpl");
-	$tmpl->param (template_context => defined $ctx);
+    
+    my $google_api_key = $plugin->get_google_api_key ($blog);
+    return "" if (!$google_api_key);
+    
+    require MT::App;
+    my $static_path = MT::App->instance->static_path;
+    my $html = qq{
+        <script type='text/javascript' src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$google_api_key' ></script><
+        <style type="text/css">
+            v\\:* {
+              behavior:url(#default#VML);
+            }
+        </style>
+    };
 
-	$tmpl->param(geotype_version => $VERSION);
-	# Build up the keys
-    $tmpl->param (google_api_key => $plugin->get_google_api_key ($blog));
-
-	$tmpl->output;
+    $html .= qq{
+        <script type="text/javascript" src="${static_path}js/tc.js"></script>
+        <script type="text/javascript" src="${static_path}mt.js"></script>   
+    } if (defined $ctx);
+    
+    return $html;    
 }
 
 # Creates the Edit form when writing an entry
