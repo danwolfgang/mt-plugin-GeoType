@@ -198,30 +198,47 @@ sub geo_type_map_tag {
  	my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
 	if (scalar @locations) {
-		my $tmpl = $plugin->load_tmpl("map.tmpl");
-		$tmpl->param(default_map_format => $config->{default_map_format});
-		$tmpl->param(map_width => $config->{map_width});
-		$tmpl->param(map_height => $config->{map_height});
-		
-		my $i = 1;
-		$tmpl->param ( location_loop => [ map {
-		    { location_name => $_->name, location_geometry => $_->geometry, location_ord => $i++ }
-		} @locations ]);
-		
-        # $tmpl->param(location_geometry => $location->geometry);
-        # $tmpl->param(location_name => $location->name);
-		$tmpl->param(map_id => $entry->id);
-		
-		$tmpl->param (default_zoom_level => $config->{default_zoom_level});
-		$tmpl->param (default_map_type   => $config->{default_map_type});
-		$tmpl->param ( map_controls_overview => $plugin->get_config_value ('map_controls_overview', 'blog:' . $blog_id) );
-        $tmpl->param ( map_controls_scale => $plugin->get_config_value ('map_controls_scale', 'blog:' . $blog_id) );
-        $tmpl->param ( map_controls_map_type => $plugin->get_config_value ('map_controls_map_type', 'blog:' . $blog_id) );
+	    my $entry_id   = $entry->id;
+	    my $map_width  = $config->{map_width};
+	    my $map_height = $config->{map_height};
+	    my $html = qq@
+	        <div id="geo_map_$entry_id" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
+            <script type="text/javascript"> //<![CDATA[ 
+            var geo_map_$entry_id;
+            TC.attachLoadEvent (function() {
+                geo_map_$entry_id = new GMap2 (getByID ('geo_map_$entry_id'));
+            
+	    @;
+	    
+	    require MT::Util;
+	    my $i = 1;
+	    my $default_zoom_level = $config->{default_zoom_level};
+	    my $default_map_type   = $config->{default_map_type};
+	    foreach my $location (@locations) {
+	        my $geom = $location->geometry;
+	        my $title_js = MT::Util::encode_js ($location->name);
+	        $html .= qq!
+            var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js' });
+
+            geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
+            geo_map_${entry_id}.addOverlay (marker_$i);
+            !;
+            $i++;
+	    }
+	    
+	    $html .= qq{geo_map_$entry_id.addControl (new GOverviewMapControl());} if $plugin->get_config_value ('map_controls_overview', 'blog:' . $blog_id);
+        $html .= qq{geo_map_$entry_id.addControl (new GScaleControl());} if $plugin->get_config_value ('map_controls_scale', 'blog:' . $blog_id);
+        $html .= qq{geo_map_$entry_id.addControl (new GMapTypeControl());} if $plugin->get_config_value ('map_controls_map_type', 'blog:' . $blog_id);
+        my $zoom - $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog_id);
+        $zoom eq 'small'    ? $html .= qq{geo_map_$entry_id.addControl (new GSmallZoomControl());} :
+        $zoom eq 'medium'   ? $html .= qq{geo_map_$entry_id.addControl (new GSmallMapControl());}  :
+        $zoom eq 'large'    ? $html .- qq{geo_map_$entry_id.addControl (new GLargeMapControl());}  : 0;
+	    
+	    $html .= qq!});
+        // ]]> 
+        </script>!;
         
-        my $zoom = $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog_id);
-        $tmpl->param ( "map_controls_zoom_$zoom" => 1 );
-        
-		return $tmpl->output;
+        return $html;
 	}
 	return "";
 }
@@ -317,7 +334,7 @@ sub geo_type_header_tag {
     require MT::App;
     my $static_path = MT::App->instance->static_path;
     my $html = qq{
-        <script type='text/javascript' src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$google_api_key' ></script><
+        <script type='text/javascript' src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$google_api_key' ></script>
         <style type="text/css">
             v\\:* {
               behavior:url(#default#VML);
