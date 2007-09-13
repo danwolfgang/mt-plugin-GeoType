@@ -418,7 +418,7 @@ sub post_save_entry {
 	my $entry_id = $obj->id;
 
     require GeoType::EntryLocation;
-    foreach my $num (1 .. 5) {
+    foreach my $num (0 .. 4) {
         my $entry_location;
         if (my $id = $app->param ("geotype_location_id_$num")) {
             $entry_location = GeoType::EntryLocation->load ($id);
