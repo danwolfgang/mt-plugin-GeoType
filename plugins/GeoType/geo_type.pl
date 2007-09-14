@@ -64,6 +64,7 @@ my $plugin = MT::Plugin::GeoType->new ({
     settings        => MT::PluginSettings->new ([
         [ 'google_api_key', 	    { Default => 'GOOGLE_API_KEY',  Scope => 'system' } ],
         [ 'google_api_key', 	    { Default => 'GOOGLE_API_KEY',  Scope => 'blog' } ],
+        [ 'site_api_key',           { Default => '',                Scope => 'blog' } ],
         [ 'georss_format', 	        { Default => 'simple',          Scope => 'blog' } ],
         [ 'georss_enable', 	        { Default => 1,                 Scope => 'blog' } ],
         [ 'map_width', 		        { Default => '200',             Scope => 'blog' } ],
@@ -330,7 +331,7 @@ sub geo_type_header_tag {
         $blog = MT::App->instance->blog;
     }
     
-    my $google_api_key = $plugin->get_google_api_key ($blog);
+    my $google_api_key = $plugin->get_google_api_key ($blog, ($ctx ? 'site' : 'interface'));
     return "" if (!$google_api_key);
     
     require MT::App;
@@ -510,9 +511,12 @@ sub geo_type_if_location_tag  {
 
 sub get_google_api_key {
     my $plugin = shift;
-    my ($blog) = @_;
+    my ($blog, $which) = @_;
     
-    return $plugin->_get_api_key ($blog, 'google');
+    my $interface_api_key =  $plugin->_get_api_key ($blog, 'google');
+    my $site_api_key      =  $plugin->get_config_value ('site_api_key', 'blog:' . $blog->id) || $interface_api_key;
+    
+    return $which && $which eq 'site' ? $site_api_key : $interface_api_key;
 }
 
 sub _get_api_key {

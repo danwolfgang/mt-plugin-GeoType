@@ -11,7 +11,16 @@
                     <p><a href="http://www.google.com/apis/maps/signup.html" title="GoogleMaps API Registration"><MT_TRANS phrase="GoogleMaps API Registration"></a> - <MT_TRANS phrase="Enter your blog url as the GoogleMaps URL"></p>
                 </div>
             </td> 
-        </tr> 
+        </tr>
+        <tr valign="top">
+            <th scope="row"><div class="label"><label for="site_api_key"><MT_TRANS phrase="Site Google API Key:"></label></div></th>
+            <td>
+                <div class="field">
+                    <input type="text" name="site_api_key" id="site_api_key" style="width: 95%" size="45" value="<TMPL_VAR NAME=site_api_key ESCAPE=HTML>" />
+                    <p>API key to use for the site, defaults to using the key above.  Useful if the site is on a different domain than MT.</p>
+                </div>
+            </td>
+        </tr>
     </table>
     <table width="100%" cellspacing="2" cellpadding="5" class="editform">
 
