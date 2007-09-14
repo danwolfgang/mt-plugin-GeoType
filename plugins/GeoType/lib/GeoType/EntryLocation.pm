@@ -8,7 +8,8 @@ __PACKAGE__->install_properties({
 	        'id' => 'integer not null auto_increment',
 	        'blog_id' => 'integer not null',
 	        'entry_id' => 'integer not null',
-	        'location_id' => 'integer not null'
+	        'location_id' => 'integer not null',
+	        'zoom_level'    => 'smallint',
 	},
     indexes => {
         entry_id => 1,

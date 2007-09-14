@@ -270,6 +270,7 @@ TC.attachLoadEvent (generate_locations_table);
 <div class="field">
     <div class="field-header"><label>Location</label></div>
     <div class="field-wrapper">
+        <input type="hidden" name="geotype_zoom_level" id="geotype_zoom_level" value="<TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>" />
         <span id="geocode_fields">
 		</span>
 			<button id="add_loc_button" onClick="add_location(); return false;">Add Location...</button>
@@ -282,14 +283,8 @@ TC.attachLoadEvent (generate_locations_table);
 var map;
 function load () {
     map = new GMap2(getByID('geo_map'));
-    // <TMPL_LOOP NAME=LOCATION_LOOP>
-    // <TMPL_IF NAME=LOCATION_GEOMETRY>
-    // marker_<TMPL_VAR NAME=LOCATION_ORD> = new GMarker (new GLatLng (<TMPL_VAR NAME=LOCATION_GEOMETRY>), { title: '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>' });
-    // 
-    // map.setCenter (new GLatLng(0, 0), <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);    
-    // map.addOverlay (marker_<TMPL_VAR NAME=LOCATION_ORD>);
-    // </TMPL_IF>
-    // </TMPL_LOOP>
+    
+    GEvent.addListener (map, 'zoomend', function (oldzoom, newzoom) { getByID('geotype_zoom_level').value = newzoom; });
     generate_markers();
     
     <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>

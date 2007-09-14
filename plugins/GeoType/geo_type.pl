@@ -56,7 +56,7 @@ my $plugin = MT::Plugin::GeoType->new ({
     author_name => "Apperceptive, LLC",
     author_link => "http://apperceptive.com/",
 
-	schema_version => 1.01,
+	schema_version => 1.1,
  	object_classes => [ 'GeoType::Location', 'GeoType::EntryLocation' ],
 	
 	system_config_template  => 'config.tmpl',
@@ -194,6 +194,8 @@ sub geo_type_map_tag {
 	my $blog_id = $ctx->stash('blog_id');
 	
 	my @locations = get_locations_for_entry($entry);
+	
+	my $zoom = get_zoom_for_entry ($entry);
 
  	my $config = $plugin->get_config_hash('blog:' . $blog_id);	
 
@@ -212,7 +214,7 @@ sub geo_type_map_tag {
 	    
 	    require MT::Util;
 	    my $i = 1;
-	    my $default_zoom_level = $config->{default_zoom_level};
+	    my $default_zoom_level = $zoom || $config->{default_zoom_level};
 	    my $default_map_type   = $config->{default_map_type};
 	    foreach my $location (@locations) {
 	        my $geom = $location->geometry;
@@ -361,6 +363,7 @@ sub _edit_entry {
 	$old = qq{<TMPL_IF NAME=DISP_PREFS_SHOW_EXCERPT>};
 		
 	if ($google_api_key) {
+	    my $zoom_level = $plugin->get_config_value ('default_zoom_level', 'blog:' . $blog->id);
 		my $entry_id = $app->param('id');
 		my @entry_locations = GeoType::EntryLocation->load ({ entry_id => $entry_id });
 		
@@ -369,6 +372,7 @@ sub _edit_entry {
 		    my $location;
 		    $location = GeoType::Location->load ($entry_locations[$id]->location_id) if ($entry_locations[$id]);
 		    if ($location) {
+                $zoom_level = $entry_locations[$id]->zoom_level if ($entry_locations[$id]->zoom_level);
 		        push @location_loop, {
 		            location_ord    => $id + 1,
 		            location_id     => $entry_locations[$id]->id,
@@ -392,7 +396,7 @@ sub _edit_entry {
 		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
 		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => $_->name } } @locations ] );
 
-		$tmpl->param ( default_zoom_level => $plugin->get_config_value ('default_zoom_level', 'blog:' . $blog->id) );
+		$tmpl->param ( default_zoom_level => $zoom_level );
 		$tmpl->param ( default_map_type => $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id) );
 		$tmpl->param ( map_width => $plugin->get_config_value ('map_width', 'blog:' . $blog->id) );
 		$tmpl->param ( map_height => $plugin->get_config_value ('map_height', 'blog:' . $blog->id) );
@@ -416,6 +420,8 @@ sub post_save_entry {
 
 	my $blog_id = $obj->blog_id;
 	my $entry_id = $obj->id;
+
+    my $zoom_level = $app->param ('geotype_zoom_level');
 
     require GeoType::EntryLocation;
     foreach my $num (0 .. 4) {
@@ -450,6 +456,7 @@ sub post_save_entry {
     	$location->visible(1);
     	$location->save or return $callback->error ("Saving location failed: ", $location->errstr);
     	
+        $entry_location->zoom_level ($zoom_level);
     	$entry_location->location_id($location->id);
         $entry_location->save or return $callback->error ("Saving entry_location failed: ", $entry_location->errstr);
     }
@@ -467,6 +474,18 @@ sub get_locations_for_entry {
         push @locations, $location if ($location);
     }
     return @locations;
+}
+
+sub get_zoom_for_entry {
+    my $entry = shift;
+    my @locations = GeoType::EntryLocation->load ({ entry_id => $entry->id });
+    
+    my $zoom;
+    foreach (@locations) {
+        $zoom = $_->zoom_level if ($_->zoom_level);
+    }
+    
+    return $zoom;
 }
 
 sub geo_type_coords_tag {
