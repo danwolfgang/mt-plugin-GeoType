@@ -276,7 +276,7 @@ TC.attachLoadEvent (generate_locations_table);
 			<button id="add_loc_button" onClick="add_location(); return false;">Add Location...</button>
 			<p>
 				<table width="30%" cellpadding="3" cellspacing="3" id="map_table">
-						<tr><td width=20%> <a href="#" onclick="geotype_resetMap();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
+						<tr><td width=20%> <a href="#" onclick="reset_map();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
 				</table><div id="geo_map" style="width: 573px; height: 354px; "></div>
 				<script type="text/javascript"> //<![CDATA[ 
 
@@ -389,6 +389,10 @@ function load_saved (id) {
     geocode(id);
     
     select.selectedIndex = 0;
+}
+
+function reset_map () {
+    map.setCenter (new GLatLng(0, 0), 0, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
 }
 
 TC.attachLoadEvent (load);
