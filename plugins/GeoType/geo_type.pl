@@ -243,10 +243,16 @@ sub geo_type_map_tag {
 	    $html .= qq{geo_map_$entry_id.addControl (new GOverviewMapControl());} if $plugin->get_config_value ('map_controls_overview', 'blog:' . $blog_id);
         $html .= qq{geo_map_$entry_id.addControl (new GScaleControl());} if $plugin->get_config_value ('map_controls_scale', 'blog:' . $blog_id);
         $html .= qq{geo_map_$entry_id.addControl (new GMapTypeControl());} if $plugin->get_config_value ('map_controls_map_type', 'blog:' . $blog_id);
-        my $zoom - $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog_id);
-        $zoom eq 'small'    ? $html .= qq{geo_map_$entry_id.addControl (new GSmallZoomControl());} :
-        $zoom eq 'medium'   ? $html .= qq{geo_map_$entry_id.addControl (new GSmallMapControl());}  :
-        $zoom eq 'large'    ? $html .- qq{geo_map_$entry_id.addControl (new GLargeMapControl());}  : 0;
+        my $zoom = $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog_id);
+        if ($zoom eq 'small') {
+            $html .= qq{geo_map_$entry_id.addControl (new GSmallZoomControl());};
+        }
+        elsif ($zoom eq 'medium') {
+            $html .= qq{geo_map_$entry_id.addControl (new GSmallMapControl());};
+        }
+        elsif ($zoom eq 'large') {
+            $html .= qq{geo_map_$entry_id.addControl (new GLargeMapControl());};
+        }
 	    
 	    $html .= qq!});
         // ]]> 
