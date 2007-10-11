@@ -134,6 +134,17 @@ my $plugin = MT::Plugin::GeoType->new ({
 
 MT->add_plugin($plugin);
 
+sub load_config {
+    my $plugin = shift;
+    $plugin->SUPER::load_config (@_);
+    my ($param, $scope) = @_;
+    
+    if ($scope =~ /^blog:\d+$/) {
+        $param->{geotype_header} = geo_type_header_tag;
+    }
+}
+
+
 sub visible_locations {
     my $app = shift;
     my @ids = $app->param ('id');
