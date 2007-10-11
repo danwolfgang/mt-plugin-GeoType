@@ -355,7 +355,9 @@ function addAddressToMap(id, response) {
                             place.Point.coordinates[0]);
         map.setCenter (point, <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
         loc = locations[id];
-        map.removeOverlay (loc.marker);
+        if (loc.marker) {
+            map.removeOverlay (loc.marker);            
+        }
         loc.marker = new GMarker (point, { title: getByID('geotype_locname_' + id).value });
         map.addOverlay (loc.marker);
         
