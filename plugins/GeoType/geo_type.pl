@@ -140,7 +140,7 @@ sub load_config {
     my ($param, $scope) = @_;
     
     if ($scope =~ /^blog:\d+$/) {
-        $param->{geotype_header} = geo_type_header_tag;
+        $param->{geotype_header} = geo_type_header_tag();
     }
 }
 
