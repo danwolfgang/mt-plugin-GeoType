@@ -569,6 +569,8 @@ sub list_locations {
             map_controls_scale => $plugin->get_config_value ('map_controls_scale', 'blog:' . $app->blog->id),
             map_controls_map_type => $plugin->get_config_value ('map_controls_map_type', 'blog:' . $app->blog->id),
             "map_controls_zoom_" .$plugin->get_config_value ('map_controls_zoom', 'blog:' . $app->blog->id) => 1,
+            
+            geotype_header  => geo_type_header_tag,
     		
         },
     });
