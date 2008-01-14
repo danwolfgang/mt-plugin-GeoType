@@ -3,6 +3,7 @@ use strict;
 
 use base qw(MT::Object);
 use GeoType::EntryLocation;
+use GeoType::ExtendedLocation;
 
 __PACKAGE__->install_properties({
 	column_defs => {
@@ -21,7 +22,7 @@ __PACKAGE__->install_properties({
     datasource => 'location',
     primary_key => 'id',
     
-    child_classes => [ 'GeoType::EntryLocation' ],
+    child_classes => [ 'GeoType::EntryLocation', 'GeoType::ExtendedLocation' ],
 });
 
 sub remove {
