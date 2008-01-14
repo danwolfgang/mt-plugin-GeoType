@@ -46,7 +46,7 @@ use GeoType::EntryLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = 1.6; 
+$VERSION = 1.5; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
@@ -56,8 +56,8 @@ my $plugin = MT::Plugin::GeoType->new ({
 	author_name => "Apperceptive, LLC",
 	author_link => "http://apperceptive.com/",
 
-	schema_version => 1.2,
-	object_classes => [ 'GeoType::Location', 'GeoType::EntryLocation' ],
+	schema_version => 1.1,
+	object_classes => [ 'GeoType::Location' ],
 	
 	system_config_template  => 'config.tmpl',
 	blog_config_template    => 'blog_config.tmpl',
@@ -77,7 +77,6 @@ my $plugin = MT::Plugin::GeoType->new ({
 		[ 'map_controls_scale',     { Default => 1,                 Scope => 'blog' } ],
 		[ 'default_add_map',         { Default => 'all',             Scope => 'blog' } ],
 		[ 'default_zoom_level',     { Default => 11,                Scope => 'blog' } ],
-		[ 'use_extended_attributes',         { Default => 0,  Scope => 'blog' } ],
 	]),
 	
 	callbacks    => {
