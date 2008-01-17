@@ -13,6 +13,7 @@ function init()
 TC.attachLoadEvent( init );
 // -->
 </script>
+<TMPL_IF NAME=EXTENSIONS><p>Click on a location name to edit its attributes.</TMPL_IF>
 <form method="post" action="<TMPL_VAR NAME=SCRIPT_URL>" onsubmit="return this['__mode'] ? true : false">
     <input type="hidden" name="__mode" value="<TMPL_IF NAME=IS_POWER_EDIT>save_entries</TMPL_IF>" />
     <input type="hidden" name="_type" value="geotype_location" />
@@ -53,7 +54,7 @@ TC.attachLoadEvent( init );
             <td class="cb"><input type="checkbox" name="id" value="<TMPL_VAR NAME=LOCATION_ID>" class="select" /></td>
             <input type="hidden" name="locid[<TMPL_VAR NAME=LOCATION_ID>]" value="<TMPL_VAR NAME=LOCATION_ID>"/>
             <input type="hidden" id="location_geometry-<TMPL_VAR NAME=LOCATION_ID>" name="location_geometry[<TMPL_VAR NAME=LOCATION_ID>]" value="<TMPL_VAR NAME=LOCATION_GEOMETRY>"/>
-            <td><TMPL_VAR NAME=LOCATION_NAME></td>
+            <td><TMPL_IF NAME=EXTENSIONS><a href="<TMPL_VAR NAME=SCRIPT_URL>?__mode=geotype_edit_location&blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;location_id=<TMPL_VAR NAME=LOCATION_ID>"></TMPL_IF><TMPL_VAR NAME=LOCATION_NAME><TMPL_IF NAME=EXTENSIONS></a></TMPL_IF></td>
             <td><TMPL_VAR NAME=LOCATION_ADDRESS></td>
             <td><TMPL_IF LOCATION_VISIBLE>Yes<TMPL_ELSE>No</TMPL_IF></td>
             <td><TMPL_VAR NAME=ENTRIES_COUNT></td>
