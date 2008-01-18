@@ -90,7 +90,19 @@ my $plugin = MT::Plugin::GeoType->new ({
 			'CMSPostDelete.geotype_location'   => \&post_delete_location,
 	},
 	
+	container_tags => {
+			'GeoTypeLocations' => \&geo_type_location_container,
+	},
 	template_tags => {
+			'GeoTypeLocationName' => \&geo_type_name_tag,
+			'GeoTypeLocationCrossStreet' => \&geo_type_cross_street_tag,
+			'GeoTypeLocationDescription' => \&geo_type_description_tag,
+			'GeoTypeLocationHours' => \&geo_type_hours_tag,
+			'GeoTypeLocationPhone' => \&geo_type_phone_tag,
+			'GeoTypeLocationPlaceId' => \&geo_type_place_id_tag,
+			'GeoTypeLocationRating' => \&geo_type_rating_tag,
+			'GeoTypeLocationThumbnail' => \&geo_type_thumbnail_tag,
+			'GeoTypeLocationURL' => \&geo_type_URL_tag,
 			'GeoTypeCoords' => \&geo_type_coords_tag,
 			'GeoTypeLocation' => \&geo_type_location_tag,
 			'GeoTypeMap' => \&geo_type_map_tag,
@@ -99,9 +111,9 @@ my $plugin = MT::Plugin::GeoType->new ({
 			'GeoRSS_Channel' =>\&geo_rss_channel_tag,
 			'GeoRSS_Entry' =>\&geo_rss_entry_tag,
 	},
-	
 	conditional_tags    => {
 			'GeoTypeIfLocation'  => \&geo_type_if_location_tag,
+			'GeoTypeIfLocationExtended'  => \&geo_type_if_location_extended,
 	},
 	
 	app_methods => {
@@ -202,6 +214,121 @@ sub init_cms {
 	$app->register_type ('geotype_location', 'GeoType::Location');
 }
 
+sub geo_type_location_container {
+    my $ctx = shift;
+    my $res = '';
+    my $builder = $ctx->stash('builder');
+    my $tokens = $ctx->stash('tokens');
+    my $entry = $ctx->stash('entry');
+    my @locations;
+    if ( ! $entry ) {                # Discover our context
+        my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
+        if ( $at ) {
+            @locations = get_locations_for_archive($ctx);
+        } else {
+            return;
+        }
+    } else {
+	@locations = get_locations_for_entry($entry);
+    }
+    foreach my $location ( @locations ) {
+        $ctx->stash('geotype_location', $location);
+	my @extended = GeoType::ExtendedLocation->load({ location_id => $location->id });
+	my $extended;
+	( scalar @extended > 0 ) && ( $extended = $extended[0] );
+	if ( $extended ) {
+		$ctx->stash('geotype_extended_location', $extended);
+	} else {
+		$ctx->stash('geotype_extended_location', 0 );
+	}
+	#$ctx->stash('geotype_extended_location', $extended);
+        defined(my $out = $builder->build($ctx, $tokens))
+            or return $ctx->error($builder->errstr);
+        $res .= $out;
+    }
+    $res;
+}
+
+sub geo_type_if_location_extended {
+    my $ctx = shift;
+    if ( $ctx->stash('geotype_extended_location') && $ctx->stash('geotype_extended_location') ne '0' ) {
+	return 1;
+    } else {
+        return 0;
+    }
+}
+
+sub geo_type_name_tag {
+	my $ctx = shift;
+	my $location = $ctx->stash('geotype_location');
+	return '' unless $location;
+	return '' unless $location->id;
+	return $location->name;
+}
+
+sub geo_type_cross_street_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->cross_street;
+}
+
+sub geo_type_hours_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->hours;
+}
+
+sub geo_type_description_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->description;
+}
+
+sub geo_type_phone_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->phone_number;
+}
+
+sub geo_type_place_id_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->place_id;
+}
+
+sub geo_type_rating_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->rating;
+}
+
+sub geo_type_thumbnail_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->thumbnail;
+}
+
+sub geo_type_URL_tag {
+	my $ctx = shift;
+	my $extended = $ctx->stash('geotype_extended_location');
+	return '' unless $extended;
+	return '' unless $extended->id;
+	return $extended->url;
+}
 
 # Creates an actual map for an entry
 sub geo_type_map_tag {
