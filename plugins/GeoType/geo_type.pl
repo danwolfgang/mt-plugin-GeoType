@@ -95,6 +95,8 @@ my $plugin = MT::Plugin::GeoType->new ({
 	},
 	template_tags => {
 			'GeoTypeLocationName' => \&geo_type_name_tag,
+			'GeoTypeLocationLatitude' => \&geo_type_latitude_tag,
+			'GeoTypeLocationLongitude' => \&geo_type_longitude_tag,
 			'GeoTypeLocationCrossStreet' => \&geo_type_cross_street_tag,
 			'GeoTypeLocationDescription' => \&geo_type_description_tag,
 			'GeoTypeLocationHours' => \&geo_type_hours_tag,
@@ -264,6 +266,26 @@ sub geo_type_name_tag {
 	return '' unless $location;
 	return '' unless $location->id;
 	return $location->name;
+}
+
+sub geo_type_latitude_tag {
+	my $ctx = shift;
+	my $location = $ctx->stash('geotype_location');
+	return '' unless $location;
+	return '' unless $location->id;
+	my $geometry = $location->geometry;
+	my @coords = split(/,/, $geometry);
+	return @coords[0];
+}
+
+sub geo_type_longitude_tag {
+	my $ctx = shift;
+	my $location = $ctx->stash('geotype_location');
+	return '' unless $location;
+	return '' unless $location->id;
+	my $geometry = $location->geometry;
+	my @coords = split(/,/, $geometry);
+	return @coords[1];
 }
 
 sub geo_type_cross_street_tag {
