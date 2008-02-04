@@ -1,0 +1,52 @@
+body{ font-family: lucida grande, verdana, sans-serif;background: #fff;padding: 0;color:#333;}
+h1, h2, h3, h4, h5, h6{color:#003366; margin-top: 20px;}
+h2, h3, h4, h5, h6{margin-bottom: 8px;}
+h1{font-size: 28px; padding-top: 30px}
+h2{font-size: 24px}
+h3{font-size: 22px}
+h4{font-size: 18px}
+h5{font-size: 16px}
+h6{font-size: 14px}
+a, a:link{color:#0066CC;font-weight:bold;}
+a:visited{color:#6699CC}
+a:hover{color:#00CCFF; text-decoration: underline}
+em{font-weight: bold;font-style:normal}
+em.menuitem{color:#FF6600}
+em.dropdownitem{color:#009966}
+p, li{font-size: 13px;margin-top: 8px;color:#333;}
+
+
+ul {margin-left: 0}
+ol{margin-left: 0;
+	list-style-type: lower-alpha;}
+	.numbers li {list-style-type:decimal;}
+ul.li{margin-bottom: 8px;}
+.little li{margin-bottom: 8px;
+	   list-style-type:lower-alpha;}
+	.nobullet li {list-style-type:none;}
+	.yesbullet li {list-style-type:disc;}
+
+
+#container{width: 850px; margin: 0 auto;}
+.directions{margin: 10px auto;width: 90%;}
+#footer{background: #efefef;margin-top: 20px;font-size: 10px;line-height: 14px;padding: 10px 0; text-align:center;clear: both}
+.figure img{border: 1px solid #666;margin-bottom: 10px}
+.figure {font-size: 11px; color: #333; text-align: center;float: right;margin: 10px;clear:right}
+.figure-main{font-size: 10px; color: #999; text-align: left;float: right;margin: 10px;clear:right}
+.figure-ref{font-style:italic; font-size: 9px;color:#333}
+.return{background:#efefef; font-size: 10px; padding: 5px; width: 100px;float:right;text-align:center}
+#quicktable{float: right; width: 600px;margin: 0 0 20px 20px;clear: both}
+#quicktable h5{text-align: center;margin-bottom: 10px}
+#quicktable table{border: 1px solid #ccc;width: 600px}
+#quicktable table th{text-align: left;border-bottom: 1px solid #ccc;padding: 8px}
+#quicktable table tr, #quicktable table td{margin: 0}
+#quicktable table td{padding: 5px;font-size: 11px; border-bottom: 1px solid #ccc;vertical-align: top}
+#quicktable table li{font-size: 11px;}
+#quicktable table ol, #quicktable table ul{margin-top: 0}
+.datatable{width: 600px; float: left; text-align: center; border-top: 1px solid #ccc;padding-top: 20px;margin-top: 30px}
+.datatable table{border: 1px solid #ccc;margin: 15px}
+.datatable table th{text-align: left;border-bottom: 1px solid #ccc;padding: 8px}
+.datatable table td{padding: 5px;font-size: 11px; border-bottom: 1px solid #ccc;vertical-align: top;text-align: left}
+.code{font-family:Courier, Courier New, monospace;font-size: 11px}
+.sideinfo{background: #efefef; padding: 15px; width: 350px;margin: 15px 0;}
+.sublist{list-style-type:lower-alpha}
