@@ -827,11 +827,26 @@ sub list_locations {
 	
 	$app->{breadcrumbs} = [];
 	$app->add_breadcrumb ('GeoType: List Locations');
-	
+	my $offset = $app->param ('offset');
+	$offset ||= 0;
+	my ( $start_offset, $end_offset, $total_rows );
+	$total_rows = GeoType::Location->count({ blog_id => $app->blog->id });
+	if ( $offset > $total_rows ) {
+		$offset = $total_rows - 20;
+	}
+	if ( $offset < 0 ) {
+		$offset = 0;
+	}
+	$start_offset = $total_rows ? $offset + 1 : 0;
+	$end_offset = ( $total_rows > $start_offset + 19 ) ? $start_offset + 19 : $total_rows;
 	return $app->listing ({
 		Type    => 'geotype_location',
+		Offset  => $offset,
 		Terms   => {
 			blog_id => $app->blog->id
+		},
+		Args	=> {
+			sort => 'name',
 		},
 		Code    => sub {
 			my ($obj, $row) = @_;
@@ -847,6 +862,14 @@ sub list_locations {
 		},
 		Template    => $plugin->load_tmpl ('list_geotype_location.tmpl'),
 		Params  => {
+			offset		=> $offset,
+			start_offset	=> $start_offset,
+			prev_page	=> ( $start_offset > 20 ) ? $start_offset - 21 : 0,
+			last_page	=> $total_rows - 20,
+			end_offset	=> $end_offset,
+			total_rows	=> $total_rows,
+			forward_arrow	=> ( $end_offset < $total_rows) ? 1 : 0,
+			back_arrow	=> ( $start_offset > 1 ) ? 1 : 0,
 			quick_search    => 0,
 			extensions      => $plugin->get_config_value ('use_extended_attributes', 'blog:'. $app->blog->id),
 			google_api_key  => $plugin->get_google_api_key ($app->blog),
