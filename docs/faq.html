@@ -18,14 +18,11 @@
 <ul class="nobullet">
 	<li><a href="#nomap">Why can't I see a map...</a>
 		<ul class="nobullet">
-			<li>on my entry's webpage?</li>
 			<li><a href="#edit_entry">in my Edit Entry screen?</a></li>
+			<li><a href="#published">on my entry's published page?</a></li>
 		</ul>
 	</li>
-	<li><a href="#otherblog">Why can't I see a photo preview for a photo I know I've uploaded
-		 		and spelled correctly?</a></li>
-	<li><a href="#nocaption">What if my photo doesn't have a caption?</a></li>
-	<li><a href="#sizing">How can I tell if the photo I've uploaded is large or small?</a></li>
+	<li><a href="#error_msg">I received an error message when I tried to GeoCode an address.</a></li>
 </ul>
 
 
@@ -33,15 +30,15 @@
 <br />
 
 <a name="nomap"></a>
-<h6>Why can't I see a map...
+<h6>Why can't I see a map...</h6>
 	<ul class="nobullet">
 		<li>
 			<a name="edit_entry"></a>
 			<h6>in my Edit Entry screen?</h6>
 			<ol class="nobullet">
-				<li><p>If you can't see any areas that would display GeoType data on your Edit Entry Screen
+				<li>If you can't see any areas that would display GeoType data on your Edit Entry Screen
 					and you see the message 'To Enable GeoType, add the appropriate library mapping keys in your
-					settings', <a href="blog_key.html">set up this blog's GoogleMaps API key</a>.</p>
+					settings', <a href="blog_key.html">set up this blog's GoogleMaps API key</a>.
 				</li>
 				<li><p>If you are able to see the areas where GeoType data should appear (such as the
 					extra fields for the location's name and address) but the map <i>itself</i> is not
@@ -50,67 +47,123 @@
 					to fix it.  Note: This should not affect the key used in any of your published pages.</li>
 					
 			</ol>
+			<br />
 		</li>
+		
+		
+		<li>
+			<a name="published"></a>
+			<h6>on my entry's published page?</h6>
+			<ol class="nobullet">
+				<li>There are a number of reasons why your map wouldn't appear on your entry's published 
+					page.  Run through this checklist:
+					<ul>
+						<li>Does this page's template utilize GeoType tags?</li>
+						<li>Does the <a href="blog_key.html">GoogleMaps API key</a> correspond to 
+							this page's url? </li>
+						<li>Are there any locations chosen for this entry?</li>
+						<br />
+					</ul>
+					If you've double checked all of these issues and still cannot see the map, contact
+					a system administrator to escalate the issue.
+				</li>
+			</ol>
+		</li>					
 	</ul>
 </h6>
 
+
+<br />
+<a name="error_msg"></a>
+<h6>I got an error message when trying to GeoCode an address.</h6>
+	<p>Sometimes the translation of an address into latitude and longitude coordinates causes an error.  
+		Here is a list of possible errors from GoogleMaps you may see: <br /> <br />
+		<table align="center" style="font-size: 11px; border-collapse:collapse; width:750px; " border="1">
+			<tr>
+				<td align="center" style="padding:4px;" width="40%">
+					<b>Error Message</b>
+				</th>
+				<td align="center" style="padding:4px;" width="60%">
+					<b>Reason</b>
+				</th>
+		   </tr>
+			
+			<tr>
+				<td style="padding:4px;">
+					"No corresponding geographic location could be found for the specified address." ;
+					"Sorry, we were unable to geocode that address"
+				</td>
+				<td style="padding:4px;">
+					GoogleMaps couldn't pinpoint the address you entered.  Try being more specific, like adding 
+					the state or country, or test the address at the 
+					<a href="http://maps.google.com">GoogleMaps webpage</a> to test if the address translates 
+					there.
+				</td>
+			</tr>
+		
+		
+			<tr>
+				<td style="padding:4px;">
+					"Request was missing the address field."
+				</td>
+				<td style="padding:4px;">
+					Sending a blank address field will yield this error.
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="padding:4px;">
+					"The given key is either invalid or does not match the domain for which it was given."
+				</td>
+				<td style="padding:4px;">
+					The GoogleMaps API key is not correct.  Check the <a href="blog_key.html">blog's key</a>
+					or the <a href="system_wide.html">system-wide key</a>.
+				</td>
+			</tr>
+		
+		
+			<tr>
+				<td style="padding:4px;">
+					"The given key has gone over the requests limit in the 24 hour period."
+				</td>
+				<td style="padding:4px;">
+					The GoogleMaps API sets a restriction on how many things one is allowed to 
+					GeoCode in a certain time period.  Read more on the 
+					<a href="http://code.google.com/apis/maps/signup.html">GoogleMaps API Signup page</a>.
+				</td>
+			</tr>
+		
+		
+			<tr>
+				<td style="padding:4px;">
+					"The geocode for the given address or the route for the given directions query
+					 cannot be returned due to legal or contractual reasons."				
+				</td>
+				<td style="padding:4px;">
+					Some locations simply are not allowed to be GoogleMap'd.  
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="padding:4px;">
+					"Request failed for an unknown reason"; "Unknown failure"
+				</td>
+				<td style="padding:4px;">
+					These errors may occur for any number of reasons, but they are beyond the means of
+					the user's ability to control as they occur on the Google side.  Try GeoCoding
+					the address again, and if the error repeatedly occurs, contact the System Administrator
+					if you need to escalate the issue.
+				</td>
+			</tr>
+			
+		</table>
+
 				
 				
 
 <br />
-<hr />
-
-
-<a name="promo"></a>
-<h6>What is the difference between the Promo Images (Thumbnail, Large Promo, Billboard Image or Flash, Optional Promo)
-	and the photos I can see in the Entry Photo?</h6>
-	<ul class="nobullet">
-		<li>The "Promo Images" are the photos displayed on the <a href="http://www.radaronline.com" target="_blank">Radar Homepage</a>, 
-		on a blog's main page (like on <a href="http://www.radaronline.com/features" target="_blank">Features</a>), and in the search
-		results page.  The Entry Photos are the ones that are displayed within the built archive pages <b>only</b>.</li>
-	</ul>
-
-<br />
-<a name="otherblog"></a>
-	<h6>Why can't I see a photo preview for a photo I know I've uploaded and spelled correctly?</h6>
-	
-	<ul class="nobullet">
-		<li>Your photo must have been uploaded through the <b>current</b> blog in order to view the 
-			preview and have the MTPhoto tag make the correct image link.  Try uploading the photo again
-			to the blog you're working in.  
-		</li>
-		<li>
-			If that doesn't work, you can always check if the photo was uploaded into your blog properly by 
-			checking through your internet browser.  Go to the main page of your blog on the staging server
-			(<a href="http://staging.radaronline.com/features/">Features</a>, 
-			<a href="http://staging.radaronline.com/exclusives/">Fresh Intelligence</a>, etc) and type your
-			file's name <b>directly after the slash of the web address</b>.  If the picture is there, it should
-			show only the image in the web browser without any fancy stylings.  If the picture is missing, a webpage
-			with text like "The requested page could not be found".  
-		</li>
-	</ul>
 	
 
-<br />
-<a name="nocaption"></a>
-	<h6>What if my photo doesn't have a caption?</h6>
-	
-	<ul class="nobullet">
-		<li>Then your photo won't have the caption text displayed.  The photo itself will still display on 
-			the page.</li>
-	</ul>
-	
-<br />
-<a name="sizing"></a>
-	<h6>How can I tell if the photo I've uploaded is large or small?</h6>
-	
-	<ul class="nobullet">
-		<li>If you've associated it with an entry, then in the entry's Photo Listing, the photo <b>Style</b>
-			field (<a href="photo_add.html">Adding Photos, Figure 4i)</a>) should state if it's a small or
-			large image.  The cutoff to determine an image's sizing is also displayed on the entry's Photo Listing
-			page at the top in red (<a href="photo_add.html">Adding Photos, Figure 4c</a>).
-		</li>
-	</ul>
 
 <p>&nbsp;</p>
 <div id="footer">

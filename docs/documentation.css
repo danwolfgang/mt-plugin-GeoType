@@ -43,10 +43,10 @@ ul.li{margin-bottom: 8px;}
 #quicktable table td{padding: 5px;font-size: 11px; border-bottom: 1px solid #ccc;vertical-align: top}
 #quicktable table li{font-size: 11px;}
 #quicktable table ol, #quicktable table ul{margin-top: 0}
-.datatable{width: 600px; float: left; text-align: center; border-top: 1px solid #ccc;padding-top: 20px;margin-top: 30px}
-.datatable table{border: 1px solid #ccc;margin: 15px}
-.datatable table th{text-align: left;border-bottom: 1px solid #ccc;padding: 8px}
-.datatable table td{padding: 5px;font-size: 11px; border-bottom: 1px solid #ccc;vertical-align: top;text-align: left}
+.datatable{font-size: 11px; width: 850px; float: middle; text-align: left; border-top: 1px solid #ccc;padding-top: 20px;margin-top: 30px}
+.datatable table{border: 1px solid #ccc;margin: 15px; size: 12pt; }
+.datatable table th{text-align: center;border-bottom: 1px solid #ccc;padding: 8px; }
+.datatable table td{padding: 5px;font-size: 11px; border-bottom: 1px solid #ccc;vertical-align: top;text-align: left; font-size:11px;}
 .code{font-family:Courier, Courier New, monospace;font-size: 11px}
 .sideinfo{background: #efefef; padding: 15px; width: 350px;margin: 15px 0;}
 .sublist{list-style-type:lower-alpha}
