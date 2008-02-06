@@ -491,8 +491,9 @@ sub geo_rss_entry_tag {
 
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
-	my $location = get_locations_for_entry($entry);
-	my $config = $plugin->get_config_hash('blog:' . $blog_id);    
+	my ( $location ) = get_locations_for_entry($entry);	
+	return "" unless ( $location );
+        my $config = $plugin->get_config_hash('blog:' . $blog_id);    
 
 	my $georss_enable = $config->{georss_enable};        
 	if ( ! $georss_enable ) {
@@ -502,6 +503,7 @@ sub geo_rss_entry_tag {
 	my $georss_format = $config->{georss_format};    
 	my $georss_entry;
 	my $geometry = $location->geometry;
+
 	if ($georss_format eq "simple") {
 		 $georss_entry = qq{<georss:point>$geometry</georss:point>};
 	}
