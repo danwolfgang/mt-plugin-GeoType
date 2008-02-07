@@ -581,11 +581,14 @@ sub _edit_entry {
 			$location = GeoType::Location->load ($entry_locations[$id]->location_id) if ($entry_locations[$id]);
 			if ($location) {
 				$zoom_level = $entry_locations[$id]->zoom_level if ($entry_locations[$id]->zoom_level);
+
+				my $escaped_name = $location->name;
+				$escaped_name = s|"|\&quot;|g;
 				push @location_loop, {
 					location_ord    => $id + 1,
 					location_id     => $entry_locations[$id]->id,
 					location_real_id => $location->id,
-					location_name   => $location->name,
+					location_name   => $escaped_name,
 					location_addr   => $location->location,
 					location_geometry   => $location->geometry,
 				};
@@ -606,8 +609,7 @@ sub _edit_entry {
 		$tmpl->param ( location_num => $#location_loop, location_loop => \@location_loop );
 
 		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
-		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => $_->name } } @locations ] );
-
+		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => &jsescape($_->name) } } @locations ] );
 		$tmpl->param ( default_zoom_level => $zoom_level );
 		$tmpl->param ( default_map_type => $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id) );
 		$tmpl->param ( map_width => $plugin->get_config_value ('map_width', 'blog:' . $blog->id) );
@@ -896,6 +898,12 @@ sub list_locations {
 			
 		},
 	});
+}
+
+sub jsescape {
+	my $string = shift;
+	$string ~= s/"/\"/g;
+	return $string;
 }
 
 1;
