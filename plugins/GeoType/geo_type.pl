@@ -408,11 +408,25 @@ sub geo_type_map_tag {
 		my $default_zoom_level = $zoom || $config->{default_zoom_level};
 		my $default_map_type   = $config->{default_map_type};
 		foreach my $location (@locations) {
+			my $marker_html;
+			if ( $entry ) {
+				my $marker_title = $entry->title;
+				$marker_title =~ s/'/\\'/g;
+				$marker_html = $marker_title;
+			} else {
+				my @le = GeoType::EntryLocation->load({ location_id => $location->id });
+				my $dummy_entry = MT::Entry->load( $le[0]->entry_id );
+				
+				my $entry_title = $dummy_entry->title;
+				$entry_title =~ s/'/\\'/g;
+				my $entry_link = $dummy_entry->permalink;
+				$marker_html = "<a href=\"$entry_link\">$entry_title</a>";
+			}
 			my $geom = $location->geometry;
 			my $title_js = MT::Util::encode_js ($location->name);
 			$html .= qq!
 			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js' });
-
+			GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
 			geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
 			geo_map_${entry_id}.addOverlay (marker_$i);
 			!;
