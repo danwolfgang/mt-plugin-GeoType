@@ -48,7 +48,7 @@ use GeoType::ExtendedLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = 1.6.1; 
+$VERSION = '1.6.1'; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
@@ -609,7 +609,7 @@ sub _edit_entry {
 		$tmpl->param ( location_num => $#location_loop, location_loop => \@location_loop );
 
 		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
-		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => &jsescape($_->name) } } @locations ] );
+		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => jsescape($_->name) } } @locations ] );
 		$tmpl->param ( default_zoom_level => $zoom_level );
 		$tmpl->param ( default_map_type => $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id) );
 		$tmpl->param ( map_width => $plugin->get_config_value ('map_width', 'blog:' . $blog->id) );
@@ -902,7 +902,7 @@ sub list_locations {
 
 sub jsescape {
 	my $string = shift;
-	$string ~= s/"/\"/g;
+	$string =~ s/"/\\"/g;
 	return $string;
 }
 
