@@ -15,7 +15,8 @@ var locations = new Array();
 <TMPL_LOOP NAME=LOCATION_LOOP>
 loc = new Object();
 loc.id = locations.length;
-loc.loc_id = <TMPL_VAR NAME=LOCATION_ID>;
+loc.loc_id= <TMPL_VAR NAME=LOCATION_ID>;
+loc.location_id = <TMPL_VAR NAME=LOCATION_REAL_ID>;
 loc.name = '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>';
 loc.addr = '<TMPL_VAR NAME=LOCATION_ADDR ESCAPE=JS>';
 loc.geometry = '<TMPL_VAR NAME=LOCATION_GEOMETRY ESCAPE=JS>';
@@ -71,28 +72,21 @@ function generate_location_table (loc) {
 	a = document.createElement("a");
 	a.setAttribute("id", "geocode_this_" + loc.id);
 	a.setAttribute("href", "javascript:void(0)");
-	if (window.addEventListener) {
-		a.addEventListener("click", function() {
-		    geocode (loc.id);
-            // num = this.id.match(/(\d)/);
-            // num = num[0];
-            // geocode(num, 'geotype_addr_' + num, 'geotype_geometry_' + num);
-			return false;
-		}, true);
-	} else {
-		a.attachEvent("onclick", function() {
-		    geocode (loc.id);
-            // num = this.id.match(/(\d)/);
-            // num = num[0];
-            // geocode(num, 'geotype_addr_' + num, 'geotype_geometry_' + num);
-			return false;
-		});
-	}
 	a.setAttribute("title", "Geocode this address");
 	a.appendChild(document.createTextNode("Geocode"));
 	td.appendChild(a);
 	td.appendChild(document.createElement("br"));
 	td.appendChild(document.createElement("br"));
+<TMPL_IF NAME="USE_EXTENDED_ATTRIBUTES">
+        a = document.createElement("a");
+        a.setAttribute("id", "edit_this_" + loc.id);
+        a.setAttribute("href", "<TMPL_VAR NAME="SCRIPT_DIR">?__mode=geotype_edit_location&blog_id=<TMPL_VAR NAME="BLOG_ID">&location_id=" + loc.location_id);
+        a.setAttribute("title", "Edit extended location attributes");
+        a.appendChild(document.createTextNode("Edit Details"));
+        td.appendChild(a);
+        td.appendChild(document.createElement("br"));
+        td.appendChild(document.createElement("br"));
+</TMPL_IF>
 	a = document.createElement('a');
 	a.setAttribute('id', 'remove_this_' + loc.id);
 	a.setAttribute('href', 'javascript:void(0)');

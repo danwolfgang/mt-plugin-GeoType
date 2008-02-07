@@ -244,7 +244,6 @@ sub geo_type_location_container {
 	} else {
 		$ctx->stash('geotype_extended_location', 0 );
 	}
-	#$ctx->stash('geotype_extended_location', $extended);
         defined(my $out = $builder->build($ctx, $tokens))
             or return $ctx->error($builder->errstr);
         $res .= $out;
@@ -583,6 +582,7 @@ sub _edit_entry {
 				push @location_loop, {
 					location_ord    => $id + 1,
 					location_id     => $entry_locations[$id]->id,
+					location_real_id => $location->id,
 					location_name   => $location->name,
 					location_addr   => $location->location,
 					location_geometry   => $location->geometry,
@@ -598,6 +598,9 @@ sub _edit_entry {
 		
 		my $header = geo_type_header_tag;
 		my $tmpl = $plugin->load_tmpl("geotype_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
+		$tmpl->param ( use_extended_attributes => $plugin->get_config_value ('use_extended_attributes', 'blog:'. $app->blog->id) );
+		$tmpl->param ( script_dir => $app->base .  $app->uri );
+		$tmpl->param ( blog_id => $app->blog->id );
 		$tmpl->param ( location_num => $#location_loop, location_loop => \@location_loop );
 
 		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
@@ -783,7 +786,7 @@ sub edit_extended_location {
 	$param->{location_id} = $location_id;
 
 	( $location_id ) or die "Location ID not provided\n";
-	# We need a locaton, but we may not have extended attributes
+	# We need a location, but we may not have extended attributes
 	my $location = GeoType::Location->load( $location_id );
 	( $location ) or die "Cannot load location ID $location_id\n";
 	my ( $extended ) = GeoType::ExtendedLocation->load({ location_id => $location_id });
