@@ -3,7 +3,7 @@ var saved_loc = new Array();
 <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
  	loc = new Object();
 	loc.value = "<TMPL_VAR NAME=LOCATION_VALUE>";
-	loc.name = "<TMPL_VAR NAME=LOCATION_NAME>";
+	loc.name = "<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>";
 	saved_loc.push(loc);
 </TMPL_LOOP>
 // var numGeo = <TMPL_VAR NAME="LOCATION_NUM">+1;
