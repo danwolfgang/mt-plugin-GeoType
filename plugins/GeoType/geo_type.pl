@@ -282,6 +282,7 @@ sub geo_type_latitude_tag {
 	return '' unless $location;
 	return '' unless $location->id;
 	my $geometry = $location->geometry;
+	return '' unless $location->geometry;
 	my @coords = split(/,/, $geometry);
 	return @coords[0];
 }
@@ -292,6 +293,7 @@ sub geo_type_longitude_tag {
 	return '' unless $location;
 	return '' unless $location->id;
 	my $geometry = $location->geometry;
+	return '' unless $location->geometry;
 	my @coords = split(/,/, $geometry);
 	return @coords[1];
 }
