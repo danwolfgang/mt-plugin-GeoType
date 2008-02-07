@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>GeoType: A User's Guide</title>
+<link href="documentation.css" rel="stylesheet" type="text/css" media="all" />
+</head>
+
+<body><div id="container">
+<div class="return"><a href="index.html">Return to Index</a></div>
+
+<h1>Blog Level Settings: GoogleMaps API Key Generation</h1>
+
+<p>These instructions show how to make a GoogleMaps API Key for one particular blog.  This 
+	GoogleMaps API key is required in addition to the system-wide key when the blog's url
+	builds outside of the domain name generated for the system-wide key, or when a system-wide
+	key does not exist.</p>
+	
+</p>
+
+
+<div class="figure">
+	<a href="img/blog_settings_1.jpg">
+	<img src="img/blog_settings_1.jpg" width="350px" height="85px" /></a><br/>
+  	Figure 1
+	<br />
+	Accessing a blog's settings from the Main Menu.  
+	<br />
+	<Br />
+	<br />
+	<br />
+	<br />
+	<br />
+	
+	
+	<a href="img/blog_settings_2.jpg">
+	<img src="img/blog_settings_2.jpg" width="350px" height="175px" /></a><br/>
+  	Figure 2
+	<br />
+	Accessing the blog-level settings for GeoType.
+	<br />
+	<Br />
+	<br />
+	<br />
+	<br />
+	<br />
+
+
+	<a href="img/blog_settings_3.jpg">
+	<img src="img/blog_settings_3_short.jpg" width="350px" height="135px" /></a><br/>
+  	Figure 3
+	<br />
+	Default system-level settings for GeoType.  
+	<br />
+	<b>Click image to enlarge.</b>
+	<br />
+	<Br />
+	<br />
+	<br />
+	<br />
+	<br />
+	
+	
+</div>
+
+<div class="sideinfo">
+<a name="add_photo"></a>
+<h4>Steps for Creating A New Google API Key for One Blog</h4>
+	<h5>Viewing Your Blog's Plugin Settings</h5>
+	<ol class="numbers">
+		<li>While logged in to Movable Type, access the main menu by clicking the 
+		'MAIN MENU' link at the very top of any page.  </li>
+		<li>Scroll down to the blog you want to work with, and click on 'Settings' in the lower-right
+			area. <span class="figure-ref">[ Figure 1 ]</span></li>
+		<li>Click on the 'Plugins' tab on the Settings page.  </li>
+		<li>Here you'll see an alphabetical listing of some of the Movable Type plugins installed.
+			Scroll down to the GeoType plugin and click on 'Show Settings'. 
+			<span class="figure-ref">[ Figure 2 ]</span></li>
+		<li>The default settings are shown in <span class="figure-ref"> Figure 3</span>.</li>
+	</ol>
+	
+	<h6><i>Special Domain Name Consideration</i></h6>
+	<p>Before you enter a domain name to obtain a GoogleMaps API key, you should note the difference
+		between the two Google API Key fields in the GeoType settings.  The first field
+		is the default value, which will work for all GoogleMaps used <i>within</i> Movable Type, such
+		as in the Edit Entry screen or on this Settings page.  The second field is to ensure that the
+		maps display <i>on your blog's site</i>.  
+		<br />
+		<br />
+		It is important to obtain <b>two</b> different keys
+		if Movable Type is installed on one domain (say, http://mt.mysite.com/) and your blog builds
+		to another (http://www.mysite.com).  It's okay to only get one key if Movable Type resides on 
+		the same domain as your blog (like http://www.mysite.com/mt/ for Movable Type and 
+		http://www.mysite.com/ for the blog).
+	</p>
+	
+	<h5>Obtaining a new GoogleMaps API Key</h5>
+
+	<p>
+	<ol class="numbers">
+		<li>To get a new key, click on the 'GoogleMaps API Registration' link from the plugin
+			settings of GeoType.  That link is also available 
+			<a href="http://code.google.com/apis/maps/signup.html">here</a>.</li>
+		<li>Read through Google's terms of service, check the box to agree, and <b>enter the domain name
+			</b>.  See the <i>Special Domain Name Consideration</i> above to get a hint as to which
+			url to use.
+		</li>
+		<li>Check the 'Generate API Key' button at the bottom.</li>
+		<li>The google page should now display your key in a yellow box.  It's a long string of upper and 
+			lower-cased letters, numbers, and underscores.  </li>
+	</ol>
+	</p>
+	
+	<h5>Saving The GoogleMaps API Key into GeoType</h5>
+	<p>
+		<ol class="numbers">
+			<li>Copy the entire GoogleMaps API Key and paste it into the Google API Key field of
+				your choice into the blog's settings of GeoType in Movable Type.</li>
+			<li>Click 'Save Changes'.  </li>
+			<li>If this is your first time configuring the settings for this blog, a preview
+				GoogleMap should appear at the bottom after saving.  
+		</ol>
+	</p>
+	
+	<h5>Further Configurations</h5>
+
+	<p>For all other blog-level configurations, see the <a href="map_settings.html">Map Settings</a>
+		page.</p>
+	
+</div>
+
+<p>&nbsp;</p>
+<div id="footer">
+		<a href="faq.html">FAQ</a>
+	<br />
+	<a href="index.html">Return to index</a>
+	<br />
+	Documentation by <a href="http://www.apperceptive.com">Apperceptive</a></div>
+</div></body>
+
+</html>

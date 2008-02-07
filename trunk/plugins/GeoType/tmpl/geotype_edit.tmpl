@@ -1,0 +1,415 @@
+<script type="text/javascript">
+var saved_loc = new Array();
+<TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
+ 	loc = new Object();
+	loc.value = "<TMPL_VAR NAME=LOCATION_VALUE>";
+	loc.name = "<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>";
+	saved_loc.push(loc);
+</TMPL_LOOP>
+// var numGeo = <TMPL_VAR NAME="LOCATION_NUM">+1;
+// if (numGeo >= 5) {
+//  document.getElementById("add_loc_button").disabled = true;
+// }
+
+var locations = new Array();
+<TMPL_LOOP NAME=LOCATION_LOOP>
+loc = new Object();
+loc.id = locations.length;
+loc.loc_id = <TMPL_VAR NAME=LOCATION_ID>;
+loc.location_id = <TMPL_VAR NAME=LOCATION_REAL_ID>;
+loc.name = '<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>';
+loc.addr = '<TMPL_VAR NAME=LOCATION_ADDR ESCAPE=JS>';
+loc.geometry = '<TMPL_VAR NAME=LOCATION_GEOMETRY ESCAPE=JS>';
+loc.visible = true;
+locations.push (loc);
+</TMPL_LOOP>
+
+function add_location () {
+    loc = new Object();
+    loc.id = locations.length;
+    loc.loc_id = 0;
+    loc.name = '';
+    loc.addr = '';
+    loc.geometry = '';
+    loc.visible = true;
+    locations.push (loc);
+    
+    generate_locations_table();
+}
+
+function remove_location (remloc) {
+    remloc.visible = false;
+    remloc.addr = '';
+    generate_locations_table();
+    
+    if (remloc.marker) {
+        map.removeOverlay (remloc.marker);
+    }
+}
+
+function generate_location_table (loc) {
+    var inner_loc = loc;
+    var table_span = document.createElement('table');
+	table_span.setAttribute('id', 'geotype_location_table_' + loc.id);
+	table_span.setAttribute('cellpadding', '3');
+	table_span.setAttribute('cellspacing', '3');
+	table_span.setAttribute('width', '100%');
+	
+	inp = document.createElement("input");
+	inp.setAttribute("type", "hidden");
+	inp.setAttribute("name", "geotype_location_id_" + loc.id);
+	inp.setAttribute("value", loc.loc_id);
+	table_span.appendChild(inp);
+	
+	tr = document.createElement("tr");
+	th = document.createElement("th");
+	th.setAttribute("align", "left");
+	th.appendChild(document.createTextNode("Name"));
+	tr.appendChild(th);
+	
+	td = document.createElement("td");
+	td.setAttribute("rowspan", 5);
+	a = document.createElement("a");
+	a.setAttribute("id", "geocode_this_" + loc.id);
+	a.setAttribute("href", "javascript:void(0)");
+        if (window.addEventListener) {
+                a.addEventListener("click", function() {
+                    geocode (loc.id);
+             // num = this.id.match(/(\d)/);
+             // num = num[0];
+             // geocode(num, 'geotype_addr_' + num, 'geotype_geometry_' + num);
+                        return false;
+                }, true);
+        } else {
+                a.attachEvent("onclick", function() {
+                    geocode (loc.id);
+             // num = this.id.match(/(\d)/);
+             // num = num[0];
+             // geocode(num, 'geotype_addr_' + num, 'geotype_geometry_' + num);
+                        return false;
+                });
+        }
+
+	a.setAttribute("title", "Geocode this address");
+	a.appendChild(document.createTextNode("Geocode"));
+	td.appendChild(a);
+	td.appendChild(document.createElement("br"));
+	td.appendChild(document.createElement("br"));
+<TMPL_IF NAME="USE_EXTENDED_ATTRIBUTES">
+        a = document.createElement("a");
+        a.setAttribute("id", "edit_this_" + loc.id);
+        a.setAttribute("href", "<TMPL_VAR NAME="SCRIPT_DIR">?__mode=geotype_edit_location&blog_id=<TMPL_VAR NAME="BLOG_ID">&location_id=" + loc.location_id);
+        a.setAttribute("title", "Edit extended location attributes");
+        a.appendChild(document.createTextNode("Edit Details"));
+        td.appendChild(a);
+        td.appendChild(document.createElement("br"));
+        td.appendChild(document.createElement("br"));
+</TMPL_IF>
+	a = document.createElement('a');
+	a.setAttribute('id', 'remove_this_' + loc.id);
+	a.setAttribute('href', 'javascript:void(0)');
+	if (window.addEventListener) {
+	    a.addEventListener('click', function() {
+            // num = this.id.match(/(\d)/);
+            // num = num[0];
+	        remove_location (inner_loc);
+	        return false;
+	    }, true);
+	} else {
+	    a.attachEvent('onclick', function() {
+            // num = this.id.match(/(\d)/);
+            // num = num[0];
+	        remove_location (inner_loc);
+	        return false;
+	    });
+	}
+	a.setAttribute('title', 'Remove this address');
+	a.appendChild(document.createTextNode('Remove'));
+	td.appendChild(a)
+	tr.appendChild(td);
+	table_span.appendChild(tr);
+	
+	tr = document.createElement("tr");
+	td = document.createElement("td");
+	inp = document.createElement("input");
+	inp.setAttribute("type", "text");
+	inp.setAttribute("name", "geotype_locname_" + loc.id);
+	inp.setAttribute("id", "geotype_locname_" + loc.id);
+	inp.setAttribute("maxlength", 255);
+	inp.value = loc.name;
+	inp.style.width = "316px";
+	
+	if (window.addEventListener) {
+	    inp.addEventListener ('change', function () {
+	        inner_loc.name = this.value;
+	    }, true);
+	}
+	else {
+	    a.attachEvent ('onchange', function () {
+	        inner_loc.name = this.value;
+	    });
+	}
+
+	td.appendChild(inp);
+	tr.appendChild(td);
+	table_span.appendChild(tr);
+	
+	tr = document.createElement("tr");
+	th = document.createElement("th");
+	th.setAttribute("align", "left");
+	th.appendChild(document.createTextNode("Address"));
+	tr.appendChild(th);
+	table_span.appendChild(tr);
+	
+	tr = document.createElement("tr");
+	td = document.createElement("td");
+	inp = document.createElement("input");
+	inp.setAttribute("type", "text");
+	inp.setAttribute("name", "geotype_addr_" + loc.id);
+	inp.setAttribute("id", "geotype_addr_" + loc.id);
+	inp.setAttribute("maxlength", 255);
+	inp.value = loc.addr;
+	inp.style.width = "316px";
+
+	if (window.addEventListener) {
+	    inp.addEventListener ('change', function () {
+	        inner_loc.addr = this.value;
+	    }, true);
+	}
+	else {
+	    a.attachEvent ('onchange', function () {
+	        inner_loc.addr = this.value;
+	    });
+	}
+
+	td.appendChild(inp);
+	tr.appendChild(td);
+	table_span.appendChild(tr);
+	
+	tr = document.createElement("tr");
+	td = document.createElement("td");
+	td.appendChild(document.createTextNode("Lat/Long: "));
+
+	span = document.createElement("span");
+	span.setAttribute("id", "geotype_lat_long_" + loc.id);
+	span.appendChild(document.createTextNode(loc.geometry));
+	td.appendChild(span);
+	inp = document.createElement("input");
+	inp.setAttribute("type", "hidden");
+	inp.setAttribute("name", "geotype_geometry_" + loc.id);
+	inp.setAttribute("id", "geotype_geometry_" + loc.id);
+	inp.value = loc.geometry;
+	td.appendChild(inp);
+	tr.appendChild(td);
+	table_span.appendChild(tr);
+	
+	tr = document.createElement("tr");
+	th = document.createElement("th");
+	th.setAttribute("align", "left");
+	th.appendChild(document.createTextNode("Saved Locations"));
+	tr.appendChild(th);
+	table_span.appendChild(tr);
+	
+	tr = document.createElement("tr");
+	td = document.createElement("td");
+	sel = document.createElement("select");
+	sel.setAttribute("id", "geotype_select_" + loc.id);
+	if (window.addEventListener) {
+		sel.addEventListener("change", function() {
+				num = this.id.match(/(\d)/);
+				num = num[0];
+				load_saved(parseInt(num));
+			}, true);
+	} else {
+		sel.attachEvent("onchange", function() {
+				num = this.id.match(/(\d)/);
+				num = num[0];
+				load_saved(parseInt(num));
+			});
+	}
+	opt = document.createElement("option");
+	opt.appendChild(document.createTextNode("--choose one--"));
+	sel.appendChild(opt);
+	
+	for (var i=0;i<saved_loc.length;i++) {
+		opt = document.createElement("option");
+		opt.setAttribute("value", saved_loc[i].value);
+		opt.appendChild(document.createTextNode(saved_loc[i].name));
+		sel.appendChild(opt);
+	}
+	td.appendChild(sel);
+	tr.appendChild(td);
+	table_span.appendChild(tr);
+	
+	return table_span;
+}
+
+function generate_locations_table () {
+    var target_elem = getByID('geocode_fields');
+    
+    target_elem.innerHTML = '';
+    
+    // if we can't find it, skip out
+    if (!target_elem) {
+        return;
+    }
+    
+    for (var i = 0; i < locations.length; i++) {
+        // if (locations[i].visible) {
+            html_bits = generate_location_table (locations[i]);
+            
+            if (!locations[i].visible) {
+                var span_elem = document.createElement ('span');
+                span_elem.style.display = 'none';
+                span_elem.appendChild(html_bits);
+                target_elem.appendChild(span_elem);
+            }
+            else {
+                target_elem.appendChild(html_bits);
+            }
+        // }
+    }
+    
+/*    if (locations.length >= 5) {
+        document.getElementById("add_loc_button").disabled = true;
+    } */
+}
+
+TC.attachLoadEvent (generate_locations_table);
+
+
+</script>
+<div class="field">
+    <div class="field-header"><label>Location</label></div>
+    <div class="field-wrapper">
+        <input type="hidden" name="geotype_zoom_level" id="geotype_zoom_level" value="<TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>" />
+        <span id="geocode_fields">
+		</span>
+			<button id="add_loc_button" onClick="add_location(); return false;">Add Location...</button>
+			<p>
+				<table width="30%" cellpadding="3" cellspacing="3" id="map_table">
+						<tr><td width=20%> <a href="#" onclick="reset_map();return false;" title="Zoom out and center map" id="geocode">Reset Map</a></td></tr>
+				</table><div id="geo_map" style="width: 573px; height: 354px; "></div>
+				<script type="text/javascript"> //<![CDATA[ 
+
+var map;
+function load () {
+    map = new GMap2(getByID('geo_map'));
+    
+    GEvent.addListener (map, 'zoomend', function (oldzoom, newzoom) { getByID('geotype_zoom_level').value = newzoom; });
+    generate_markers();
+    
+    <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>
+    map.addControl (new GOverviewMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_SCALE>
+    map.addControl (new GScaleControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_MAP_TYPE>
+    map.addControl (new GMapTypeControl());
+    </TMPL_IF>
+    
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_SMALL>
+    map.addControl (new GSmallZoomControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_MEDIUM>
+    map.addControl (new GSmallMapControl());
+    </TMPL_IF>
+    <TMPL_IF NAME=MAP_CONTROLS_ZOOM_LARGE>
+    map.addControl (new GLargeMapControl());
+    </TMPL_IF>
+    
+}
+
+function generate_markers () {
+    map.clearOverlays();
+    for (i = 0; i < locations.length; i++) {
+        ltlng = eval ("new GLatLng (" + locations[i].geometry + ");");
+        locations[i].marker = new GMarker (ltlng, { title: locations[i].name });
+        map.setCenter (ltlng, <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
+        map.addOverlay (locations[i].marker);
+    }
+}
+
+function addAddressToMap(id, response) {
+    // map.clearOverlays();
+    if (!response || response.Status.code != 200) {
+        if (response) {
+            switch (response.Status.code) {
+                case 500:
+                    alert ("Request failed for an unknown reason");
+                    break;
+                case 601:
+                    alert ("Request was missing the address field");
+                    break;
+                case 602:
+                    alert ("No corresponding geographic location could be found for the specified address");
+                    break;
+                case 603:
+                    alert ("The geocode for the given address or the route for the given directions query cannot be returned due to legal or contractual reasons");
+                    break;
+                case 610:
+                    alert ("The given key is either invalid or does not match the domain for which it was given");
+                    break;
+                case 620:
+                    alert ("The given key has gone over the requests limit in the 24 hour period");
+                    break;
+                default:
+                    alert ("Unknown failure"); 
+            }
+        }
+        else {
+            alert("Sorry, we were unable to geocode that address");            
+        }
+    } else {
+        place = response.Placemark[0];
+        point = new GLatLng(place.Point.coordinates[1],
+                            place.Point.coordinates[0]);
+        map.setCenter (point, <TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
+        loc = locations[id];
+        if (loc.marker) {
+            map.removeOverlay (loc.marker);            
+        }
+        loc.marker = new GMarker (point, { title: getByID('geotype_locname_' + id).value });
+        map.addOverlay (loc.marker);
+        
+        loc.geometry = place.Point.coordinates[1] + "," + place.Point.coordinates[0];
+        
+        getByID('geotype_geometry_' + id).value = loc.geometry;
+        getByID('geotype_lat_long_' + id).innerHTML = '';
+        getByID('geotype_lat_long_' + id).innerHTML = loc.geometry;
+  }
+}
+
+var geocoder;
+function geocode (id) {
+    if (! geocoder) {
+        geocoder = new GClientGeocoder();
+    }
+    var address = getByID('geotype_addr_' + id).value;
+    geocoder.getLocations (address, function (response) { addAddressToMap (id, response) });
+}
+
+function load_saved (id) {
+    var select = getByID('geotype_select_' + id);
+    
+    if (select.options[select.selectedIndex].value == "") {
+        return;
+    }
+    
+    getByID('geotype_locname_' + id).value = select.options[select.selectedIndex].text;
+    getByID('geotype_addr_' + id).value    = select.options[select.selectedIndex].value;
+    
+    geocode(id);
+    
+    select.selectedIndex = 0;
+}
+
+function reset_map () {
+    map.setCenter (new GLatLng(0, 0), 0, <TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
+}
+
+TC.attachLoadEvent (load);
+                </script>
+	</div>
+</div>

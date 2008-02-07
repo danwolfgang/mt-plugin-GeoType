@@ -1,0 +1,149 @@
+<TMPL_INCLUDE NAME="header.tmpl">
+<a href="<TMPL_VAR NAME=SCRIPT_URL>?__mode=view&blog_id=<TMPL_VAR NAME=BLOG_ID>">Edit Locations</a>
+
+<div class="wrap"><h2>Configure Map Layout</h2>
+    <h3>About</h3>
+    <div><p>This page configures the default map that will appear with posts and when you use INSERT_MAP. By setting the map size, default zoom level, and various controls that appear, you can customize how the maps on your site look.</p>
+        <p>Unfortunately, not all mapping providers (Google, Yahoo, or Microsoft) support turning on or off some of the controls to the right. Therefore, some of your settings may not appear correct when displayed on certain mapping providers. For example, Yahoo maps doesn't currently allow for removing the zoom control.</p>
+    </div>
+    <h3>Default Map</h3>
+    <form name="configure_map" method="post" action="<TMPL_VAR NAME=SCRIPT_URL>">
+      <input type="hidden" name="__mode" value="save_map" />
+      <input type="hidden" name="blog_id" value="<TMPL_VAR NAME=BLOG_ID>" />
+      
+        <div style='float:left;'><div id="geo_map" class="mapstraction" style="height: <TMPL_VAR NAME=MAP_HEIGHT>px; width: <TMPL_VAR NAME=MAP_WIDTh>px;"></div>
+    
+    <!-- GeoPress Map --> <script type="text/javascript">
+    //<![CDATA[ 
+    geopress_addEvent(window,'load', function() { geo_map = new Mapstraction("geo_map","<TMPL_VAR NAME=DEFAULT_MAP_FORMAT>");
+    geo_map.setCenterAndZoom(new LatLonPoint(0,0), 1);
+    geo_map.addControls({
+        pan: <TMPL_IF NAME=MAP_CONTROLS_PAN>true</TMPL_IF><TMPL_UNLESS NAME=MAP_CONTROLS_PAN>false</TMPL_UNLESS>,
+        zoom: '<TMPL_VAR NAME=MAP_CONTROLS_ZOOM>',
+        overview: <TMPL_IF NAME=MAP_CONTROLS_OVERVIEW>true</TMPL_IF><TMPL_UNLESS NAME=MAP_CONTROLS_OVERVIEW>false</TMPL_UNLESS>,
+        scale: <TMPL_IF NAME=MAP_CONTROLS_SCALE>true</TMPL_IF><TMPL_UNLESS NAME=MAP_CONTROLS_SCALE>false</TMPL_UNLESS>,
+        map_type: <TMPL_IF NAME=MAP_CONTROLS_MAP_TYPE>true</TMPL_IF><TMPL_UNLESS NAME=MAP_CONTROLS_MAP_TYPE>false</TMPL_UNLESS>
+    });
+    geo_map.setMapType(Mapstraction.<TMPL_VAR NAME=DEFAULT_MAP_TYPE>);
+    var markers = new Array(); var i = 0;
+    i = markers.push(new Marker(new LatLonPoint(-38.333332, 176)));
+    markers[i-1].setInfoBubble("<a href='http://location.highearthorbit.com/travel/?location=Auckland' title='All posts at Auckland'>@ Auckland</a>");
+    geo_map.addMarker(markers[i-1]);
+    geo_map.setZoom(<TMPL_VAR NAME=DEFAULT_ZOOM_LEVEL>);
+    geo_map.setCenter(new LatLonPoint(-38.333332, 176));
+}); 
+// ]]> 
+</script><!-- end GeoPress Map --> </div>
+<fieldset class="options">
+    <table width="100%" cellspacing="2" cellpadding="5" class="editform">
+        <tr valign="top">
+            <th width="33%" scope="row">Map Size:</th>
+
+            <td>
+                <dl>
+                    <dt><label for="map_width">Map Width:</label></dt>
+                    <dd><input type="text" id="map_width" name="map_width" value="<TMPL_VAR NAME=MAP_WIDTH>" size="5" onchange="geopress_change_map_size()"/> px</dd>
+                    <dt><label for="map_height">Map Height:</label></dt>
+                    <dd><input type="text" id="map_height" name="map_height" value="<TMPL_VAR NAME=MAP_HEIGHT>" size="5" onchange="geopress_change_map_size()"/> px</dd>
+
+                    <dt><label for="default_zoom_level">Default Zoom:</label></dt>
+                    <dd><select name='default_zoom_level' id='default_zoom_level' onchange='geopress_change_zoom();'>
+                        <option value='18'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_18> selected='selected'</TMPL_IF>>Zoomed In</option>
+                        <option value='17'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_17> selected='selected'</TMPL_IF>>Single Block</option>
+                        <option value='16'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_16> selected='selected'</TMPL_IF>>Neighborhood</option>
+                        <option value='15'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_15> selected='selected'</TMPL_IF>>15</option>
+                        <option value='14'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_14> selected='selected'</TMPL_IF>>Several blocks</option>
+                        <option value='13'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_13> selected='selected'</TMPL_IF>>13</option>
+                        <option value='12'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_12> selected='selected'</TMPL_IF>>12</option>
+                        <option value='11'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_11> selected='selected'</TMPL_IF>>City</option>
+                        <option value='10'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_10> selected='selected'</TMPL_IF>>10</option>
+                        <option value='9'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_9> selected='selected'</TMPL_IF>>9</option>
+                        <option value='8'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_8> selected='selected'</TMPL_IF>>8</option>
+                        <option value='7'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_7> selected='selected'</TMPL_IF>>Region</option>
+                        <option value='6'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_6> selected='selected'</TMPL_IF>>6</option>
+                        <option value='5'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_5> selected='selected'</TMPL_IF>>5</option>
+                        <option value='4'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_4> selected='selected'</TMPL_IF>>4</option>
+                        <option value='3'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_3> selected='selected'</TMPL_IF>>Continent</option>
+                        <option value='2'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_2> selected='selected'</TMPL_IF>>2</option>
+                        <option value='1'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_1> selected='selected'</TMPL_IF>>Zoomed Out</option>
+                    </select>					
+                </dd>
+            </dl>
+        </td>
+    </tr>	
+    <tr valign="top">
+        <th scope="row">Map Format:</th>			
+        <td>
+            <select name='default_map_format' id='default_map_format' onchange=''>
+                <option value='google'<TMPL_IF NAME=DEFAULT_MAP_FORMAT_GOOGLE> selected='selected'</TMPL_IF>>Google</option>
+                <option value='yahoo'<TMPL_IF NAME=DEFAULT_MAP_FORMAT_YAHOO> selected='selected'</TMPL_IF>>Yahoo</option>
+                <option value='microsoft'<TMPL_IF NAME=DEFAULT_MAP_FORMAT_MICROSOFT> selected='selected'</TMPL_IF>>Microsoft</option>
+            </select>		
+            <em>Changing the Map format requires saving your options</em>
+        </td>
+    </tr>
+
+    <tr valign="top">
+        <th scope="row">Map Type: (<TMPL_VAR NAME=DEFAULT_MAP_TYPE>)</th>			
+        <td>
+            <select name='default_map_type' id='default_map_type' onchange='geopress_change_view()'>
+                <option value='ROAD' <TMPL_IF NAME=DEFAULT_MAP_TYPE_ROAD> selected='selected'</TMPL_IF>>Road</option>
+                <option value='SATELLITE' <TMPL_IF NAME=DEFAULT_MAP_TYPE_SATELLITE> selected='selected'</TMPL_IF>>Satellite</option>
+                <option value='HYBRID' <TMPL_IF NAME=DEFAULT_MAP_TYPE_HYBRID> selected='selected'</TMPL_IF>>Hybrid</option>
+            </select>		
+        </td>
+    </tr>		
+    <tr valign="top">
+        <th scope="row">Controls:</th>			
+        <td>
+            <select name='map_controls_zoom' id='map_controls_zoom' onchange='geopress_change_controls(this)' >
+                <option value='false'<TMPL_IF NAME=MAP_CONTROLS_ZOOM_NONE> selected='selected'</TMPL_IF>>None</option>
+                <option value='small'<TMPL_IF NAME=MAP_CONTROLS_ZOOM_SMALL> selected='selected'</TMPL_IF>>Small</option>
+                <option value='large'<TMPL_IF NAME=MAP_CONTROLS_ZOOM_LARGE> selected='selected'</TMPL_IF>>Large</option>
+            </select>		
+            <label for="map_controls_zoom">Zoom control size</label>
+        </td>
+    </tr>	
+    <tr>
+        <th scope="row"></th> 
+        <td>
+            <input name="map_controls_pan" type="checkbox" id="map_controls_pan" onchange="geopress_change_controls(this)" value="true"<TMPL_IF NAME=MAP_CONTROLS_PAN> checked="checked"</TMPL_IF> /> 
+            <label for="map_controls_pan">Pan control</label> <em>(Yahoo)</em>
+        </td>
+    </tr>	
+    <tr>
+        <th scope="row"></th> 
+        <td>
+            <input name="map_controls_map_type" type="checkbox" id="map_controls_map_type" onchange="geopress_change_controls(this)" value="true"<TMPL_IF NAME=MAP_CONTROLS_MAP_TYPE> checked="checked"</TMPL_IF> /> 
+            <label for="map_controls_map_type">Map Type</label> <em>(Google)</em>
+        </td>
+    </tr>
+
+    <tr>
+        <th scope="row"></th> 
+        <td>
+            <input name="map_controls_overview" type="checkbox" id="map_controls_overview" onchange="geopress_change_controls(this)" value="true"<TMPL_IF NAME=MAP_CONTROLS_OVERVIEW> checked="checked"</TMPL_IF> /> 
+            <label for="map_controls_overview">Overview</label> <em>(Google)</em>
+        </td>
+    </tr>
+    <tr>
+
+        <th scope="row"></th> 
+        <td>
+            <input name="map_controls_scale" type="checkbox" id="map_controls_scale" onchange="geopress_change_controls(this)" value="true"<TMPL_IF NAME=MAP_CONTROLS_SCALE> checked="checked"</TMPL_IF> /> 
+            <label for="map_controls_scale">Scale</label> <em>(Google)</em>
+        </td>
+    </tr>
+</table>
+</fieldset>
+
+<input type="hidden" id="georss_enable" name="georss_enable" value="<TMPL_VAR NAME=GEORSS_ENABLE>"/>
+<input type="hidden" id="default_add_map" name="default_add_map" value="<TMPL_VAR NAME=DEFAULT_ADD_MAP>"/>
+<input type="hidden" id="google_api_key" name="google_api_key" value="<TMPL_VAR NAME=google_api_key>"/>
+<input type="hidden" id="yahoo_api_key" name="yahoo_api_key" value="<TMPL_VAR NAME=YAHOO_API_KEY>"/>
+<input type="hidden" id="microsoft_map" name="microsoft_map" value="<TMPL_VAR NAME=MICROSOFT_MAP>"/>
+
+<div class="submit"><input type="submit" name="Options" value="Save Map Layout&raquo;" />
+</div>
+
+<TMPL_INCLUDE NAME="footer.tmpl">
