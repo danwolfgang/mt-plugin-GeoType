@@ -48,7 +48,7 @@ use GeoType::ExtendedLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = '1.6.1'; 
+$VERSION = '1.6.2'; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
@@ -391,17 +391,31 @@ sub geo_type_map_tag {
 
 	my $config = $plugin->get_config_hash('blog:' . $blog_id);    
 
+	our $useManager = 0;
 	if (scalar @locations) {
 		my $map_width  = $config->{map_width};
 		my $map_height = $config->{map_height};
 		my $html = qq@
 			<div id="geo_map_$entry_id" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
 			<script type="text/javascript"> //<![CDATA[ 
+			var shadowlessIcon = new GIcon(G_DEFAULT_ICON);
+			shadowlessIcon.shadow = '';
 			var geo_map_$entry_id;
 			TC.attachLoadEvent (function() {
 				geo_map_$entry_id = new GMap2 (getByID ('geo_map_$entry_id'));
 			
 		@;
+		if ( defined($maxLat) && defined($minLat) && defined($maxLon) && defined($minLon) ) {
+			$html .= qq@
+			var SW = new GLatLng($minLat, $minLon);
+			var NE = new GLatLng($maxLat, $maxLon);
+			var bounds = new GLatLngBounds( SW, NE );
+			geo_map_$entry_id.setCenter(bounds.getCenter());
+			geo_map_$entry_id.setZoom(geo_map_$entry_id.getBoundsZoomLevel(bounds));
+			var marker_array_$entry_id = new Array();
+			@;
+			$useManager = 1;
+		}
 		
 		require MT::Util;
 		my $i = 1;
@@ -422,14 +436,23 @@ sub geo_type_map_tag {
 				my $entry_link = $dummy_entry->permalink;
 				$marker_html = "<a href=\"$entry_link\">$entry_title</a>";
 			}
+			$marker_html = "<div class=\"GeoTypeMarkerContent\">$marker_html</div>";
 			my $geom = $location->geometry;
 			my $title_js = MT::Util::encode_js ($location->name);
 			$html .= qq!
-			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js' });
+			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js', icon: shadowlessIcon });
 			GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
 			geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
+			!;
+			if ( $useManager ) { 
+			$html .= qq!
+			marker_array_${entry_id}.push(marker_$i);
+			!;
+			} else {
+			$html .= qq!
 			geo_map_${entry_id}.addOverlay (marker_$i);
 			!;
+			}
 			$i++;
 		}
 		
@@ -446,16 +469,15 @@ sub geo_type_map_tag {
 		elsif ($zoom eq 'large') {
 			$html .= qq{geo_map_$entry_id.addControl (new GLargeMapControl());};
 		}
-		if ( defined($maxLat) && defined($minLat) && defined($maxLon) && defined($minLon) ) {
-			$html .= qq@
-			var SW = new GLatLng($minLat, $minLon);
-			var NE = new GLatLng($maxLat, $maxLon);
-			var bounds = new GLatLngBounds( SW, NE );
-			geo_map_$entry_id.setCenter(bounds.getCenter());
-			geo_map_$entry_id.setZoom(geo_map_$entry_id.getBoundsZoomLevel(bounds));
-			@;
+		if ( $useManager ) { 
+			$html .= qq!;
+				var mgrOptions = { borderPadding: 50 };
+				var mgr_$entry_id = new MarkerManager(geo_map_$entry_id, mgrOptions);			
+				mgr_$entry_id = new MarkerManager(geo_map_$entry_id);			
+				mgr_$entry_id.addMarkers( marker_array_${entry_id} , 6 );
+				mgr_$entry_id.refresh();
+			!;
 		}
-		
 		$html .= qq!});
 		// ]]> 
 		</script>!;
@@ -558,7 +580,9 @@ sub geo_type_header_tag {
 	require MT::App;
 	my $static_path = MT::App->instance->static_path;
 	my $html = qq{
-		<script type='text/javascript' src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$google_api_key' ></script>
+		<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2.s&amp;key=$google_api_key" ></script>
+		<script type="text/javascript" src="http://gmaps-utility-library.googlecode.com/svn/trunk/markermanager/release/src/markermanager.js"></script>
+		
 		<style type="text/css">
 			v\\:* {
 			  behavior:url(#default#VML);
