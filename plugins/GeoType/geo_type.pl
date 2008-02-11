@@ -398,8 +398,6 @@ sub geo_type_map_tag {
 		my $html = qq@
 			<div id="geo_map_$entry_id" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
 			<script type="text/javascript"> //<![CDATA[ 
-			var shadowlessIcon = new GIcon(G_DEFAULT_ICON);
-			shadowlessIcon.shadow = '';
 			var geo_map_$entry_id;
 			TC.attachLoadEvent (function() {
 				geo_map_$entry_id = new GMap2 (getByID ('geo_map_$entry_id'));
@@ -413,6 +411,8 @@ sub geo_type_map_tag {
 			geo_map_$entry_id.setCenter(bounds.getCenter());
 			geo_map_$entry_id.setZoom(geo_map_$entry_id.getBoundsZoomLevel(bounds));
 			var marker_array_$entry_id = new Array();
+			var cluster_$entry_id = new Clusterer(map);
+			cluster_${entry_id}.maxVisibleMarkers = 20;
 			@;
 			$useManager = 1;
 		}
@@ -423,30 +423,31 @@ sub geo_type_map_tag {
 		my $default_map_type   = $config->{default_map_type};
 		foreach my $location (@locations) {
 			my $marker_html;
+			my $marker_title;
 			if ( $entry ) {
-				my $marker_title = $entry->title;
+				$marker_title = $entry->title;
 				$marker_title =~ s/'/\\'/g;
 				$marker_html = $marker_title;
 			} else {
 				my @le = GeoType::EntryLocation->load({ location_id => $location->id });
 				my $dummy_entry = MT::Entry->load( $le[0]->entry_id );
 				
-				my $entry_title = $dummy_entry->title;
-				$entry_title =~ s/'/\\'/g;
+				$marker_title = $dummy_entry->title;
+				$marker_title =~ s/'/\\'/g;
 				my $entry_link = $dummy_entry->permalink;
-				$marker_html = "<a href=\"$entry_link\">$entry_title</a>";
+				$marker_html = "<a href=\"$entry_link\">$marker_title</a>";
 			}
 			$marker_html = "<div class=\"GeoTypeMarkerContent\">$marker_html</div>";
 			my $geom = $location->geometry;
 			my $title_js = MT::Util::encode_js ($location->name);
 			$html .= qq!
-			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js', icon: shadowlessIcon });
+			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js' });
 			GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
 			geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
 			!;
 			if ( $useManager ) { 
 			$html .= qq!
-			marker_array_${entry_id}.push(marker_$i);
+			cluster_${entry_id}.AddMarker(marker_$i, '$marker_title');
 			!;
 			} else {
 			$html .= qq!
@@ -468,15 +469,6 @@ sub geo_type_map_tag {
 		}
 		elsif ($zoom eq 'large') {
 			$html .= qq{geo_map_$entry_id.addControl (new GLargeMapControl());};
-		}
-		if ( $useManager ) { 
-			$html .= qq!;
-				var mgrOptions = { borderPadding: 50 };
-				var mgr_$entry_id = new MarkerManager(geo_map_$entry_id, mgrOptions);			
-				mgr_$entry_id = new MarkerManager(geo_map_$entry_id);			
-				mgr_$entry_id.addMarkers( marker_array_${entry_id} , 6 );
-				mgr_$entry_id.refresh();
-			!;
 		}
 		$html .= qq!});
 		// ]]> 
@@ -582,7 +574,7 @@ sub geo_type_header_tag {
 	my $html = qq{
 		<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2.s&amp;key=$google_api_key" ></script>
 		<script type="text/javascript" src="http://gmaps-utility-library.googlecode.com/svn/trunk/markermanager/release/src/markermanager.js"></script>
-		
+		<script src="http://www.acme.com/javascript/Clusterer2.jsm" type="text/javascript"></script>
 		<style type="text/css">
 			v\\:* {
 			  behavior:url(#default#VML);
