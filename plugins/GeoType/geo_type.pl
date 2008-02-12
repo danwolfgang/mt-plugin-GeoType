@@ -399,9 +399,24 @@ sub geo_type_map_tag {
 			<div id="geo_map_$entry_id" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
 			<script type="text/javascript"> //<![CDATA[ 
 			var geo_map_$entry_id;
+		@;
+		if ( scalar @locations > 10 ) {
+			$html .= qq@
+			var om = new OverlayMessage(document.getElementById('geo_map_${entry_id}'));
+			om.Set('Please wait while data loads from Google Maps.');
+			window.onload=function() {
+				        om.Clear();
+			}
+			@;
+		}
+		require MT::App;
+		our $static_path = MT::App->instance->static_path;
+		$html .= qq@
 			TC.attachLoadEvent (function() {
 				geo_map_$entry_id = new GMap2 (getByID ('geo_map_$entry_id'));
-			
+				geo_icon = new GIcon(G_DEFAULT_ICON)
+				geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
+
 		@;
 		if ( defined($maxLat) && defined($minLat) && defined($maxLon) && defined($minLon) ) {
 			$html .= qq@
@@ -411,7 +426,16 @@ sub geo_type_map_tag {
 			geo_map_$entry_id.setCenter(bounds.getCenter());
 			geo_map_$entry_id.setZoom(geo_map_$entry_id.getBoundsZoomLevel(bounds));
 			var marker_array_$entry_id = new Array();
-			var cluster_$entry_id = new Clusterer(map);
+			var cluster_$entry_id = new Clusterer(geo_map_${entry_id});
+			clusterIcon = new GIcon(G_DEFAULT_ICON);
+                        clusterIcon.image = '${static_path}/plugins/GeoType/images/clustermarker.png';
+                        clusterIcon.shadow = '${static_path}/plugins/GeoType/images/clustershadow.png';
+                        clusterIcon.iconSize = new GSize( 30, 51 );
+                        clusterIcon.shadowSize = new GSize( 56, 51 );
+                        clusterIcon.iconAnchor = new GPoint( 13, 34 );
+                        clusterIcon.infoWindowAnchor = new GPoint( 13, 3 );
+                        clusterIcon.iconShadowAnchor = new GPoint( 27, 37 );
+                        cluster_ARCH.SetIcon( clusterIcon );
 			cluster_${entry_id}.maxVisibleMarkers = 20;
 			@;
 			$useManager = 1;
@@ -441,7 +465,7 @@ sub geo_type_map_tag {
 			my $geom = $location->geometry;
 			my $title_js = MT::Util::encode_js ($location->name);
 			$html .= qq!
-			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js' });
+			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js', icon: geo_icon });
 			GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
 			geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
 			!;
@@ -573,8 +597,9 @@ sub geo_type_header_tag {
 	my $static_path = MT::App->instance->static_path;
 	my $html = qq{
 		<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2.s&amp;key=$google_api_key" ></script>
-		<script type="text/javascript" src="http://gmaps-utility-library.googlecode.com/svn/trunk/markermanager/release/src/markermanager.js"></script>
-		<script src="http://www.acme.com/javascript/Clusterer2.jsm" type="text/javascript"></script>
+		<script type="text/javascript" src="${static_path}/plugins/GeoType/js/Clusterer2.js"></script>
+		<script type="text/javascript" src="${static_path}/plugins/GeoType/js/OverlayMessage.js"></script>
+
 		<style type="text/css">
 			v\\:* {
 			  behavior:url(#default#VML);
