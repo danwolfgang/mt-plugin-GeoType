@@ -404,9 +404,9 @@ sub geo_type_map_tag {
 			$html .= qq@
 			var om = new OverlayMessage(document.getElementById('geo_map_${entry_id}'));
 			om.Set('Please wait while data loads from Google Maps.');
-			window.onload=function() {
+			TC.attachLoadEvent (function() {
 				        om.Clear();
-			}
+			});
 			@;
 		}
 		require MT::App;
