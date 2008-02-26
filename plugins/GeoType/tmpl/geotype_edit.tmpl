@@ -98,7 +98,7 @@ function generate_location_table (loc) {
 <TMPL_IF NAME="USE_EXTENDED_ATTRIBUTES">
         a = document.createElement("a");
         a.setAttribute("id", "edit_this_" + loc.id);
-        a.setAttribute("href", "<TMPL_VAR NAME="SCRIPT_DIR">?__mode=geotype_edit_location&blog_id=<TMPL_VAR NAME="BLOG_ID">&location_id=" + loc.location_id);
+        a.setAttribute("href", "<TMPL_VAR NAME="SCRIPT_DIR">?__mode=geotype_edit_location&blog_id=<TMPL_VAR NAME="BLOG_ID">&return_to_entry=<TMPL_VAR NAME="ENTRY_ID">&location_id=" + loc.location_id);
         a.setAttribute("title", "Edit extended location attributes");
         a.appendChild(document.createTextNode("Edit Details"));
         td.appendChild(a);

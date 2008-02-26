@@ -54,7 +54,7 @@ my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
 	key         => "GeoType",
 	version     => $VERSION,
-	description => "<MT_TRANS phrase=\"GeoType allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth.<br\><br\>GeoType settings are on a per-blog setting, so you'll need to set this up in each weblog you administer. Use the 'GeoType' link in the left sidebar under 'Utilities' to configure your Map defaults and Locations.\">",
+	description => "<MT_TRANS phrase=\"GeoType allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth.<br\><br\>GeoType settings are on a per-blog setting, so you'll need to set this up in each weblog you administer.\">",
 	author_name => "Apperceptive, LLC",
 	author_link => "http://apperceptive.com/",
 
@@ -205,6 +205,9 @@ sub instance { $plugin; }
 	
 sub left_nav {
 	my ($eh, $app, $tmpl) = @_;
+        if ( $MT::VERSION < 3.4 ) {
+		return $tmpl;
+	}
 	my $slug = <<END_TMPL;
 <li><a style="background-image: url(<TMPL_VAR NAME=STATIC_URI>images/nav_icons/color/plugins.gif);" <TMPL_IF NAME=NAV_MEDIAMANAGER>class="here"</TMPL_IF> id="nav-mmanager" title="<MT_TRANS phrase="GeoType">" href="<TMPL_VAR NAME=MT_URL>?__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>"><MT_TRANS phrase="GeoType"></a></li>
 END_TMPL
@@ -214,7 +217,9 @@ END_TMPL
 sub init_cms {
 	my $plugin = shift;
 	my $app = shift;
-	$app->register_type ('geotype_location', 'GeoType::Location');
+        unless ( $MT::VERSION < 3.4 ) {
+                $app->register_type ('geotype_location', 'GeoType::Location');
+        }
 }
 
 sub geo_type_location_container {
@@ -658,6 +663,7 @@ sub _edit_entry {
 		my $tmpl = $plugin->load_tmpl("geotype_edit.tmpl") or die "Error loading template: ", $plugin->errstr;
 		$tmpl->param ( use_extended_attributes => $plugin->get_config_value ('use_extended_attributes', 'blog:'. $app->blog->id) );
 		$tmpl->param ( script_dir => $app->base .  $app->uri );
+		$tmpl->param ( entry_id => $entry_id );
 		$tmpl->param ( blog_id => $app->blog->id );
 		$tmpl->param ( location_num => $#location_loop, location_loop => \@location_loop );
 
@@ -879,6 +885,9 @@ sub edit_extended_location {
 	$app->{breadcrumbs} = [];
 	$app->add_breadcrumb('Edit Location');
 	$param->{script_url} = MT::ConfigMgr->instance->CGIPath . MT::ConfigMgr->instance->AdminScript;
+	if ( $app->param('return_to_entry') ) {
+		$param->{return_entry} = $app->param('return_to_entry');
+	}
 	my $tmpl = $plugin->load_tmpl("geotype_edit_extended.tmpl");
         $app->build_page($tmpl, $param);
 	$app->build_page($tmpl);
