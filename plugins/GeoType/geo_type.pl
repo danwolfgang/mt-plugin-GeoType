@@ -202,10 +202,16 @@ sub post_delete_location {
 
 
 sub instance { $plugin; }
+
+sub _check_MTE {
+	return 0 unless ( defined(&MT::product_name) );
+	return 0 unless ( &MT::product_name eq 'Movable Type Enterprise' );
+	return 1;	
+}
 	
 sub left_nav {
 	my ($eh, $app, $tmpl) = @_;
-        if ( $MT::VERSION < 3.4 ) {
+        unless ( &_check_MTE() ) {
 		return $tmpl;
 	}
 	my $slug = <<END_TMPL;
@@ -217,7 +223,7 @@ END_TMPL
 sub init_cms {
 	my $plugin = shift;
 	my $app = shift;
-        unless ( $MT::VERSION < 3.4 ) {
+        if ( &_check_MTE() ) {
                 $app->register_type ('geotype_location', 'GeoType::Location');
         }
 }
