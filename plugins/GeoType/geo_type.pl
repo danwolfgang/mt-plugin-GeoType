@@ -48,7 +48,7 @@ use GeoType::ExtendedLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = '1.6.4'; 
+$VERSION = '1.6.5'; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
