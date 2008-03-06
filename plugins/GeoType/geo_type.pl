@@ -48,7 +48,7 @@ use GeoType::ExtendedLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = '1.6.3'; 
+$VERSION = '1.6.4'; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
@@ -294,8 +294,8 @@ sub geo_type_latitude_tag {
 	return '' unless $location->id;
 	my $geometry = $location->geometry;
 	return '' unless $location->geometry;
-	my @coords = split(/,/, $geometry);
-	return @coords[0];
+	my @coords = split(/, /, $geometry);
+	return $coords[0];
 }
 
 sub geo_type_longitude_tag {
@@ -305,8 +305,8 @@ sub geo_type_longitude_tag {
 	return '' unless $location->id;
 	my $geometry = $location->geometry;
 	return '' unless $location->geometry;
-	my @coords = split(/,/, $geometry);
-	return @coords[1];
+	my @coords = split(/, /, $geometry);
+	return $coords[1];
 }
 
 sub geo_type_cross_street_tag {
@@ -581,7 +581,7 @@ sub geo_rss_entry_tag {
 XML
 	}
 	elsif ($georss_format eq "w3c") {
-		my @coords = split(/,/, $geometry);
+		my @coords = split(/, /, $geometry);
 		 $georss_entry = qq{<geo:lat>$coords[0]</geo:lat><geo:long>$coords[1]</geo:long>};
 	}
 	return $georss_entry;
@@ -765,7 +765,7 @@ sub get_bounds_for_locations {
 	my @locations = @_;
 	my ( $maxLat, $minLat, $maxLon, $minLon );
 	foreach my $location ( @locations ) {
-		my ( $lat, $lon ) = split(/,/, $location->geometry );
+		my ( $lat, $lon ) = split(/, /, $location->geometry );
 		next unless ( $lat && $lon );
 		$maxLat = $lat unless ( defined $maxLat );
 		$minLat = $lat unless ( defined $minLat );

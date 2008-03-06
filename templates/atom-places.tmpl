@@ -33,7 +33,7 @@
    <$MTEntryMore encode_xml="1"$>
 </content>
    <MTIfNonEmpty tag="MTGeoTypeLocationLatitude"><MTIfNonEmpty tag="MTGeoTypeLocationLongitude">
-<georss:point> <$MTGeoTypeLocationLatitude$> <$MTGeoTypeLocationLongitude$></georss:point>
+<georss:point><$MTGeoTypeLocationLatitude$> <$MTGeoTypeLocationLongitude$></georss:point>
    <MTIfNonEmpty tag="MTGeoTypeLocationPhone"><lp:eattr name="Phone" value="<$MTGeoTypeLocationPhone encode_xml="1"$>" /></MTIfNonEmpty>
    <MTIfNonEmpty tag="MTGeoTypeLocationRating"><lp:eattr name="Rating" value="<$MTGeoTypeLocationRating encode_xml="1"$>" /></MTIfNonEmpty>
    <MTIfNonEmpty tag="MTGeoTypeLocationThumbnail"><lp:img src="<$MTGeoTypeLocationThumbnail encode_xml="1"$>" <MTIfNonEmpty tag="MTGeoTypeLocationURL">url="<$MTGeoTypeLocationURL encode_xml="1"$>"</MTIfNonEmpty> /></MTIfNonEmpty>
