@@ -421,7 +421,19 @@ sub geo_type_map_tag {
 			@;
 		}
 		require MT::App;
-		our $static_path = MT::App->instance->static_path;
+		our $static_path;
+		eval {
+			$static_path = MT::App->instance->static_path;
+		};
+		if ( $@ ) {
+			if ( $ctx->stash('static_uri') ) {
+				$static_path = $ctx->stash('static_uri');
+			} elsif ( MT::ConfigMgr->instance->StaticWebPath ) {
+				$static_path = MT::ConfigMgr->instance->StaticWebPath;
+			} else {
+				die "Unable to locate STATIC_PATH";
+			}
+		}
 		$html .= qq@
 			TC.attachLoadEvent (function() {
 				geo_map_$entry_id = new GMap2 (getByID ('geo_map_$entry_id'));
@@ -605,7 +617,19 @@ sub geo_type_header_tag {
 	return "" if (!$google_api_key);
 	
 	require MT::App;
-	my $static_path = MT::App->instance->static_path;
+	my $static_path;
+	eval {
+		$static_path = MT::App->instance->static_path;
+	};
+	if ( $@ ) {
+		if ( $ctx->stash('static_uri') ) {
+			$static_path = $ctx->stash('static_uri');
+		} elsif ( MT::ConfigMgr->instance->StaticWebPath ) {
+			$static_path = MT::ConfigMgr->instance->StaticWebPath;
+		} else {
+			die "Unable to locate STATIC_PATH";
+		}
+	}
 	my $html = qq{
 		<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2.s&amp;key=$google_api_key" ></script>
 		<script type="text/javascript" src="${static_path}/plugins/GeoType/js/Clusterer2.js"></script>
@@ -619,8 +643,8 @@ sub geo_type_header_tag {
 	};
 
 	$html .= qq{
-		<script type="text/javascript" src="${static_path}js/tc.js"></script>
-		<script type="text/javascript" src="${static_path}mt.js"></script>   
+		<script type="text/javascript" src="${static_path}/js/tc.js"></script>
+		<script type="text/javascript" src="${static_path}/mt.js"></script>   
 	} if (defined $ctx);
 	
 	return $html;    
