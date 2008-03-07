@@ -48,7 +48,7 @@ use GeoType::ExtendedLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = '1.6.5'; 
+$VERSION = '1.6.6'; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
@@ -294,7 +294,7 @@ sub geo_type_latitude_tag {
 	return '' unless $location->id;
 	my $geometry = $location->geometry;
 	return '' unless $location->geometry;
-	my @coords = split(/, /, $geometry);
+	my @coords = split(/, ?/, $geometry);
 	return $coords[0];
 }
 
@@ -305,7 +305,7 @@ sub geo_type_longitude_tag {
 	return '' unless $location->id;
 	my $geometry = $location->geometry;
 	return '' unless $location->geometry;
-	my @coords = split(/, /, $geometry);
+	my @coords = split(/, ?/, $geometry);
 	return $coords[1];
 }
 
@@ -441,6 +441,7 @@ sub geo_type_map_tag {
 				geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
 
 		@;
+		my $default_map_type   = $config->{default_map_type};
 		if ( defined($maxLat) && defined($minLat) && defined($maxLon) && defined($minLon) ) {
 			$html .= qq@
 			var SW = new GLatLng($minLat, $minLon);
@@ -448,6 +449,7 @@ sub geo_type_map_tag {
 			var bounds = new GLatLngBounds( SW, NE );
 			geo_map_$entry_id.setCenter(bounds.getCenter());
 			geo_map_$entry_id.setZoom(geo_map_$entry_id.getBoundsZoomLevel(bounds));
+			geo_map_$entry_id.setMapType($default_map_type);
 			var marker_array_$entry_id = new Array();
 			var cluster_$entry_id = new Clusterer(geo_map_${entry_id});
 			clusterIcon = new GIcon(G_DEFAULT_ICON);
@@ -459,7 +461,7 @@ sub geo_type_map_tag {
                         clusterIcon.infoWindowAnchor = new GPoint( 13, 3 );
                         clusterIcon.iconShadowAnchor = new GPoint( 27, 37 );
                         cluster_ARCH.SetIcon( clusterIcon );
-			cluster_${entry_id}.SetMaxVisibleMarkers = 20;
+			cluster_${entry_id}.SetMaxVisibleMarkers( 20 );
 			@;
 			$useManager = 1;
 		}
@@ -467,7 +469,6 @@ sub geo_type_map_tag {
 		require MT::Util;
 		my $i = 1;
 		my $default_zoom_level = $zoom || $config->{default_zoom_level};
-		my $default_map_type   = $config->{default_map_type};
 		foreach my $location (@locations) {
 			my $marker_html;
 			my $marker_title;
@@ -593,7 +594,7 @@ sub geo_rss_entry_tag {
 XML
 	}
 	elsif ($georss_format eq "w3c") {
-		my @coords = split(/, /, $geometry);
+		my @coords = split(/, ?/, $geometry);
 		 $georss_entry = qq{<geo:lat>$coords[0]</geo:lat><geo:long>$coords[1]</geo:long>};
 	}
 	return $georss_entry;
@@ -789,7 +790,7 @@ sub get_bounds_for_locations {
 	my @locations = @_;
 	my ( $maxLat, $minLat, $maxLon, $minLon );
 	foreach my $location ( @locations ) {
-		my ( $lat, $lon ) = split(/, /, $location->geometry );
+		my ( $lat, $lon ) = split(/, ?/, $location->geometry );
 		next unless ( $lat && $lon );
 		$maxLat = $lat unless ( defined $maxLat );
 		$minLat = $lat unless ( defined $minLat );
