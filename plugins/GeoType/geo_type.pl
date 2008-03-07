@@ -459,7 +459,7 @@ sub geo_type_map_tag {
                         clusterIcon.infoWindowAnchor = new GPoint( 13, 3 );
                         clusterIcon.iconShadowAnchor = new GPoint( 27, 37 );
                         cluster_ARCH.SetIcon( clusterIcon );
-			cluster_${entry_id}.maxVisibleMarkers = 20;
+			cluster_${entry_id}.SetMaxVisibleMarkers = 20;
 			@;
 			$useManager = 1;
 		}
@@ -490,7 +490,6 @@ sub geo_type_map_tag {
 			$html .= qq!
 			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js', icon: geo_icon });
 			GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
-			geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
 			!;
 			if ( $useManager ) { 
 			$html .= qq!
@@ -498,6 +497,7 @@ sub geo_type_map_tag {
 			!;
 			} else {
 			$html .= qq!
+			geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
 			geo_map_${entry_id}.addOverlay (marker_$i);
 			!;
 			}
