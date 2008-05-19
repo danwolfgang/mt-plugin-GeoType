@@ -1,4 +1,5 @@
 <script type="text/javascript">
+<TMPL_UNLESS NAME="hide_saved_locations">
 var saved_loc = new Array();
 <TMPL_LOOP NAME=SAVED_LOCATIONS_LOOP>
  	loc = new Object();
@@ -6,6 +7,7 @@ var saved_loc = new Array();
 	loc.name = "<TMPL_VAR NAME=LOCATION_NAME ESCAPE=JS>";
 	saved_loc.push(loc);
 </TMPL_LOOP>
+</TMPL_UNLESS>
 // var numGeo = <TMPL_VAR NAME="LOCATION_NUM">+1;
 // if (numGeo >= 5) {
 //  document.getElementById("add_loc_button").disabled = true;
@@ -202,7 +204,8 @@ function generate_location_table (loc) {
 	td.appendChild(inp);
 	tr.appendChild(td);
 	table_span.appendChild(tr);
-	
+
+<TMPL_UNLESS NAME="hide_saved_locations">
 	tr = document.createElement("tr");
 	th = document.createElement("th");
 	th.setAttribute("align", "left");
@@ -240,6 +243,7 @@ function generate_location_table (loc) {
 	td.appendChild(sel);
 	tr.appendChild(td);
 	table_span.appendChild(tr);
+</TMPL_UNLESS>
 	
 	return table_span;
 }

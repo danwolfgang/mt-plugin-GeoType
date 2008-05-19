@@ -48,7 +48,7 @@ use GeoType::ExtendedLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = '1.6.6'; 
+$VERSION = '1.6.7'; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
@@ -58,7 +58,13 @@ my $plugin = MT::Plugin::GeoType->new ({
 	author_name => "Apperceptive, LLC",
 	author_link => "http://apperceptive.com/",
 
-	schema_version => 1.2,
+	schema_version => 1.3,
+        upgrade_functions => {
+                'geotype_add_location_basename' => {
+                        version_limit => 1.3,
+			code => &save_all_locations
+                }
+	},
 	object_classes => [ 'GeoType::Location', 'GeoType::EntryLocation', 'GeoType::ExtendedLocation' ],
 	
 	system_config_template  => 'config.tmpl',
@@ -80,6 +86,7 @@ my $plugin = MT::Plugin::GeoType->new ({
 		[ 'default_add_map',         { Default => 'all',             Scope => 'blog' } ],
 		[ 'default_zoom_level',     { Default => 11,                Scope => 'blog' } ],
 		[ 'use_extended_attributes', { Default => 0,                Scope => 'blog' } ],
+		[ 'hide_saved_locations', { Default => 0,                Scope => 'blog' } ],
 		]),
 	
 	callbacks    => {
@@ -96,6 +103,7 @@ my $plugin = MT::Plugin::GeoType->new ({
 	template_tags => {
 			'GeoTypeLocationName' => \&geo_type_name_tag,
 			'GeoTypeLocationId' => \&geo_type_id_tag,
+			'GeoTypeLocationGUID' => \&geo_type_GUID_tag,
 			'GeoTypeLocationLatitude' => \&geo_type_latitude_tag,
 			'GeoTypeLocationLongitude' => \&geo_type_longitude_tag,
 			'GeoTypeLocationCrossStreet' => \&geo_type_cross_street_tag,
@@ -152,6 +160,13 @@ my $plugin = MT::Plugin::GeoType->new ({
 });
 
 MT->add_plugin($plugin);
+
+sub save_all_locations {
+	my $iter = GeoType::Location->load_iter({});
+	while ( my $loc = $iter->() ) {
+		$loc->save;
+	}
+}
 
 sub load_config {
 	my $plugin = shift;
@@ -239,7 +254,9 @@ sub geo_type_location_container {
         my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
         if ( $at ) {
             @locations = get_locations_for_archive($ctx);
-        } else {
+        } elsif ( $ctx->stash('locations') ) {
+	    @locations = @{$ctx->stash('locations')};
+	} else {
             return;
         }
     } else {
@@ -285,6 +302,14 @@ sub geo_type_id_tag {
 	return '' unless $location;
 	return '' unless $location->id;
 	return $location->id;
+}
+
+sub geo_type_GUID_tag {
+	my $ctx = shift;
+	my $location = $ctx->stash('geotype_location');
+	return '' unless $location;
+	return '' unless $location->id;
+	return $location->make_guid;
 }
 
 sub geo_type_latitude_tag {
@@ -698,7 +723,8 @@ sub _edit_entry {
 		$tmpl->param ( blog_id => $app->blog->id );
 		$tmpl->param ( location_num => $#location_loop, location_loop => \@location_loop );
 
-		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id });
+		my @locations = grep { $_->visible } GeoType::Location->load ({ blog_id => $blog->id }, { sort => 'name' } );
+		$tmpl->param ( hide_saved_locations => $plugin->get_config_value ('hide_saved_locations', 'blog:'. $app->blog->id) );
 		$tmpl->param ( saved_locations_loop => [ map { { location_value => $_->location, location_name => $_->name } } @locations ] );
 		$tmpl->param ( default_zoom_level => $zoom_level );
 		$tmpl->param ( default_map_type => $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id) );
@@ -922,6 +948,10 @@ sub edit_extended_location {
 	my $tmpl = $plugin->load_tmpl("geotype_edit_extended.tmpl");
         $app->build_page($tmpl, $param);
 	$app->build_page($tmpl);
+}
+
+sub location_entry_feed {
+	my ($app) = @_;
 }
 
 sub list_locations {
