@@ -50,3 +50,17 @@ ul.li{margin-bottom: 8px;}
 .code{font-family:Courier, Courier New, monospace;font-size: 11px}
 .sideinfo{background: #efefef; padding: 15px; width: 350px;margin: 15px 0;}
 .sublist{list-style-type:lower-alpha}
+
+.table-container{ width: 400px;margin-bottom: 20px;background: #efefef;padding: 15px}
+.table-container h5{text-align: center;margin-bottom: 10px}
+.table-container h6{margin-bottom: 10px}
+.table-container table{border: 1px solid #ccc;background:#fff;margin-bottom: 20px}
+.table-container table th{text-align: left;border-bottom: 1px solid #ccc;padding: 8px}
+.table-container table tr, .table-container table td{margin: 0}
+.table-container table td{padding: 5px;font-size: 11px; border-bottom: 1px solid #ccc;vertical-align: top}
+.table-container table li{font-size: 11px;}
+.table-container table ol, .table-container table ul{margin-top: 0}
+.tags {width: 650px}
+.tags table{width: 650px}
+.table-container table td.subtitle {font-weight: bold; background: #efefef}
+table td.last {border-bottom: 0}

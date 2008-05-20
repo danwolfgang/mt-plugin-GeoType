@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>GeoType: A User's Guide</title>
+<link href="documentation.css" rel="stylesheet" type="text/css" media="all" />
+</head>
+
+<body><div id="container">
+<div class="return"><a href="index.html">Return to Index</a></div>
+
+<h1>Tags Documentation
+  </p>
+</h1>
+
+<div class="table-container tags">
+<h6>Container Tags</h6>
+  <table>
+    <tr>
+      <th>Tag</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td width="250" class="last">&lt; MTGeoTypeLocations&nbsp;/&gt;</td>
+      <td class="last">A container tag that loops through all locations for a given context. The following contexts are checked:<br />
+* If there is an entry in context, it will loop through all entries for that location<br />
+* If there is no entry in context and the page is an archive, it will loop through all locations for entries in that archive<br />
+* If there is no entry or archive in context, it will check the stash<br />
+* If these checks fail, it will return empty</td>
+    </tr>
+  </table>
+  <h6>Conditional Tags</h6>
+  <table>
+    <tr>
+      <th>Tag</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td width="250">&lt; MTGeoTypeIfLocation /&gt;</td>
+      <td>Checks for the presence of a location in context</td>
+    </tr>
+    <tr>
+      <td class="last">&lt; MTGeoTypeIfLocationExtended /&gt;</td>
+      <td class="last">Checks for extended location values in context to test whether extended locations have been activated in the plugin settings </td>
+    </tr>
+  </table>
+  <h6>Template Tags</h6>
+  <table>
+    <tr>
+      <th>Tag</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+    	<td colspan="2" class="subtitle">
+        	Base location values:        </td>
+     </tr>
+    <tr>
+      <td width="250">&lt; MTGeoTypeLocationName &gt;</td>
+      <td>The name of the location</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationId &gt;</td>
+      <td>The ID of the GeoType::Location record</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationGUID &gt;</td>
+      <td>Returns a globally unique identifier for the location, based on the MT::Entry GUID methodology, for use in feeds. The basename for the identifier is determined by the GeoType::Location::location field and thus will most likely resemble a street address.</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationLatitude &gt;</td>
+      <td>Latitude of the location</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationLongitude &gt;</td>
+      <td>Longitude of the location</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeCoords &gt;</td>
+      <td>Coordinates of the locations (&quot;Long, Lati&quot;).</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocation &gt;</td>
+      <td>Returns the location value; likely to be a street address (&quot;1060 West Addison Street, Chicago, IL&quot;) that has been used for geocoding</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeMap &gt;</td>
+      <td>Generates a Google map for a given location or locations using preferences set in plugin settings.</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeHeader &gt;</td>
+      <td>Generates calls to include &lt;script&gt; and &lt;style&gt; items for proper creation and display of the GeoTypeMap tag's output. To be included in the document's &lt;head&gt;</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="subtitle">Extended Location Values:</td>
+      </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationCrossStreet &gt;</td>
+      <td>Returns the cross street, if any, set in the GeoType::ExtendedLocation record.</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationDescription &gt;</td>
+      <td>Returns the description, if any, set in the GeoType::ExtendedLocation record.</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationHours &gt;</td>
+      <td>Returns the hours, if any, set in the GeoType::ExtendedLocation record. Likely to be a string.</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationPhone &gt;</td>
+      <td>Returns the phone number, if any, set in the GeoType::ExtendedLocation record.</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationPlaceId&gt;</td>
+      <td>Returns the PlaceID record, if any, set in the GeoType::ExtendedLocation record. See <a href="http://sramanamitra.com/2007/09/10/its-about-place-part-1">this page</a> for details.</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationRating &gt;</td>
+      <td>Returns the rating, if any, set in the GeoType::ExtendedLocation record. A numeric value (&quot;3.5&quot;).</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationThumbnail &gt;</td>
+      <td>Returns the thumbnail value, if any, set in the GeoType::ExtendedLocation record. A string (&quot;http://www.example.com/visitor_thumb.png&quot;).</td>
+    </tr>
+    <tr>
+      <td>&lt; MTGeoTypeLocationURL &gt;</td>
+      <td>Returns the URL, if any, set in the GeoType::ExtendedLocation record.</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="subtitle">GeoRSS values:</td>
+      </tr>
+    <tr>
+      <td>&lt;GeoRSS_Namespace &gt;</td>
+      <td>GeoRSS_Namespace</td>
+    </tr>
+    <tr>
+      <td>&lt;GeoRSS_Entry &gt;</td>
+      <td>Generates &lt;point&gt; tag or &lt;geo:lat&gt;/&lt;geo:long&gt; tags for location, depending on style selected in plugin settings</td>
+    </tr>
+    <tr>
+      <td class="last">&lt;GeoRSS_Channel &gt;</td>
+      <td class="last">Currently unused</td>
+    </tr>
+  </table>
+  <p>&nbsp;</p>
+  </div>
+
+
+<p>&nbsp;</p>
+<div id="footer">
+		<a href="faq.html">FAQ</a>
+	<br />
+	<a href="index.html">Return to index</a>
+	<br />
+	Documentation by <a href="http://www.apperceptive.com">Apperceptive</a></div>
+</div></body>
+
+</html>
