@@ -62,7 +62,7 @@ my $plugin = MT::Plugin::GeoType->new ({
         upgrade_functions => {
                 'geotype_add_location_basename' => {
                         version_limit => 1.3,
-			code => &save_all_locations
+						code => \&save_all_locations,
                 }
 	},
 	object_classes => [ 'GeoType::Location', 'GeoType::EntryLocation', 'GeoType::ExtendedLocation' ],
