@@ -48,7 +48,7 @@ use GeoType::ExtendedLocation;
 use Data::Dumper;
 
 use vars qw( $VERSION );
-$VERSION = '1.6.8'; 
+$VERSION = '1.6.8.1'; 
 
 my $plugin = MT::Plugin::GeoType->new ({
 	name        => "GeoType",
@@ -593,7 +593,10 @@ sub geo_rss_entry_tag {
 
 	my $entry = $ctx->stash('entry');
 	my $blog_id = $ctx->stash('blog_id');
-	my ( $location ) = get_locations_for_entry($entry);	
+        my $location = $ctx->stash('geotype_location');
+        unless ( $location ) {
+		( $location ) = get_locations_for_entry($entry);	
+        }
 	return "" unless ( $location );
         my $config = $plugin->get_config_hash('blog:' . $blog_id);    
 
@@ -857,16 +860,25 @@ sub get_zoom_for_entry {
 
 sub geo_type_coords_tag {
 	my $ctx = shift;
+        my $location = $ctx->stash('geotype_location');
+        if ( $location ) {
+                return $location->geometry;
+        }
 	my $entry = $ctx->stash('entry');
-	my ($location) = get_locations_for_entry($entry);
+	( $location ) = get_locations_for_entry($entry);
 
 	return $location ? $location->geometry : "";
 }
 
 sub geo_type_location_tag {
 	my $ctx = shift;
+	my $location = $ctx->stash('geotype_location');
+	if ( $location ) {
+        	return $location->location;
+	}
+
 	my $entry = $ctx->stash('entry');
-	my ($location) = get_locations_for_entry($entry);
+	( $location ) = get_locations_for_entry($entry);
 
 	return $location ? $location->location : "";
 }
