@@ -11,6 +11,7 @@ Go to Plugins, click on "Show Settings" in the GeoPress plugin
 Add a GoogleMaps or Yahoo App ID, and/or select Microsoft Maps
  - Note: "Add Maps" doesn't affect GeoPress/MT
  - Note: GeoRSS feeds select doesn't "automatically" add to the index.xml template, but will deactivate the GeoRSS inserts if this is unchecked
+OPTIONAL: If you will be using location details, such as phone number and hours, check the "Activate extensions" checkbox
 Save Changes
 
 == Writing an Entry
