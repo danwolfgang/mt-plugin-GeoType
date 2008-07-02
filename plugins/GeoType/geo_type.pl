@@ -103,7 +103,6 @@ my $plugin = MT::Plugin::GeoType->new ({
 	template_tags => {
 			'GeoTypeLocationName' => \&geo_type_name_tag,
 			'GeoTypeLocationId' => \&geo_type_id_tag,
-			'GeoTypeLocationGUID' => \&geo_type_GUID_tag,
 			'GeoTypeLocationLatitude' => \&geo_type_latitude_tag,
 			'GeoTypeLocationLongitude' => \&geo_type_longitude_tag,
 			'GeoTypeLocationCrossStreet' => \&geo_type_cross_street_tag,
@@ -302,14 +301,6 @@ sub geo_type_id_tag {
 	return '' unless $location;
 	return '' unless $location->id;
 	return $location->id;
-}
-
-sub geo_type_GUID_tag {
-	my $ctx = shift;
-	my $location = $ctx->stash('geotype_location');
-	return '' unless $location;
-	return '' unless $location->id;
-	return $location->make_guid;
 }
 
 sub geo_type_latitude_tag {
