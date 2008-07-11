@@ -749,7 +749,7 @@ sub post_save_entry {
 
 	require GeoType::EntryLocation;
 	my $num = 0;
-	while (my $location_name = $app->param("geotype_locname_$num")) {
+	while (my $geometry = $app->param("geotype_geometry_$num")) {
 		   my $entry_location;
 		if (my $id = $app->param ("geotype_location_id_$num")) {
 			$entry_location = GeoType::EntryLocation->load ($id);
@@ -773,14 +773,14 @@ sub post_save_entry {
 
 		# my $location_name = $app->param("geotype_locname_$num");
 		my $location_addr = $app->param("geotype_addr_$num");
-		my $geometry = $app->param("geotype_geometry_$num");
+		my $location_name = $app->param("geotype_locname_$num");
 
 		my $location = GeoType::Location->get_by_key ({ location => $location_addr, blog_id => $blog_id });        
-		$location->name($location_name);
+		$location->name($location_name || $location_addr);
 		$location->geometry($geometry);
 		$location->visible(1);
 		$location->save or return $callback->error ("Saving location failed: ", $location->errstr);
-		
+				
 		$entry_location->zoom_level ($zoom_level);
 		$entry_location->location_id($location->id);
 		$entry_location->save or return $callback->error ("Saving entry_location failed: ", $entry_location->errstr);
