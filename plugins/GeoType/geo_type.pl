@@ -672,6 +672,7 @@ sub geo_type_header_tag {
 	};
 
 	$html .= qq{
+		<script type="text/javascript" src="${static_path}/js/core.js"></script>
 		<script type="text/javascript" src="${static_path}/js/tc.js"></script>
 		<script type="text/javascript" src="${static_path}/mt.js"></script>   
 	} if (defined $ctx);
