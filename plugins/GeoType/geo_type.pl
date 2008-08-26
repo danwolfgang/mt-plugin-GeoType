@@ -415,7 +415,14 @@ sub geo_type_map_tag {
 			@locations = get_locations_for_archive($ctx);
 			($maxLat, $minLat, $maxLon, $minLon) = &get_bounds_for_locations(@locations);
 			$entry_id = 'ARCH';
-		} else {
+		} 
+		elsif (my $n = $args->{lastnentries}) {
+		    require MT::Entry;
+            my @entries = MT::Entry->load ({ blog_id => $blog_id, status => MT::Entry::RELEASE() }, { sort => 'created_on', direction => 'descend', limit => $n });
+            local $ctx->{__stash}{entries} = \@entries;
+            @locations = get_locations_for_archive ($ctx);
+		}
+		else {
 			# No entry, no archive
 			return;
 		}
