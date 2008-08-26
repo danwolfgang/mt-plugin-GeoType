@@ -400,7 +400,7 @@ sub geo_type_URL_tag {
 
 # Creates an actual map for an entry
 sub geo_type_map_tag {
-	my $ctx = shift;
+	my ($ctx, $args) = shift;
 	my $entry = $ctx->stash('entry');
 	my $entry_id;
 	my $blog_id = $ctx->stash('blog_id');
