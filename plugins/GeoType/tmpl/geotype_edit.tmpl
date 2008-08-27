@@ -51,12 +51,15 @@ function remove_location (remloc) {
 
 function generate_location_table (loc) {
     var inner_loc = loc;
-    var table_span = document.createElement('table');
-	table_span.setAttribute('id', 'geotype_location_table_' + loc.id);
-	table_span.setAttribute('cellpadding', '3');
-	table_span.setAttribute('cellspacing', '3');
-	table_span.setAttribute('width', '100%');
+    var table_parent = document.createElement('table');
+	table_parent.setAttribute('id', 'geotype_location_table_' + loc.id);
+	table_parent.setAttribute('cellpadding', '3');
+	table_parent.setAttribute('cellspacing', '3');
+	table_parent.setAttribute('width', '100%');
 	
+	var table_span = document.createElement('tbody');
+	table_parent.appendChild(table_span);
+
 	inp = document.createElement("input");
 	inp.setAttribute("type", "hidden");
 	inp.setAttribute("name", "geotype_location_id_" + loc.id);
@@ -245,7 +248,7 @@ function generate_location_table (loc) {
 	table_span.appendChild(tr);
 </TMPL_UNLESS>
 	
-	return table_span;
+	return table_parent;
 }
 
 function generate_locations_table () {
