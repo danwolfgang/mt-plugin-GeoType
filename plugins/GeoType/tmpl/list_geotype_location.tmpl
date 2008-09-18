@@ -76,13 +76,13 @@ TC.attachLoadEvent( init );
 
 <div class="list-pagination rightcol" id="pagination-control">
 <TMPL_IF NAME="BACK_ARROW">
-&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=0">&lt;&lt;</a>
-&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=<TMPL_VAR NAME="PREV_PAGE">">&lt; Previous</a>&nbsp;
+&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_location&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=0">&lt;&lt;</a>
+&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_location&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=<TMPL_VAR NAME="PREV_PAGE">">&lt; Previous</a>&nbsp;
 </TMPL_IF>
 <span class="current-page">Showing: <TMPL_VAR NAME="start_offset"> &ndash; <TMPL_VAR NAME="end_offset"> of <TMPL_VAR NAME="total_rows"></span>
 <TMPL_IF NAME="FORWARD_ARROW">
-&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=<TMPL_VAR NAME="END_OFFSET">">Next &gt;</a>
-&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_locations&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=<TMPL_VAR NAME="LAST_PAGE">">&gt;&gt;</a>
+&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_location&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=<TMPL_VAR NAME="END_OFFSET">">Next &gt;</a>
+&nbsp;<a href="<TMPL_VAR NAME=SCRIPT_URL>?;__mode=geotype_list_location&amp;blog_id=<TMPL_VAR NAME=BLOG_ID>&amp;offset=<TMPL_VAR NAME="LAST_PAGE">">&gt;&gt;</a>
 </TMPL_IF>
 </span>
 </div>

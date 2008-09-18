@@ -69,3 +69,5 @@ sub make_guid {
     return '' unless $host && $year && $path && $blog_id && $basename;
     qq{tag:$host,$year:$path/$blog_id.loc.$basename};
 }
+
+1;

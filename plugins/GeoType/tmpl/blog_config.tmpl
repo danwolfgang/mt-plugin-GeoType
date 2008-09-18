@@ -214,9 +214,9 @@ TC.attachBeforeUnloadEvent (GUnload);
 <div class="setting grouped">
     <div class="label"><label for="default_map_type">Default Map Type: </label></div>
     <div class="field"><select name='default_map_type' id='default_map_type' onchange='update_map()'>
-        <option value='G_NORMAL_MAP' <TMPL_IF NAME=DEFAULT_MAP_TYPE_G_NORMAL_MAPD> selected='selected'</TMPL_IF>>Road</option>
-        <option value='G_SATELLITE_MAP' <TMPL_IF NAME=DEFAULT_MAP_TYPE_G_SATELLITE_MAP> selected='selected'</TMPL_IF>>Satellite</option>
-        <option value='G_HYBRID_MAP' <TMPL_IF NAME=DEFAULT_MAP_TYPE_G_HYBRID_MAP> selected='selected'</TMPL_IF>>Hybrid</option>
+        <option value='roadmap' <TMPL_IF NAME=DEFAULT_MAP_TYPE_ROADMAP> selected='selected'</TMPL_IF>>Road</option>
+        <option value='satellite' <TMPL_IF NAME=DEFAULT_MAP_TYPE_satellite> selected='selected'</TMPL_IF>>Satellite</option>
+        <option value='hybrid' <TMPL_IF NAME=DEFAULT_MAP_TYPE_hybrid> selected='selected'</TMPL_IF>>Hybrid</option>
     </select>		
     </div>
 </div>

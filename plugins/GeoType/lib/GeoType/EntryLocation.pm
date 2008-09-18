@@ -20,3 +20,5 @@ __PACKAGE__->install_properties({
     primary_key => 'id',
     child_of    => 'MT::Entry',
 });
+
+1;

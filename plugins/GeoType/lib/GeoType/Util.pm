@@ -30,4 +30,69 @@ sub make_location_basename {
     $base;
 }
 
+sub get_google_api_key {
+    my $plugin = MT->component ('geotype');
+	my ($blog, $which) = @_;
+	
+	my $interface_api_key =  _get_api_key ($blog, 'google');
+	my $site_api_key      =  $plugin->get_config_value ('site_api_key', 'blog:' . $blog->id) || $interface_api_key;
+	
+	return $which && $which eq 'site' ? $site_api_key : $interface_api_key;
+}
 
+sub _get_api_key {
+    my $plugin = MT->component ('geotype');
+	my ($blog, $key) = @_;
+	
+	my $system_value = $plugin->get_config_value ($key . '_api_key', 'system');
+	my $blog_value   = $plugin->get_config_value ($key . '_api_key', 'blog:' . $blog->id);
+	
+	return $blog_value && $blog_value ne uc($key . '_api_key') ? $blog_value : $system_value ne uc($key . '_api_key') ? $system_value : undef;
+}
+
+sub static_url_for_locations {
+    my $plugin = MT->component ('geotype');
+    my ($params, @locs) = @_;
+    
+    my $blog = $locs[0]->blog;
+    my $width  = $params->{Width} || $plugin->get_config_value ('map_width', 'blog:' . $blog->id);
+    my $height = $params->{Height} || $plugin->get_config_value ('map_height', 'blog:' . $blog->id);
+    
+    my $key = get_google_api_key ($blog, 'interface');
+    
+    my $marker_str = $params->{marker_size} . $params->{marker_color};
+    
+    my $url = 'http://maps.google.com/staticmap?';
+    $url .= "size=${width}x${height}";
+    $url .= "&markers=" . join ("|", map { my $char = lc (delete $params->{marker_char}); join (',', $_->geometry, $marker_str . $char) } @locs);
+    $url .= "&key=$key";
+    
+    $url .= "&maptype=" . ($params->{MapType} || $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id));
+    
+    $url;
+}
+
+sub geocode {
+    my $plugin = MT->component ('geotype');
+    my ($blog, $address) = @_;
+    
+    my $key = get_google_api_key ($blog);
+    my $url = 'http://maps.google.com/maps/geo?';
+    
+    require MT::Util;
+    $url .= 'q=' . MT::Util::encode_url ($address);
+    $url .= '&output=json';
+    $url .= "&key=$key";
+    
+    my $ua = MT->new_ua;
+    my $res = $ua->get ($url);
+
+    # yeah, not pretty right now
+    require JSON;
+    my $obj = JSON::jsonToObj ($res->content);
+    my $coords = $obj->{Placemark}->[0]->{Point}->{coordinates};
+    return wantarray ? ($coords->[0], $coords->[1]) : join (',', $coords->[0], $coords->[1]);
+}
+
+
+1;
