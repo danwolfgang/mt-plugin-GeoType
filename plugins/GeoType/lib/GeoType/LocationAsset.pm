@@ -70,6 +70,8 @@ sub insert_options {
     my $asset = shift;
     my ($param) = @_;
 
+    return unless $param->{edit_field} ne 'location_list';
+
     my $app   = MT->instance;
     my $perms = $app->{perms};
     my $blog  = $asset->blog or return;
