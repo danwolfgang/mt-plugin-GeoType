@@ -121,6 +121,12 @@ sub param_edit_entry {
         }
 
         function insertLocation (id, name) {
+            // Skip out if the id already exists in the list
+            for (var i = 0; i < locations.length; i++) {
+                if (locations[i].id == id) {
+                    return;
+                }
+            }
             var new_location = new Object();
             new_location.name = name;
             new_location.id = id;
