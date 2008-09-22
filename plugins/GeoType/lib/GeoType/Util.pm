@@ -55,6 +55,15 @@ sub static_url_for_locations {
     my ($params, @locs) = @_;
     
     my $blog = $locs[0]->blog;
+    my $square = $params->{Square};
+    if ($square) {
+        if ($params->{Width} && !$params->{Height}) {
+            $params->{Height} = $params->{Width};
+        }
+        elsif ($params->{Height} && !$params->{Width}) {
+            $params->{Width} = $params->{Height};
+        }
+    }
     my $width  = $params->{Width} || $plugin->get_config_value ('map_width', 'blog:' . $blog->id);
     my $height = $params->{Height} || $plugin->get_config_value ('map_height', 'blog:' . $blog->id);
     
