@@ -47,7 +47,7 @@ sub _get_api_key {
 	my $system_value = $plugin->get_config_value ($key . '_api_key', 'system');
 	my $blog_value   = $plugin->get_config_value ($key . '_api_key', 'blog:' . $blog->id);
 	
-	return $blog_value && $blog_value ne uc($key . '_api_key') ? $blog_value : $system_value ne uc($key . '_api_key') ? $system_value : undef;
+	return $blog_value  ? $blog_value : $system_value ? $system_value : undef;
 }
 
 sub static_url_for_locations {
@@ -67,7 +67,7 @@ sub static_url_for_locations {
     $url .= "&markers=" . join ("|", map { my $char = lc (delete $params->{marker_char}); join (',', $_->geometry, $marker_str . $char) } @locs);
     $url .= "&key=$key";
     
-    $url .= "&maptype=" . ($params->{MapType} || $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id));
+    $url .= "&maptype=" . ($params->{MapType} || $plugin->get_config_value ('static_map_type', 'blog:' . $blog->id));
     
     $url;
 }
@@ -94,5 +94,22 @@ sub geocode {
     return wantarray ? ($coords->[0], $coords->[1]) : join (',', $coords->[0], $coords->[1]);
 }
 
+sub get_bounds_for_locations {
+	my @locations = @_;
+	my ( $maxLat, $minLat, $maxLon, $minLon );
+	foreach my $location ( @locations ) {
+		my ( $lat, $lon ) = split(/, ?/, $location->geometry );
+		next unless ( $lat && $lon );
+		$maxLat = $lat unless ( defined $maxLat );
+		$minLat = $lat unless ( defined $minLat );
+		$maxLon = $lon unless ( defined $maxLon );
+		$minLon = $lon unless ( defined $minLon );
+		( $lat > $maxLat ) && ( $maxLat = $lat );
+		( $lat < $minLat ) && ( $minLat = $lat );
+		( $lon > $maxLon ) && ( $maxLon = $lon );
+		( $lon < $minLon ) && ( $minLon = $lon );
+	}
+	return ($maxLat, $minLat, $maxLon, $minLon);
+}
 
 1;

@@ -378,24 +378,6 @@ sub get_locations_for_archive {
 	return @locations;
 }
 
-sub get_bounds_for_locations {
-	my @locations = @_;
-	my ( $maxLat, $minLat, $maxLon, $minLon );
-	foreach my $location ( @locations ) {
-		my ( $lat, $lon ) = split(/, ?/, $location->geometry );
-		next unless ( $lat && $lon );
-		$maxLat = $lat unless ( defined $maxLat );
-		$minLat = $lat unless ( defined $minLat );
-		$maxLon = $lon unless ( defined $maxLon );
-		$minLon = $lon unless ( defined $minLon );
-		( $lat > $maxLat ) && ( $maxLat = $lat );
-		( $lat < $minLat ) && ( $minLat = $lat );
-		( $lon > $maxLon ) && ( $maxLon = $lon );
-		( $lon < $minLon ) && ( $minLon = $lon );
-	}
-	return ($maxLat, $minLat, $maxLon, $minLon);
-}
-
 sub get_locations_for_entry {
 	my $entry = shift;
 

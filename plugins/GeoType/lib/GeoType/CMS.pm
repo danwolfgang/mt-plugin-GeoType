@@ -10,7 +10,9 @@ use GeoType::Util;
 sub create_location {
     my $app = shift;
     
-    $app->load_tmpl ('dialog/create_location.tmpl');
+    my $entry_insert = $app->param ('entry_insert');
+    my $edit_field   = $app->param ('edit_field');
+    $app->load_tmpl ('dialog/create_location.tmpl', { entry_insert => $entry_insert, edit_field => $edit_field });
 }
 
 sub verify_location {
@@ -18,6 +20,9 @@ sub verify_location {
     
     my $address = $app->param ('location_address');
     my @coords  = GeoType::Util::geocode ($app->blog, $address);
+    
+    my $entry_insert = $app->param ('entry_insert');
+    my $edit_field   = $app->param ('edit_field');
     
     require GeoType::LocationAsset;
     my $la = GeoType::LocationAsset->new;
@@ -28,6 +33,8 @@ sub verify_location {
     my $url = $la->thumbnail_url (Width => 600, Height => int(600 / 1.61));
     
     $app->load_tmpl ('dialog/verify_location.tmpl', { 
+        edit_field  => $edit_field,
+        entry_insert    => $entry_insert,
         location_address => $address,
         gecoded_url => $url,
         location_lattitude => $coords[1],
@@ -52,6 +59,11 @@ sub insert_location {
     
     $la->save or die $la->errstr;
     
+    if ($app->param ('entry_insert')) {
+        require MT::CMS::Asset;
+        $app->param ('id', $la->id);
+        return MT::CMS::Asset::insert ($app)
+    }
     return $app->redirect(
         $app->uri(
             'mode' => 'list_assets',
@@ -101,6 +113,7 @@ sub source_edit_entry {
 
 sub param_edit_entry {
     my ($cb, $app, $param, $tmpl) = @_;
+    my $blog_id = $app->blog->id;
     my $header = $tmpl->getElementById('header_include');
     my $html_head = $tmpl->createElement('setvarblock', { name => 'html_head', append => 1 });
     my $innerHTML = q{
@@ -118,6 +131,12 @@ sub param_edit_entry {
             elem.innerHTML = html;
             var value_elem = getByID ('location_list');
             location_list.value = locations.map (function (x) { return x.id }).join(",");
+            if (locations.length) {
+                DOM.removeClassName ('location-list-preview', 'hidden');
+            }
+            else {
+                DOM.addClassName ('location-list-preview', 'hidden');
+            }
         }
 
         function insertLocation (id, name) {
@@ -146,6 +165,11 @@ sub param_edit_entry {
             locations = new_locations;
             buildLocationList();
         }
+        
+        function openLocationPreview (f) {
+            var location_list = getByID ('location_list').value;
+            return openDialog (f, 'preview_locations', 'blog_id=<$mt:var name="blog_id">&location_list=' + location_list);
+        }
 
         TC.attachLoadEvent (buildLocationList);
         /* ]]> */
@@ -158,15 +182,9 @@ sub param_edit_entry {
     $param->{location_setting} = q{
 <ul class='category-list pkg' id='location-list'>
 </ul>
+<a href="javascript:void(0)" id="location-list-preview" class="pkg center button" style="text-align: center" onclick="openLocationPreview(this.form)" title="<__trans phrase="Preview Locations">"><__trans phrase="preview"/></a>
 <input type="hidden" name="location_list" id="location_list" />
 };
-    
-    # my $category_widget = $tmpl->getElementById ('entry-category-widget');
-    # 
-    # my $location_widget = $tmpl->createElement ('app:widget', { id => 'entry-location-widget', label => 'Locations' });
-    # $location_widget->innerHTML ('<p>Location bits here.</p>');
-    # 
-    # $tmpl->insertAfter ($category_widget, $location_widget);
     
     if ($param->{id}) {
         require MT::ObjectAsset;
@@ -244,6 +262,50 @@ sub post_save_entry {
             if @old_ids;
     }
     1;
+}
+
+sub preview_locations {
+    my $app = shift;
+    my $blog = $app->blog;
+    
+    my $location_list = $app->param ('location_list');
+    my @ids = split (/\s*,\s*/, $location_list);
+    my @locations;
+    require MT::Asset;
+    for my $id (@ids) {
+        next unless $id;
+        my $asset = MT::Asset->load ($id) or next;
+        push @locations, $asset if ($asset->isa ('GeoType::LocationAsset'));
+    }
+    
+    @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->lattitude, lng => $_->longitude } } @locations;
+    
+    my $plugin = MT->component ('geotype');
+    my $map_type = $plugin->get_config_value ('interactive_map_type', 'blog:' . $blog->id);
+    my $interactive_map_scale = $plugin->get_config_value ('interactive_map_scale', 'blog:' . $blog->id);
+    my $config = $plugin->get_config_hash ('blog:' . $blog->id);
+    $map_type = $map_type eq 'roadmap' ? 'G_NORMAL_MAP' : $map_type eq 'satellite' ? 'G_SATELLITE_MAP' : $map_type eq 'hybrid' ? 'G_HYBRID_MAP' : $map_type eq 'terrain' ? 'G_PHYSICAL_MAP' : 'G_NORMAL_MAP';
+    my $key = GeoType::Util::get_google_api_key ($blog);
+    return $app->load_tmpl ('dialog/preview_locations.tmpl', {
+        map_type    => $map_type,
+        google_api_key  => $key,
+        location_list   => \@locations,
+        %$config,
+    });
+}
+
+sub source_asset_list {
+    my ($cb, $app, $tmpl) = @_;
+
+    return 1 unless ($app->param ('edit_field') eq 'location_list');
+    
+    my $new = q{
+        <img src="<mt:var name="static_uri">images/status_icons/create.gif" alt="<__trans phrase="Add New Location">" width="9" height="9" />
+        <mt:unless name="asset_select"><mt:setvar name="entry_insert" value="1"></mt:unless>
+        <a href="<mt:var name="script_url">?__mode=create_location&amp;blog_id=<mt:var name="blog_id">&amp;dialog_view=1&amp;entry_insert=1&amp;edit_field=<mt:var name="edit_field" escape="url">&amp;upload_mode=<mt:var name="upload_mode" escape="url">&amp;<mt:if name="require_type">require_type=<mt:var name="require_type">&amp;</mt:if>return_args=<mt:var name="return_args" escape="url"><mt:if name="user_id">&amp;user_id=<mt:var name="user_id" escape="url"></mt:if>" ><__trans phrase="Add New Location"></a>
+    };
+    
+    $$tmpl =~ s{\Q<mt:setvarblock name="upload_new_file_link">\E.*\Q</mt:setvarblock>\E}{<mt:setvarblock name="upload_new_file_link">$new</mt:setvarblock>}ms;
 }
 
 

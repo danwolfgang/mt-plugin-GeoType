@@ -18,3 +18,10 @@
 #location-list .delete span {
     display: none;
 }
+
+#preview_map {
+    height: 370px;
+    width: 600px;
+    
+/*    border: 1px solid blue;*/
+}

@@ -29,12 +29,13 @@ applications:
       create_location: $GeoType::GeoType::CMS::create_location
       verify_location: $GeoType::GeoType::CMS::verify_location
       insert_location: $GeoType::GeoType::CMS::insert_location
+      preview_locations: $GeoType::GeoType::CMS::preview_locations
       # geotype_list_location: $GeoType::GeoType::CMS::list_location
     #       geotype_edit_location: $GeoType::GeoType::CMS::edit_extended_location
 
 settings:
   google_api_key:
-    Default: GOOGLE_API_KEY
+    Default: ''
   site_api_key:
     Default: ''
     Scope: blog
@@ -49,6 +50,21 @@ settings:
     Scope: blog
   map_height:
     Default: 200
+    Scope: blog
+  static_map_type:
+    Default: roadmap
+    Scope: blog
+  interactive_map_type:
+    Default: roadmap
+    Scope: blog
+  interactive_map_scale:
+    Default: 1
+    Scope: blog
+  interactive_map_type:
+    Default: 1
+    Scope: blog
+  interactive_map_overview:
+    Default: 1
     Scope: blog
   default_map_type:
     Default: hybrid
@@ -90,6 +106,7 @@ callbacks:
   MT::App::CMS::template_source.asset_options: $GeoType::GeoType::CMS::source_asset_options
   MT::App::CMS::template_param.asset_options: $GeoType::GeoType::CMS::param_asset_options
   MT::App::CMS::template_param.asset_insert: $GeoType::GeoType::CMS::param_asset_insert
+  MT::App::CMS::template_source.asset_list: $GeoType::GeoType::CMS::source_asset_list
 
 tags:
   block:
