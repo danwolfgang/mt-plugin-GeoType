@@ -262,7 +262,7 @@ sub _hdlr_map_header {
         }
     }
     
-    google.load ('maps', '2.130d', { callback: maps_loaded });
+    google.load ('maps', '2.x', { callback: maps_loaded });
     
     </script>
     };
@@ -270,15 +270,36 @@ sub _hdlr_map_header {
     $res;
 }
 
-sub _hdlr_entry_map {
+sub _hdlr_map {
     my ($ctx, $args, $cond) = @_;
-    my $e = $ctx->stash ('entry') or return $ctx->_no_entry_error();
+    
+    my @ids;
+    my $blog_id = $ctx->stash ('blog_id');
+    my $map_id;
+    my $loc_options;
+    if ($ctx->stash ('tag') eq 'geotype:entrymap') {
+        my $e = $ctx->stash ('entry') or return $ctx->_no_entry_error();
+        push @ids, $e->id;
+
+        $map_id = 'entry-' . $e->id;
+        $loc_options = $e->location_options;
+    }
+    elsif ($ctx->stash ('tag') eq 'geotype:archivemap') {
+        my $entries = $ctx->stash ('entries') || [];
+        push @ids, map { $_->id } @$entries;
+        
+        require MT::Util;
+        my $title = $ctx->tag ('archivetitle', {}, $cond);
+        $title = MT::Util::dirify ($title);
+        $map_id = 'archive-' . $title;
+        $loc_options = {};
+    }
     
     require GeoType::LocationAsset;
     require MT::ObjectAsset;
     require MT::Asset;
     my @assets = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on(undef, {
-        asset_id => \'= asset_id', object_ds => 'entry', object_id => $e->id, $args->{all} ? () : ( embedded => 0 ) } )});
+        asset_id => \'= asset_id', object_ds => 'entry', object_id => \@ids, $args->{all} ? () : ( embedded => 0 ) } )});
     return '' unless @assets;
     
     my $width = $args->{width};
@@ -291,7 +312,7 @@ sub _hdlr_entry_map {
         $params->{Width}  = $width  if ($width);
         
         $params->{Square} = $square;
-        $params->{blog_id} = $ctx->stash ('blog_id');
+        $params->{blog_id} = $blog_id;
         
         my ($url, $w, $h) = GeoType::Util::static_url_for_locations ($params, @assets);
         return sprintf qq(<img src="%s" width="%d" height="%d" alt="" /></a>), $url, $w, $h;
@@ -303,11 +324,9 @@ sub _hdlr_entry_map {
             $res .= $ctx->tag ('geotype:mapheader', {}, {});
         }
         my $plugin = MT->component ('geotype');
-        my $config = $plugin->get_config_hash ('blog:' . $e->blog_id);
-        my $map_id = 'entry-' . $e->id;
+        my $config = $plugin->get_config_hash ('blog:' . $blog_id);
         $height = $config->{interactive_map_height} unless ($height);
         $width  = $config->{interactive_map_width}  unless ($width);
-        my $loc_options = $e->location_options;
         my @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->lattitude, lng => $_->longitude, options => $loc_options->{$_->id} } } @assets;
         require JSON;
         my $location_json = @locations ? JSON::objToJson (\@locations) : '[]';
