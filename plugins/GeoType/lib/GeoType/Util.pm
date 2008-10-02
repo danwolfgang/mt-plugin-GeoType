@@ -54,7 +54,9 @@ sub static_url_for_locations {
     my $plugin = MT->component ('geotype');
     my ($params, @locs) = @_;
     
-    my $blog = $locs[0]->blog;
+    my $blog_id = $params->{blog_id} || $locs[0]->blog->id;
+    require MT::Blog;
+    my $blog = MT::Blog->load ($blog_id) or die "No blog_id: $blog_id";
     my $square = $params->{Square};
     if ($square) {
         if ($params->{Width} && !$params->{Height}) {
@@ -64,8 +66,8 @@ sub static_url_for_locations {
             $params->{Width} = $params->{Height};
         }
     }
-    my $width  = $params->{Width} || $plugin->get_config_value ('map_width', 'blog:' . $blog->id);
-    my $height = $params->{Height} || $plugin->get_config_value ('map_height', 'blog:' . $blog->id);
+    my $width  = $params->{Width} || $plugin->get_config_value ('map_width', 'blog:' . $blog_id);
+    my $height = $params->{Height} || $plugin->get_config_value ('map_height', 'blog:' . $blog_id);
     
     my $key = get_google_api_key ($blog, 'interface');
     
@@ -76,9 +78,9 @@ sub static_url_for_locations {
     $url .= "&markers=" . join ("|", map { my $char = lc (delete $params->{marker_char}); join (',', $_->geometry, $marker_str . $char) } @locs);
     $url .= "&key=$key";
     
-    $url .= "&maptype=" . ($params->{MapType} || $plugin->get_config_value ('static_map_type', 'blog:' . $blog->id));
+    $url .= "&maptype=" . ($params->{MapType} || $plugin->get_config_value ('static_map_type', 'blog:' . $blog_id));
     
-    $url;
+    return wantarray ? ($url, $width, $height) : $url;
 }
 
 sub geocode {

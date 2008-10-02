@@ -12,6 +12,8 @@ object_types:
   geotype_extended_location: GeoType::ExtendedLocation
   geotype_location_asset: GeoType::LocationAsset
   asset.location: GeoType::LocationAsset
+  entry:
+    location_options: hash meta
 
 system_config_template: config.tmpl
 blog_config_template: blog_config.tmpl
@@ -30,8 +32,7 @@ applications:
       verify_location: $GeoType::GeoType::CMS::verify_location
       insert_location: $GeoType::GeoType::CMS::insert_location
       preview_locations: $GeoType::GeoType::CMS::preview_locations
-      # geotype_list_location: $GeoType::GeoType::CMS::list_location
-    #       geotype_edit_location: $GeoType::GeoType::CMS::edit_extended_location
+      location_options: $GeoType::GeoType::CMS::location_options
 
 settings:
   google_api_key:
@@ -45,10 +46,19 @@ settings:
   georss_enable:
     Default: 1
     Scope: blog
-  map_width:
+  static_map_width:
     Default: 200
     Scope: blog
-  map_height:
+  static_map_height:
+    Default: 200
+    Scope: blog
+  static_map_marker_color:
+    Default: red
+    Scope: blog
+  interactive_map_width:
+    Default: 200
+    Scope: blog
+  interactive_map_height:
     Default: 200
     Scope: blog
   static_map_type:
@@ -60,29 +70,14 @@ settings:
   interactive_map_scale:
     Default: 1
     Scope: blog
-  interactive_map_type:
+  interactive_map_type_control:
     Default: 1
     Scope: blog
   interactive_map_overview:
     Default: 1
     Scope: blog
-  default_map_type:
-    Default: hybrid
-    Scope: blog
-  map_controls_pan:
-    Default: 1
-    Scope: blog
-  map_controls_map_type:
-    Default: 1
-    Scope: blog
-  map_controls_zoom:
-    Default: small
-    Scope: blog
-  map_controls_overview:
-    Default: 0
-    Scope: blog
-  map_controls_scale:
-    Default: 1
+  interactive_map_zoom_control:
+    Default: none
     Scope: blog
   default_add_map:
     Default: all
@@ -108,29 +103,40 @@ callbacks:
   MT::App::CMS::template_param.asset_insert: $GeoType::GeoType::CMS::param_asset_insert
   MT::App::CMS::template_source.asset_list: $GeoType::GeoType::CMS::source_asset_list
 
+
 tags:
-  block:
-    GeoTypeLocations: $GeoType::GeoType::Tags::geo_type_location_container
-    GeoTypeIfLocation?: $GeoType::GeoType::Tags::geo_type_if_location_tag
-    GeoTypeIfLocationExtended?: $GeoType::GeoType::Tags::geo_type_if_location_extended
   function:
-    GeoTypeLocationName: $GeoType::GeoType::Tags::geo_type_name_tag
-    GeoTypeLocationId: $GeoType::GeoType::Tags::geo_type_id_tag
-    GeoTypeLocationGUID: $GeoType::GeoType::Tags::geo_type_GUID_tag
-    GeoTypeLocationLatitude: $GeoType::GeoType::Tags::geo_type_latitude_tag
-    GeoTypeLocationLongitude: $GeoType::GeoType::Tags::geo_type_longitude_tag
-    GeoTypeLocationCrossStreet: $GeoType::GeoType::Tags::geo_type_cross_street_tag
-    GeoTypeLocationDescription: $GeoType::GeoType::Tags::geo_type_description_tag
-    GeoTypeLocationHours: $GeoType::GeoType::Tags::geo_type_hours_tag
-    GeoTypeLocationPhone: $GeoType::GeoType::Tags::geo_type_phone_tag
-    GeoTypeLocationPlaceId: $GeoType::GeoType::Tags::geo_type_place_id_tag
-    GeoTypeLocationRating: $GeoType::GeoType::Tags::geo_type_rating_tag
-    GeoTypeLocationThumbnail: $GeoType::GeoType::Tags::geo_type_thumbnail_tag
-    GeoTypeLocationURL: $GeoType::GeoType::Tags::geo_type_URL_tag
-    GeoTypeCoords: $GeoType::GeoType::Tags::geo_type_coords_tag
-    GeoTypeLocation: $GeoType::GeoType::Tags::geo_type_location_tag
-    GeoTypeMap: $GeoType::GeoType::Tags::geo_type_map_tag
-    GeoTypeHeader: $GeoType::GeoType::Tags::geo_type_header_tag
-    GeoRSS_Namespace: $GeoType::GeoType::Tags::geo_rss_namespace_tag
-    GeoRSS_Channel: $GeoType::GeoType::Tags::geo_rss_channel_tag
-    GeoRSS_Entry: $GeoType::GeoType::Tags::geo_rss_entry_tag
+    "geotype:locationname": $GeoType::GeoType::Tags::_hdlr_location_name
+    "geotype:locationdescription": $GeoType::GeoType::Tags::_hdlr_location_description
+    "geotype:locationlatitude": $GeoType::GeoType::Tags::_hdlr_location_latitude
+    "geotype:locationlongitude": $GeoType::GeoType::Tags::_hdlr_location_longitude
+    "geotype:locationthumbnail": $GeoType::GeoType::Tags::_hdlr_location_thumbnail
+    geotype:entrymap: $GeoType::GeoType::Tags::_hdlr_entry_map
+    geotype:mapheader: $GeoType::GeoType::Tags::_hdlr_map_header
+
+# tags:
+#   block:
+#     GeoTypeLocations: $GeoType::GeoType::Tags::geo_type_location_container
+#     GeoTypeIfLocation?: $GeoType::GeoType::Tags::geo_type_if_location_tag
+#     GeoTypeIfLocationExtended?: $GeoType::GeoType::Tags::geo_type_if_location_extended
+#   function:
+#     GeoTypeLocationName: $GeoType::GeoType::Tags::geo_type_name_tag
+#     GeoTypeLocationId: $GeoType::GeoType::Tags::geo_type_id_tag
+#     GeoTypeLocationGUID: $GeoType::GeoType::Tags::geo_type_GUID_tag
+#     GeoTypeLocationLatitude: $GeoType::GeoType::Tags::geo_type_latitude_tag
+#     GeoTypeLocationLongitude: $GeoType::GeoType::Tags::geo_type_longitude_tag
+#     GeoTypeLocationCrossStreet: $GeoType::GeoType::Tags::geo_type_cross_street_tag
+#     GeoTypeLocationDescription: $GeoType::GeoType::Tags::geo_type_description_tag
+#     GeoTypeLocationHours: $GeoType::GeoType::Tags::geo_type_hours_tag
+#     GeoTypeLocationPhone: $GeoType::GeoType::Tags::geo_type_phone_tag
+#     GeoTypeLocationPlaceId: $GeoType::GeoType::Tags::geo_type_place_id_tag
+#     GeoTypeLocationRating: $GeoType::GeoType::Tags::geo_type_rating_tag
+#     GeoTypeLocationThumbnail: $GeoType::GeoType::Tags::geo_type_thumbnail_tag
+#     GeoTypeLocationURL: $GeoType::GeoType::Tags::geo_type_URL_tag
+#     GeoTypeCoords: $GeoType::GeoType::Tags::geo_type_coords_tag
+#     GeoTypeLocation: $GeoType::GeoType::Tags::geo_type_location_tag
+#     GeoTypeMap: $GeoType::GeoType::Tags::geo_type_map_tag
+#     GeoTypeHeader: $GeoType::GeoType::Tags::geo_type_header_tag
+#     GeoRSS_Namespace: $GeoType::GeoType::Tags::geo_rss_namespace_tag
+#     GeoRSS_Channel: $GeoType::GeoType::Tags::geo_rss_channel_tag
+#     GeoRSS_Entry: $GeoType::GeoType::Tags::geo_rss_entry_tag

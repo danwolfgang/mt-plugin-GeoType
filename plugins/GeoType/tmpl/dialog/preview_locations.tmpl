@@ -29,6 +29,11 @@ function maps_loaded () {
 <mt:if name="interactive_map_scale">preview_map.addControl(new google.maps.ScaleControl());</mt:if>
 <mt:if name="interactive_map_type">preview_map.addControl(new google.maps.MapTypeControl());</mt:if>
 <mt:if name="interactive_map_overview">preview_map.addControl(new google.maps.OverviewMapControl());</mt:if>
+<mt:if name="interactive_map_zoom_control">
+<mt:if name="interactive_map_zoom_control" eq="small_zoom">preview_map.addControl(new google.maps.SmallZoomControl());</mt:if>
+<mt:if name="interactive_map_zoom_control" eq="small">preview_map.addControl(new google.maps.SmallMapControl());</mt:if>
+<mt:if name="interactive_map_zoom_control" eq="large">preview_map.addControl(new google.maps.LargeMapControl());</mt:if>
+</mt:if>
 }
 
 function init_preview_map () {

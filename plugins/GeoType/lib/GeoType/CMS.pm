@@ -121,16 +121,31 @@ sub param_edit_entry {
         <script type="text/javascript">
         /* <![CDATA[ */
         var locations = <mt:if name="location_list"><mt:var name="location_list" to_json="1"><mt:else>[]</mt:else></mt:if>;
+        function locationToStr (loc) {
+            var str = loc.id + "||";
+            var o = [];
+            for (var opt in loc.options) {
+                o.push (opt + '=' + loc.options[opt]);
+            }
+            return str + o.join (escape('&&'));
+        }
+
         function buildLocationList () {
             var elem = getByID ('location-list');
             elem.innerHTML = '';
             var html = '';
             for (var i = 0; i < locations.length; i++) {
-                html = html + "<li class='pkg' onmouseover='DOM.addClassName(this, \"focus\")' onmouseout='DOM.removeClassName(this, \"focus\")' mt:id='" + locations[i].id + "'><strong>" + locations[i].name + '</strong><a href="javascript:void(0);" onclick="removeLocation (' + locations[i].id + ')" mt:command="remove" class="delete" title="Remove">&nbsp;<span>Remove</span></a></li>';
+                html = html + "<li class='pkg' onmouseover='DOM.addClassName(this, \"focus\")' onmouseout='DOM.removeClassName(this, \"focus\")' mt:id='" + locations[i].id + "'><strong><a href='javascript:void(0)' onclick='openLocationOptionsDialog(this.form, " + locations[i].id + ")'>" + locations[i].name + '</a></strong><a href="javascript:void(0);" onclick="removeLocation (' + locations[i].id + ')" mt:command="remove" class="delete" title="Remove">&nbsp;<span>Remove</span></a></li>';
             }        
             elem.innerHTML = html;
             var value_elem = getByID ('location_list');
-            location_list.value = locations.map (function (x) { return x.id }).join(",");
+            
+            value_elem.value = locations.toJSON();
+            /*value_elem.value = locations.map (locationToStr).join ('==');
+            # alert ("Value set to " + value_elem.value);
+            # for (var i = 0; i < locations.length; i++) {
+            #     
+            # }*/
             if (locations.length) {
                 DOM.removeClassName ('location-list-preview', 'hidden');
             }
@@ -149,8 +164,18 @@ sub param_edit_entry {
             var new_location = new Object();
             new_location.name = name;
             new_location.id = id;
+            new_location.options = {};
             locations[locations.length] = new_location;
 
+            buildLocationList();
+        }
+        
+        function updateLocationOptions (id, options) {
+            for (var i = 0; i < locations.length; i++) {
+                if (locations[i].id == id) {
+                    locations[i].options = options;
+                }
+            }
             buildLocationList();
         }
         
@@ -168,7 +193,17 @@ sub param_edit_entry {
         
         function openLocationPreview (f) {
             var location_list = getByID ('location_list').value;
-            return openDialog (f, 'preview_locations', 'blog_id=<$mt:var name="blog_id">&location_list=' + location_list);
+            return openDialog (f, 'preview_locations', 'blog_id=<$mt:var name="blog_id"$>&location_list=' + location_list);
+        }
+        
+        function openLocationOptionsDialog (f, id) {
+            var location;
+            for (var i = 0; i < locations.length; i++) {
+                if (locations[i].id == id) {
+                    location = locations[i];
+                }
+            }
+            return openDialog (f, 'location_options', 'blog_id=<$mt:var name="blog_id"$>&location_id=' + location.id + "&location_options=" + escape(Object.toJSON(location.options)));
         }
 
         TC.attachLoadEvent (buildLocationList);
@@ -198,7 +233,8 @@ sub param_edit_entry {
         for my $oa (@non_embedded_assets) {
             my $a = MT::Asset->load ($oa->asset_id);
             next unless ($a->isa ('GeoType::LocationAsset'));
-            push @location_list, { id => $a->id, name => $a->name };
+            my $e = MT::Entry->load ($oa->object_id);
+            push @location_list, { id => $a->id, name => $a->name, options => ($e->location_options->{$a->id} || {}) };
         }
         
         $param->{location_list} = \@location_list;
@@ -225,13 +261,22 @@ sub param_asset_insert {
     }
 }
 
-sub post_save_entry {
+sub post_save_entry { 
     my ($cb, $app, $entry) = @_;
     
     my $location_list = $app->param ('location_list');
-    my @ids = split(/\s*,\s*/, $location_list);
-    
-    require MT::ObjectAsset;
+    require JSON;
+    my $locations = JSON::jsonToObj ($location_list);
+    my %locations;
+    foreach my $loc (@$locations) {
+        $locations{$loc->{id}} = $loc->{options};
+    }
+    # foreach my $loc (split (/\s*,\s*/, $location_list)) {
+    #     my ($id, $opts) = split (/\|\|/, $loc, 2);
+    #     my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
+    #     $locations{$id} = { %opts_hash };
+    # }
+    my @ids = keys %locations;
 
     require MT::ObjectAsset;
     my @assets = MT::ObjectAsset->load({
@@ -251,8 +296,8 @@ sub post_save_entry {
             object_id => $entry->id,
             object_ds => $entry->datasource,
             asset_id => $id,
-            embedded => 0
-        }) or die MT::ObjectAsset->errstr;
+            embedded => 0,
+        }) or return $cb->error (MT::ObjectAsset->errstr);
         $assets{$id} = 0;
     }
     
@@ -261,6 +306,9 @@ sub post_save_entry {
         MT::ObjectAsset->remove( { id => \@old_ids })
             if @old_ids;
     }
+    
+    $entry->location_options (\%locations);
+    $entry->save or return $cb->error ($entry->errstr);
     1;
 }
 
@@ -282,7 +330,6 @@ sub preview_locations {
     
     my $plugin = MT->component ('geotype');
     my $map_type = $plugin->get_config_value ('interactive_map_type', 'blog:' . $blog->id);
-    my $interactive_map_scale = $plugin->get_config_value ('interactive_map_scale', 'blog:' . $blog->id);
     my $config = $plugin->get_config_hash ('blog:' . $blog->id);
     $map_type = $map_type eq 'roadmap' ? 'G_NORMAL_MAP' : $map_type eq 'satellite' ? 'G_SATELLITE_MAP' : $map_type eq 'hybrid' ? 'G_HYBRID_MAP' : $map_type eq 'terrain' ? 'G_PHYSICAL_MAP' : 'G_NORMAL_MAP';
     my $key = GeoType::Util::get_google_api_key ($blog);
@@ -306,6 +353,54 @@ sub source_asset_list {
     };
     
     $$tmpl =~ s{\Q<mt:setvarblock name="upload_new_file_link">\E.*\Q</mt:setvarblock>\E}{<mt:setvarblock name="upload_new_file_link">$new</mt:setvarblock>}ms;
+}
+
+sub location_options {
+    my $app = shift;
+    my $blog = $app->blog;
+    
+    # die "In location options";
+    my $loc = $app->param ('location');
+    my ($id, $options) = split (/\|\|/, $loc, 2);
+    my $id = $app->param ('location_id');
+    # die "$options";
+    my $options = $app->param ('location_options');
+
+    # my $opt_hash = {};
+    # foreach my $opt (split (/&&/, $options)) {
+    #     my ($k, $v) = split (/=/, $opt, 2);
+    #     $opt_hash->{$k} = $v;
+    # }
+    # $options = $opt_hash;
+
+    # use Data::Dumper;
+    # die Dumper ($options);
+    # die $options;
+    require JSON;
+    $options = JSON::jsonToObj ($options);
+    
+    require MT::Asset;
+    my $location = MT::Asset->load ($id);
+    
+    my $location_hash = { id => $location->id, name => $location->name, geometry => $location->geometry, lat => $location->lattitude, lng => $location->longitude, options => $options };
+    $location_hash->{options}->{contents} ||= $location->description;
+    # my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
+    # $location_opts->{location_marker_opt_contents} ||= $location->description;
+
+    my $plugin = MT->component ('geotype');
+    my $map_type = $plugin->get_config_value ('interactive_map_type', 'blog:' . $blog->id);
+    my $config = $plugin->get_config_hash ('blog:' . $blog->id);
+    $map_type = $map_type eq 'roadmap' ? 'G_NORMAL_MAP' : $map_type eq 'satellite' ? 'G_SATELLITE_MAP' : $map_type eq 'hybrid' ? 'G_HYBRID_MAP' : $map_type eq 'terrain' ? 'G_PHYSICAL_MAP' : 'G_NORMAL_MAP';
+    my $key = GeoType::Util::get_google_api_key ($blog);
+
+    return $app->load_tmpl ('dialog/location_options.tmpl', {
+        location => $location_hash,
+        map_type    => $map_type,
+        google_api_key  => $key,
+        %$config,
+        %{$location_hash->{options}},
+        # %$location_opts,
+    });
 }
 
 

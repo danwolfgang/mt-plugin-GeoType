@@ -77,10 +77,11 @@ sub insert_options {
     my $blog  = $asset->blog or return;
     my $plugin = MT->component ('geotype');
     
-    $param->{MapType} = $plugin->get_config_value ('default_map_type', 'blog:' . $blog->id);
-    $param->{Height}   = $plugin->get_config_value ('map_height', 'blog:' . $blog->id);
-    $param->{Width}    = $plugin->get_config_value ('map_width', 'blog:' . $blog->id);
-    $param->{marker_color} = '';
+    my $cfg = $plugin->get_config_hash ('blog:' . $blog->id);
+    $param->{MapType} = $cfg->{static_map_type};
+    $param->{Height}   = $cfg->{static_map_height};
+    $param->{Width}    = $cfg->{static_map_width};
+    $param->{marker_color} = $cfg->{static_map_marker_color};
     $param->{marker_size}  = '';
     $param->{marker_char}  = '';
 

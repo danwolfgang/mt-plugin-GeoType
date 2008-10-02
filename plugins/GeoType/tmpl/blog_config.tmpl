@@ -1,6 +1,6 @@
 <mtapp:settinggroup
     id="api_keys">
-    <h3>Google Maps API Keys</h3>
+    <h2>Google Maps API Keys</h2>
 
     <mtapp:setting
         id="google_api_key"
@@ -18,11 +18,11 @@
 
 <mtapp:settinggroup
     id="map_options">
-    <h3>Default Map Options</h3>
+    <h2>Default Map Options</h2>
 
     <mtapp:settinggroup
         id="static_map">
-        <h4>Static Maps</h4>
+        <h3>Static Maps</h3>
         
         <mtapp:setting
             id="static_map_dimensions"
@@ -53,11 +53,41 @@
                 <option value="hybrid"<mt:if var="static_map_type_hybrid"> selected="selected"</mt:if>>Hybrid</option>
             </select>
         </mtapp:setting>
+        
+        <mtapp:setting
+            id="static_map_marker_color"
+            label="Marker Color">
+            <select name="static_map_marker_color" id="static_map_marker_color">
+                <option value="red"<mt:if var="static_map_marker_color" eq="red"> selected="selected"</mt:if>>Red</option>
+                <option value="black"<mt:if var="static_map_marker_color" eq="black"> selected="selected"</mt:if>>Black</option>
+                <option value="brown"<mt:if var="static_map_marker_color" eq="brown"> selected="selected"</mt:if>>Brown</option>
+                <option value="green"<mt:if var="static_map_marker_color" eq="green"> selected="selected"</mt:if>>Green</option>
+                <option value="purple"<mt:if var="static_map_marker_color" eq="purple"> selected="selected"</mt:if>>Purple</option>
+                <option value="yellow"<mt:if var="static_map_marker_color" eq="yellow"> selected="selected"</mt:if>>Yellow</option>
+                <option value="blue"<mt:if var="static_map_marker_color" eq="blue"> selected="selected"</mt:if>>Blue</option>
+                <option value="gray"<mt:if var="static_map_marker_color" eq="gray"> selected="selected"</mt:if>>Gray</option>
+                <option value="orange"<mt:if var="static_map_marker_color" eq="orange"> selected="selected"</mt:if>>Orange</option>
+                <option value="white"<mt:if var="static_map_marker_color" eq="white"> selected="selected"</mt:if>>White</option>
+            </select>
+        </mtapp:setting>
+        
+        <mtapp:setting
+            id="static_map_marker_size"
+            label="Marker Size"
+            hint="Markers sized tiny and small are not capable of displaying an alphanumeric-character."
+            show_hint="1">
+            <select name="static_map_marker_size" id="static_map_marker_size">
+                <option value=""<mt:if var="static_map_marker_size" eq=""> selected="selected"</mt:if>>Normal</option>
+                <option value="mid"<mt:if var="static_map_marker_size" eq="mid"> selected="selected"</mt:if>>Mid</option>
+                <option value="small"<mt:if var="static_map_marker_size" eq="small"> selected="selected"</mt:if>>Small</option>
+                <option value="tiny"<mt:if var="static_map_marker_size" eq="tiny"> selected="selected"</mt:if>>Tiny</option>
+            </select>
+        </mtapp:setting>
     </mtapp:settinggroup>
 
     <mtapp:settinggroup
         id="interactive_map">
-        <h4>Interactive Maps</h4>
+        <h3>Interactive Maps</h3>
 
         <mtapp:setting
             id="interactive_map_dimensions"
@@ -76,12 +106,41 @@
                 <option value="hybrid"<mt:if var="interactive_map_type_hybrid"> selected="selected"</mt:if>>Hybrid</option>
             </select>
         </mtapp:setting>
+
+        <mtapp:settinggroup
+            id="interactive_map_controls">
+            <h4>Map Controls</h4>
+
+            <mtapp:setting
+                id="interactive_map_type_control"
+                label="Type">
+                <input type="checkbox" class="cb" name="interactive_map_type_control" id="interactive_map_type_control" value="1"<mt:if var="interactive_map_type_control"> checked="checked"</mt:if> />
+            </mtapp:setting>
         
-        <mtapp:setting
-            id="interactive_map_scale"
-            label="Scale">
-            <input type="checkbox" class="cb" name="interactive_map_scale" id="interactive_map_scale" value="1"<mt:if var="interactive_map_scale"> checked="checked"</mt:if> />
-        </mtapp:setting>
+            <mtapp:setting
+                id="interactive_map_scale"
+                label="Scale">
+                <input type="checkbox" class="cb" name="interactive_map_scale" id="interactive_map_scale" value="1"<mt:if var="interactive_map_scale"> checked="checked"</mt:if> />
+            </mtapp:setting>
+        
+            <mtapp:setting
+                id="interactive_map_overview"
+                label="Overview">
+                <input type="checkbox" class="cb" name="interactive_map_overview" id="interactive_map_overview" value="1"<mt:if var="interactive_map_overview"> checked="checked"</mt:if> />
+            </mtapp:setting>
+            
+            <mtapp:setting
+                id="interactive_map_zoom_control"
+                label="Zoom and Pan Control">
+                <select name="interactive_map_zoom_control" id="interactive_map_zoom_control">
+                    <option value="none"<mt:if name="interactive_map_zoom_control" eq="none"> selected="selected"</mt:if>>None</option>
+                    <option value="small_zoom"<mt:if name="interactive_map_zoom_control" eq="small_zoom"> selected="selected"</mt:if>>Small (zoom only)</option>
+                    <option value="small"<mt:if name="interactive_map_zoom_control" eq="small"> selected="selected"</mt:if>>Small (zoom and pan)</option>
+                    <option value="large"<mt:if name="interactive_map_zoom_control" eq="large"> selected="selected"</mt:if>>Large</option>
+                </select>
+            </mtapp:setting>
+            
+        </mtapp:settinggroup>
     </mtapp:settinggroup>
 </mtapp:settinggroup>
 <!-- <TMPL_VAR NAME=GEOTYPE_HEADER>
