@@ -273,11 +273,21 @@ sub _hdlr_map_header {
 sub _hdlr_map {
     my ($ctx, $args, $cond) = @_;
     
+    my @assets;
     my @ids;
     my $blog_id = $ctx->stash ('blog_id');
     my $map_id;
     my $loc_options;
-    if ($ctx->stash ('tag') eq 'geotype:entrymap') {
+    if ($ctx->stash ('tag') eq 'geotype:assetmap') {
+        my $asset = $ctx->stash ('asset') or return $ctx->_no_asset_error();
+        return '' unless ($asset->isa ('GeoType::LocationAsset'));
+        
+        push @assets, $asset;
+        if (my $e = $ctx->stash ('entry')) {
+            $loc_options = $e->location_options;
+        }
+    }
+    elsif ($ctx->stash ('tag') eq 'geotype:entrymap') {
         my $e = $ctx->stash ('entry') or return $ctx->_no_entry_error();
         push @ids, $e->id;
 
@@ -296,10 +306,12 @@ sub _hdlr_map {
     }
     
     require GeoType::LocationAsset;
-    require MT::ObjectAsset;
-    require MT::Asset;
-    my @assets = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on(undef, {
-        asset_id => \'= asset_id', object_ds => 'entry', object_id => \@ids, $args->{all} ? () : ( embedded => 0 ) } )});
+    unless (@assets) {
+        require MT::ObjectAsset;
+        require MT::Asset;
+        @assets = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on(undef, {
+            asset_id => \'= asset_id', object_ds => 'entry', object_id => \@ids, $args->{all} ? () : ( embedded => 0 ) } )});        
+    }
     return '' unless @assets;
     
     my $width = $args->{width};

@@ -34,6 +34,11 @@ sub class_label_plural {
 
 sub geometry {
     my $obj = shift;
+    if (my $geom = shift) {
+        my ($lat, $long) = split (/\s*,\s*/, $geom);
+        $obj->lattitude ($lat);
+        $obj->longitude ($long);
+    }
     return join (",", $obj->lattitude, $obj->longitude);
 }
 

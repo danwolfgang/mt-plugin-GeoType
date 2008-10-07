@@ -5,6 +5,7 @@ version: 1.6.8.3
 description: GeoType allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth. GeoType settings are on a per-blog setting, so you'll need to set this up in each weblog you administer.
 author_name: Six Apart, Ltd.
 author_link: http://www.sixapart.com/
+schema_version: 2.0
 
 object_types:
   geotype_location: GeoType::Location
@@ -14,6 +15,11 @@ object_types:
   asset.location: GeoType::LocationAsset
   entry:
     location_options: hash meta
+    
+upgrade_functions:
+  location_to_asset:
+    version_limit: 2.0
+    code: $GeoType::GeoType::Upgrade::location_to_asset
 
 system_config_template: config.tmpl
 blog_config_template: blog_config.tmpl
@@ -111,6 +117,7 @@ tags:
     "geotype:locationlatitude": $GeoType::GeoType::Tags::_hdlr_location_latitude
     "geotype:locationlongitude": $GeoType::GeoType::Tags::_hdlr_location_longitude
     "geotype:locationthumbnail": $GeoType::GeoType::Tags::_hdlr_location_thumbnail
+    geotype:assetmap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:entrymap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:archivemap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:mapheader: $GeoType::GeoType::Tags::_hdlr_map_header
