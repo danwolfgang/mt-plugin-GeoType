@@ -105,6 +105,20 @@ sub geocode {
     return wantarray ? ($coords->[0], $coords->[1]) : join (',', $coords->[0], $coords->[1]);
 }
 
+sub asset_from_address {
+    my $plugin = MT->component ('geotype');
+    my ($blog, $address, $name) = @_;
+    
+    require GeoType::LocationAsset;
+    my $la = GeoType::LocationAsset->new;
+    $la->blog_id ($blog->id);
+    $la->geometry (scalar geocode ($blog, $address));
+    $la->location ($address);
+    $la->name ($name) if ($name);
+    
+    return $la;
+}
+
 sub get_bounds_for_locations {
 	my @locations = @_;
 	my ( $maxLat, $minLat, $maxLon, $minLon );
