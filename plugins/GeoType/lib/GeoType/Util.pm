@@ -66,8 +66,8 @@ sub static_url_for_locations {
             $params->{Width} = $params->{Height};
         }
     }
-    my $width  = $params->{Width} || $plugin->get_config_value ('map_width', 'blog:' . $blog_id);
-    my $height = $params->{Height} || $plugin->get_config_value ('map_height', 'blog:' . $blog_id);
+    my $width  = $params->{Width} || $plugin->get_config_value ('static_map_width', 'blog:' . $blog_id);
+    my $height = $params->{Height} || $plugin->get_config_value ('static_map_height', 'blog:' . $blog_id);
     
     my $key = get_google_api_key ($blog, 'interface');
     

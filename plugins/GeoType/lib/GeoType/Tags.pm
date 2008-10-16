@@ -322,6 +322,7 @@ sub _hdlr_map {
         my $asset = $ctx->stash ('asset') or return $ctx->_no_asset_error();
         return '' unless ($asset->isa ('GeoType::LocationAsset'));
         
+        $map_id = 'asset-' . $asset->id;
         push @assets, $asset;
         if (my $e = $ctx->stash ('entry')) {
             $loc_options = $e->location_options;

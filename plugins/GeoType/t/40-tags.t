@@ -5,8 +5,13 @@ use warnings;
 use lib 't/lib', 'lib', 'extlib';
 
 use MT::Test qw( :db :data );
-use Test::More tests => 13;
+use Test::More tests => 19;
 use Test::Exception;
+
+# setup api key
+use MT;
+my $plugin = MT->component ('geotype');
+$plugin->set_config_value ('google_api_key', 'abcdefg', 'blog:1');
 
 require MT::Template::Context;
 my $ctx = MT::Template::Context->new;
@@ -53,3 +58,23 @@ $tmpl->reset_tokens;
 # this test is iffy, since it dies instead of erroring out
 # is ($tmpl->build (MT::Template::Context->new), undef, "Archive map with no archive context");
 is ($tmpl->build ($archive_ctx), '', "Archive map with archive context, but no locations");
+
+require MT::Blog;
+require_ok ('GeoType::Util');
+my $location_asset = GeoType::Util::asset_from_address (MT::Blog->load (1), "1600 Amphitheatre Parkway, Mountain View, CA", "Google HQ");
+ok ($location_asset->save, "Saved location asset");
+
+my $asset_ctx = MT::Template::Context->new;
+$asset_ctx->stash ('asset', $location_asset);
+
+$tmpl->text ('<mt:geotype:map>');
+$tmpl->reset_tokens;
+my $res = $tmpl->build ($asset_ctx);
+isnt ($res, undef, "Map with asset context didn't error out");
+isnt ($res, '', "Map with asset context didn't return empty");
+
+$tmpl->text ('<mt:geotype:map static="1">');
+$tmpl->reset_tokens;
+$res = $tmpl->build ($asset_ctx);
+isnt ($res, undef, "Map with asset context didn't error out");
+isnt ($res, '', "Map with asset context didn't return empty");
