@@ -117,6 +117,7 @@ tags:
     "geotype:locationlatitude": $GeoType::GeoType::Tags::_hdlr_location_latitude
     "geotype:locationlongitude": $GeoType::GeoType::Tags::_hdlr_location_longitude
     "geotype:locationthumbnail": $GeoType::GeoType::Tags::_hdlr_location_thumbnail
+    geotype:map: $GeoType::GeoType::Tags::_hdlr_map
     geotype:assetmap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:entrymap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:archivemap: $GeoType::GeoType::Tags::_hdlr_map

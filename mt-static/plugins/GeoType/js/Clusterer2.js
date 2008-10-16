@@ -59,6 +59,80 @@ Clusterer = function ( map )
     this.clusters = [];
     this.timeout = null;
     this.currentZoomLevel = map.getZoom();
+    
+    if (!Clusterer.defaultIcon) {
+        Clusterer.defaultIcon = new GIcon();
+        Clusterer.defaultIcon.image = 'http://www.acme.com/resources/images/markers/blue_large.PNG';
+        Clusterer.defaultIcon.shadow = 'http://www.acme.com/resources/images/markers/shadow_large.PNG';
+        Clusterer.defaultIcon.iconSize = new GSize( 30, 51 );
+        Clusterer.defaultIcon.shadowSize = new GSize( 56, 51 );
+        Clusterer.defaultIcon.iconAnchor = new GPoint( 13, 34 );
+        Clusterer.defaultIcon.infoWindowAnchor = new GPoint( 13, 3 );
+        Clusterer.defaultIcon.infoShadowAnchor = new GPoint( 27, 37 );
+        
+        Clusterer.defaultMaxVisibleMarkers = 150;
+        Clusterer.defaultGridSize = 5;
+        Clusterer.defaultMinMarkersPerCluster = 5;
+        Clusterer.defaultMaxLinesPerInfoBox = 10;
+        
+        // Augment GMarker so it handles markers that have been created but
+        // not yet addOverlayed.
+
+        GMarker.prototype.setMap = function ( map )
+            {
+            this.map = map;
+            };
+
+        GMarker.prototype.addedToMap = function ()
+            {
+            this.map = null;
+            };
+
+        GMarker.prototype.origOpenInfoWindow = GMarker.prototype.openInfoWindow;
+        GMarker.prototype.openInfoWindow = function ( node, opts )
+            {
+            if ( this.map != null )
+        	return this.map.openInfoWindow( this.getPoint(), node, opts );
+            else
+        	return this.origOpenInfoWindow( node, opts );
+            };
+
+        GMarker.prototype.origOpenInfoWindowHtml = GMarker.prototype.openInfoWindowHtml;
+        GMarker.prototype.openInfoWindowHtml = function ( html, opts )
+            {
+            if ( this.map != null )
+        	return this.map.openInfoWindowHtml( this.getPoint(), html, opts );
+            else
+        	return this.origOpenInfoWindowHtml( html, opts );
+            };
+
+        GMarker.prototype.origOpenInfoWindowTabs = GMarker.prototype.openInfoWindowTabs;
+        GMarker.prototype.openInfoWindowTabs = function ( tabNodes, opts )
+            {
+            if ( this.map != null )
+        	return this.map.openInfoWindowTabs( this.getPoint(), tabNodes, opts );
+            else
+        	return this.origOpenInfoWindowTabs( tabNodes, opts );
+            };
+
+        GMarker.prototype.origOpenInfoWindowTabsHtml = GMarker.prototype.openInfoWindowTabsHtml;
+        GMarker.prototype.openInfoWindowTabsHtml = function ( tabHtmls, opts )
+            {
+            if ( this.map != null )
+        	return this.map.openInfoWindowTabsHtml( this.getPoint(), tabHtmls, opts );
+            else
+        	return this.origOpenInfoWindowTabsHtml( tabHtmls, opts );
+            };
+
+        GMarker.prototype.origShowMapBlowup = GMarker.prototype.showMapBlowup;
+        GMarker.prototype.showMapBlowup = function ( opts )
+            {
+            if ( this.map != null )
+        	return this.map.showMapBlowup( this.getPoint(), opts );
+            else
+        	return this.origShowMapBlowup( opts );
+            };
+    }
 
     this.maxVisibleMarkers = Clusterer.defaultMaxVisibleMarkers;
     this.gridSize = Clusterer.defaultGridSize;
@@ -72,19 +146,7 @@ Clusterer = function ( map )
     };
 
 
-Clusterer.defaultMaxVisibleMarkers = 150;
-Clusterer.defaultGridSize = 5;
-Clusterer.defaultMinMarkersPerCluster = 5;
-Clusterer.defaultMaxLinesPerInfoBox = 10;
 
-Clusterer.defaultIcon = new GIcon();
-Clusterer.defaultIcon.image = 'http://www.acme.com/resources/images/markers/blue_large.PNG';
-Clusterer.defaultIcon.shadow = 'http://www.acme.com/resources/images/markers/shadow_large.PNG';
-Clusterer.defaultIcon.iconSize = new GSize( 30, 51 );
-Clusterer.defaultIcon.shadowSize = new GSize( 56, 51 );
-Clusterer.defaultIcon.iconAnchor = new GPoint( 13, 34 );
-Clusterer.defaultIcon.infoWindowAnchor = new GPoint( 13, 3 );
-Clusterer.defaultIcon.infoShadowAnchor = new GPoint( 27, 37 );
 
 
 // Call this to change the cluster icon.
@@ -453,61 +515,3 @@ Clusterer.MakeCaller = function ( func, arg )
     return function () { func( arg ); };
     };
 
-
-// Augment GMarker so it handles markers that have been created but
-// not yet addOverlayed.
-
-GMarker.prototype.setMap = function ( map )
-    {
-    this.map = map;
-    };
-
-GMarker.prototype.addedToMap = function ()
-    {
-    this.map = null;
-    };
-
-GMarker.prototype.origOpenInfoWindow = GMarker.prototype.openInfoWindow;
-GMarker.prototype.openInfoWindow = function ( node, opts )
-    {
-    if ( this.map != null )
-	return this.map.openInfoWindow( this.getPoint(), node, opts );
-    else
-	return this.origOpenInfoWindow( node, opts );
-    };
-
-GMarker.prototype.origOpenInfoWindowHtml = GMarker.prototype.openInfoWindowHtml;
-GMarker.prototype.openInfoWindowHtml = function ( html, opts )
-    {
-    if ( this.map != null )
-	return this.map.openInfoWindowHtml( this.getPoint(), html, opts );
-    else
-	return this.origOpenInfoWindowHtml( html, opts );
-    };
-
-GMarker.prototype.origOpenInfoWindowTabs = GMarker.prototype.openInfoWindowTabs;
-GMarker.prototype.openInfoWindowTabs = function ( tabNodes, opts )
-    {
-    if ( this.map != null )
-	return this.map.openInfoWindowTabs( this.getPoint(), tabNodes, opts );
-    else
-	return this.origOpenInfoWindowTabs( tabNodes, opts );
-    };
-
-GMarker.prototype.origOpenInfoWindowTabsHtml = GMarker.prototype.openInfoWindowTabsHtml;
-GMarker.prototype.openInfoWindowTabsHtml = function ( tabHtmls, opts )
-    {
-    if ( this.map != null )
-	return this.map.openInfoWindowTabsHtml( this.getPoint(), tabHtmls, opts );
-    else
-	return this.origOpenInfoWindowTabsHtml( tabHtmls, opts );
-    };
-
-GMarker.prototype.origShowMapBlowup = GMarker.prototype.showMapBlowup;
-GMarker.prototype.showMapBlowup = function ( opts )
-    {
-    if ( this.map != null )
-	return this.map.showMapBlowup( this.getPoint(), opts );
-    else
-	return this.origShowMapBlowup( opts );
-    };

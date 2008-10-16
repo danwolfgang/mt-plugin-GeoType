@@ -114,8 +114,13 @@ sub _hdlr_map_header {
     my $scale    = $config->{interactive_map_scale} || 0;
     my $type     = $config->{interactive_map_type_control} || 0;
     my $zoom_controls = $config->{interactive_map_zoom_control} || 'none';
+    my $static_path = $ctx->tag ('StaticWebPath', {}, $cond);
     my $res = '';
-    $res .= qq{<script type="text/javascript" src="http://www.google.com/jsapi?key=$key"></script>
+    $res .= qq{
+    <script type="text/javascript" src="${static_path}plugins/GeoType/js/Clusterer2.js"></script>
+    <script type="text/javascript" src="${static_path}plugins/GeoType/js/OverlayMessage.js"></script>
+        
+    <script type="text/javascript" src="http://www.google.com/jsapi?key=$key"></script>
     <script type="text/javascript">
     
     
@@ -213,9 +218,7 @@ sub _hdlr_map_header {
         }
         
         var locations = geo_type_maps[map_id].locations;
-        for (var i = 0; i < locations.length; i++) {
-            geo_type_maps[map_id].map.addOverlay (markerForLocation (locations[i]));
-        }
+        addLocationMarkers (geo_type_maps[map_id]);
         
         if (geo_type_maps[map_id].wikipedia) {
             geo_type_maps[map_id].map.addOverlay (new google.maps.Layer ("org.wikipedia." + geo_type_maps[map_id].wikipedia));
@@ -223,6 +226,26 @@ sub _hdlr_map_header {
         
         if (geo_type_maps[map_id].panoramio) {
             geo_type_maps[map_id].map.addOverlay (new google.maps.Layer ("com.panoramio.all"));
+        }
+    }
+
+    function addLocationMarkers (geo_map) {
+		geo_map.clusterer = new Clusterer(geo_map.map);
+        /*clusterIcon = new GIcon(G_DEFAULT_ICON);
+                            clusterIcon.image = '${static_path}/plugins/GeoType/images/clustermarker.png';
+                            clusterIcon.shadow = '${static_path}/plugins/GeoType/images/clustershadow.png';
+                            clusterIcon.iconSize = new GSize( 30, 51 );
+                            clusterIcon.shadowSize = new GSize( 56, 51 );
+                            clusterIcon.iconAnchor = new GPoint( 13, 34 );
+                            clusterIcon.infoWindowAnchor = new GPoint( 13, 3 );
+                            clusterIcon.iconShadowAnchor = new GPoint( 27, 37 );
+                            cluster_ARCH.SetIcon( clusterIcon );*/
+		geo_map.clusterer.SetMaxVisibleMarkers( 20 );
+		
+		var locations = geo_map.locations;
+        for (var i = 0; i < locations.length; i++) {
+            //map.addOverlay (markerForLocation (locations[i]));
+            geo_map.clusterer.AddMarker (markerForLocation (locations[i]), locations[i].name);
         }
     }
     
@@ -270,6 +293,10 @@ sub _hdlr_map_header {
     $res;
 }
 
+sub _locations_from_archive {
+    my ($ctx)
+}
+
 sub _hdlr_map {
     my ($ctx, $args, $cond) = @_;
     
@@ -277,8 +304,48 @@ sub _hdlr_map {
     my @ids;
     my $blog_id = $ctx->stash ('blog_id');
     my $map_id;
-    my $loc_options;
-    if ($ctx->stash ('tag') eq 'geotype:assetmap') {
+    my $loc_options = {};
+    if ($ctx->stash ('tag') eq 'geotype:map' && $args->{lastnentries}) {
+        my $n = $args->{lastnentries};
+        # try to guess what the user wants here based on archive types, etc
+    	my $entry = $ctx->stash ('entry');
+    	my $asset = $ctx->stash ('asset');
+    	my @entries = ();
+        $loc_options = {};
+    	if ( ! $entry ) {
+    		# Discover our context
+    		my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
+    		if ( $at ) {
+                my $entries = $ctx->stash ('entries') || [];
+                push @ids, map { $_->id } @$entries;
+
+                require MT::Util;
+                my $title = $ctx->tag ('archivetitle', {}, $cond);
+                $title = MT::Util::dirify ($title);
+                $map_id = 'archive-' . $title;
+    		} 
+    		elsif (my $n = $args->{lastnentries}) {
+                # local $ctx->{__stash}{entries} = \@entries;
+                # @locations = get_locations_for_archive ($ctx);
+    		}
+    		else {
+    			# No entry, no archive
+    			return $ctx->error ('No context from which to extract locations');
+    		}
+    	} else {
+    	    push @entries, $entry;
+    	    $map_id = 'entry-' . $e->id;
+    	    $loc_options = $entry->location_options;
+                # @locations = get_locations_for_entry($entry);
+                # $zoom = get_zoom_for_entry ($entry);
+                # $entry_id = $entry->id;
+    	}
+
+        push @ids, map { $_->id } @$entries;
+
+    }
+    elsif ($ctx->stash ('tag') eq 'geotype:assetmap' ||
+        ($ctx->stash ('tag') eq 'geotype:map' && $ctx->stash ('asset'))) {
         my $asset = $ctx->stash ('asset') or return $ctx->_no_asset_error();
         return '' unless ($asset->isa ('GeoType::LocationAsset'));
         
@@ -287,14 +354,16 @@ sub _hdlr_map {
             $loc_options = $e->location_options;
         }
     }
-    elsif ($ctx->stash ('tag') eq 'geotype:entrymap') {
+    elsif ($ctx->stash ('tag') eq 'geotype:entrymap' || 
+        ($ctx->stash ('tag') eq 'geotype:map' && $ctx->stash ('entry'))) {
         my $e = $ctx->stash ('entry') or return $ctx->_no_entry_error();
         push @ids, $e->id;
 
         $map_id = 'entry-' . $e->id;
         $loc_options = $e->location_options;
     }
-    elsif ($ctx->stash ('tag') eq 'geotype:archivemap') {
+    elsif ($ctx->stash ('tag') eq 'geotype:archivemap' || 
+        ($ctx->stash ('tag') eq 'geotype:map' && ($ctx->{archive_type} || $ctx->{current_archive_type}))) {
         my $entries = $ctx->stash ('entries') || [];
         push @ids, map { $_->id } @$entries;
         
@@ -302,7 +371,9 @@ sub _hdlr_map {
         my $title = $ctx->tag ('archivetitle', {}, $cond);
         $title = MT::Util::dirify ($title);
         $map_id = 'archive-' . $title;
-        $loc_options = {};
+    }
+    else {
+        return $ctx->error ('No context from which to extract locations');
     }
     
     require GeoType::LocationAsset;
