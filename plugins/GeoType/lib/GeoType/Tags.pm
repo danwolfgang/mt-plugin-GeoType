@@ -307,41 +307,14 @@ sub _hdlr_map {
     my $loc_options = {};
     if ($ctx->stash ('tag') eq 'geotype:map' && $args->{lastnentries}) {
         my $n = $args->{lastnentries};
-        # try to guess what the user wants here based on archive types, etc
-    	my $entry = $ctx->stash ('entry');
-    	my $asset = $ctx->stash ('asset');
-    	my @entries = ();
-        $loc_options = {};
-    	if ( ! $entry ) {
-    		# Discover our context
-    		my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
-    		if ( $at ) {
-                my $entries = $ctx->stash ('entries') || [];
-                push @ids, map { $_->id } @$entries;
-
-                require MT::Util;
-                my $title = $ctx->tag ('archivetitle', {}, $cond);
-                $title = MT::Util::dirify ($title);
-                $map_id = 'archive-' . $title;
-    		} 
-    		elsif (my $n = $args->{lastnentries}) {
-                # local $ctx->{__stash}{entries} = \@entries;
-                # @locations = get_locations_for_archive ($ctx);
-    		}
-    		else {
-    			# No entry, no archive
-    			return $ctx->error ('No context from which to extract locations');
-    		}
-    	} else {
-    	    push @entries, $entry;
-    	    $map_id = 'entry-' . $e->id;
-    	    $loc_options = $entry->location_options;
-                # @locations = get_locations_for_entry($entry);
-                # $zoom = get_zoom_for_entry ($entry);
-                # $entry_id = $entry->id;
-    	}
-
-        push @ids, map { $_->id } @$entries;
+        my (%blog_terms, %blog_args);
+        $ctx->set_blog_load_context($args, \%blog_terms, \%blog_args)
+            or return $ctx->error($ctx->errstr);
+        
+        require MT::Entry;
+        my @entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', limit => $n });
+        $map_id = 'last-' . $n;
+        push @ids, map { $_->id } @entries;
 
     }
     elsif ($ctx->stash ('tag') eq 'geotype:assetmap' ||
