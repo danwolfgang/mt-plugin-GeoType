@@ -384,7 +384,7 @@ sub _hdlr_map {
         my $config = $plugin->get_config_hash ('blog:' . $blog_id);
         $height = $config->{interactive_map_height} unless ($height);
         $width  = $config->{interactive_map_width}  unless ($width);
-        my @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->lattitude, lng => $_->longitude, options => $loc_options->{$_->id} } } @assets;
+        my @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->latitude, lng => $_->longitude, options => $loc_options->{$_->id} } } @assets;
         require JSON;
         my $location_json = @locations ? JSON::objToJson (\@locations) : '[]';
         my $wikipedia = $args->{wikipedia} || '';

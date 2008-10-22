@@ -27,7 +27,7 @@ sub verify_location {
     require GeoType::LocationAsset;
     my $la = GeoType::LocationAsset->new;
     $la->blog_id ($app->blog->id);
-    $la->lattitude ($coords[1]);
+    $la->latitude ($coords[1]);
     $la->longitude ($coords[0]);
     
     my $url = $la->thumbnail_url (Width => 600, Height => int(600 / 1.61));
@@ -37,7 +37,7 @@ sub verify_location {
         entry_insert    => $entry_insert,
         location_address => $address,
         gecoded_url => $url,
-        location_lattitude => $coords[1],
+        location_latitude => $coords[1],
         location_longitude => $coords[0],
     });
 }
@@ -46,7 +46,7 @@ sub insert_location {
     my $app = shift;
     my $address = $app->param ('location_address');
     my $name    = $app->param ('location_name');
-    my $lattitude = $app->param ('location_lattitude');
+    my $latitude = $app->param ('location_latitude');
     my $longitude = $app->param ('location_longitude');
     
     require GeoType::LocationAsset;
@@ -54,7 +54,7 @@ sub insert_location {
     $la->blog_id ($app->blog->id);
     $la->name ($name);
     $la->location ($address);
-    $la->lattitude ($lattitude);
+    $la->latitude ($latitude);
     $la->longitude ($longitude);
     
     $la->save or die $la->errstr;
@@ -326,7 +326,7 @@ sub preview_locations {
         push @locations, $asset if ($asset->isa ('GeoType::LocationAsset'));
     }
     
-    @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->lattitude, lng => $_->longitude } } @locations;
+    @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->latitude, lng => $_->longitude } } @locations;
     
     my $plugin = MT->component ('geotype');
     my $map_type = $plugin->get_config_value ('interactive_map_type', 'blog:' . $blog->id);
@@ -382,7 +382,7 @@ sub location_options {
     require MT::Asset;
     my $location = MT::Asset->load ($id);
     
-    my $location_hash = { id => $location->id, name => $location->name, geometry => $location->geometry, lat => $location->lattitude, lng => $location->longitude, options => $options };
+    my $location_hash = { id => $location->id, name => $location->name, geometry => $location->geometry, lat => $location->latitude, lng => $location->longitude, options => $options };
     $location_hash->{options}->{contents} ||= $location->description;
     # my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
     # $location_opts->{location_marker_opt_contents} ||= $location->description;

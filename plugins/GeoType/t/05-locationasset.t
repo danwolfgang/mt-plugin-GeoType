@@ -16,6 +16,6 @@ my $la = MT->model ('asset.location')->new;
 ok ($la, "LocationAsset created");
 
 $la->geometry ("1, 2");
-is ($la->lattitude, 1, "Latitude");
+is ($la->latitude, 1, "Latitude");
 is ($la->longitude, 2, "Longitude");
 is ($la->geometry, "1,2", "Geometry");

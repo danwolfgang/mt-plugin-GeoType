@@ -9,7 +9,7 @@ use base qw( MT::Asset );
 __PACKAGE__->install_properties ({
     class_type  => 'location',
     column_defs => {
-        'lattitude' => 'string meta',
+        'latitude' => 'string meta',
         'longitude' => 'string meta',
         'basename' => 'string meta',
         # 'visible' => 'integer not null default 1 meta'
@@ -36,10 +36,10 @@ sub geometry {
     my $obj = shift;
     if (my $geom = shift) {
         my ($lat, $long) = split (/\s*,\s*/, $geom);
-        $obj->lattitude ($lat);
+        $obj->latitude ($lat);
         $obj->longitude ($long);
     }
-    return join (",", $obj->lattitude, $obj->longitude);
+    return join (",", $obj->latitude, $obj->longitude);
 }
 
 sub has_thumbnail { 1; }

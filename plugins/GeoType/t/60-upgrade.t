@@ -46,7 +46,7 @@ ok ($loc_asset->isa ('GeoType::LocationAsset'), "As the right class");
 is ($loc_asset->name, "Testing location", "Name upgraded correctly");
 is ($loc_asset->location, "Somewhere in testing land", "Location upgraded correctly");
 is ($loc_asset->geometry, "1,4", "Geometry ugpraded correctly");
-is ($loc_asset->lattitude, 1, "Latitude correct");
+is ($loc_asset->latitude, 1, "Latitude correct");
 is ($loc_asset->longitude, 4, "Longitude correct");
 is ($loc_asset->blog_id, 1, "blog_id correct");
 
