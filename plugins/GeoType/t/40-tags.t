@@ -5,7 +5,7 @@ use warnings;
 use lib 't/lib', 'lib', 'extlib';
 
 use MT::Test qw( :db :data );
-use Test::More tests => 25;
+use Test::More tests => 26;
 use Test::Exception;
 
 # setup api key
