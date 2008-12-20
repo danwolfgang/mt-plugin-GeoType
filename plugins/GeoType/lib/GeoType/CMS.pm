@@ -193,7 +193,8 @@ sub param_edit_entry {
         
         function openLocationPreview (f) {
             var location_list = getByID ('location_list').value;
-            return openDialog (f, 'preview_locations', 'blog_id=<$mt:var name="blog_id"$>&location_list=' + location_list);
+            alert (location_list);
+            return openDialog (f, 'preview_locations', 'blog_id=<$mt:var name="blog_id"$>&location_list=' + escape (location_list));
         }
         
         function openLocationOptionsDialog (f, id) {
@@ -317,7 +318,9 @@ sub preview_locations {
     my $blog = $app->blog;
     
     my $location_list = $app->param ('location_list');
-    my @ids = split (/\s*,\s*/, $location_list);
+    require JSON;
+    my $locations = JSON::jsonToObj ($location_list);
+    my @ids = map { $_->{id} } @$locations;
     my @locations;
     require MT::Asset;
     for my $id (@ids) {
@@ -359,23 +362,11 @@ sub location_options {
     my $app = shift;
     my $blog = $app->blog;
     
-    # die "In location options";
     my $loc = $app->param ('location');
-    my ($id, $options) = split (/\|\|/, $loc, 2);
+    # my ($id, $options) = split (/\|\|/, $loc, 2);
     my $id = $app->param ('location_id');
-    # die "$options";
     my $options = $app->param ('location_options');
 
-    # my $opt_hash = {};
-    # foreach my $opt (split (/&&/, $options)) {
-    #     my ($k, $v) = split (/=/, $opt, 2);
-    #     $opt_hash->{$k} = $v;
-    # }
-    # $options = $opt_hash;
-
-    # use Data::Dumper;
-    # die Dumper ($options);
-    # die $options;
     require JSON;
     $options = JSON::jsonToObj ($options);
     
