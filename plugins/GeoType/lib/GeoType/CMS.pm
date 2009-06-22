@@ -291,7 +291,6 @@ sub post_save_entry {
     require GeoType::LocationAsset;
     for my $id (@ids) {
         my $la = GeoType::LocationAsset->load ($id) or next;
-        
         my $oa = MT::ObjectAsset->set_by_key ({
             blog_id => $entry->blog_id,
             object_id => $entry->id,
@@ -303,7 +302,13 @@ sub post_save_entry {
     }
     
     if (my @old_maps = grep { $assets{$_->asset_id} } @assets) {
-        my @old_ids = map { $_->id } @old_maps;
+		my @old_ids;
+		for my $old_id (@old_maps) {
+			# we want to make sure we're only removing old geotype assets here
+			my $asset = MT::Asset->load($old_id->asset_id);
+			push (@old_ids, $old_id) if ($asset->isa('GeoType::LocationAsset'));
+		}
+
         MT::ObjectAsset->remove( { id => \@old_ids })
             if @old_ids;
     }
