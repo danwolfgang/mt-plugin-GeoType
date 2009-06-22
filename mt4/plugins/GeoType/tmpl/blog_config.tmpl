@@ -1,0 +1,396 @@
+<mtapp:settinggroup
+    id="api_keys">
+    <h2>Google Maps API Keys</h2>
+
+    <mtapp:setting
+        id="google_api_key"
+        label="MT Interface Key">
+        <input type="text" name="google_api_key" id="google_api_key" class="full-width" value="<$mt:var name="google_api_key" escape="html"$>" />
+    </mtapp:setting>
+
+    <mtapp:setting
+        id="site_api_key"
+        label="Site Key">
+        <input type="text" name="site_api_key" id="site_api_key" class="full-width" value="<$mt:var name="site_api_key" escape="html"$>" />
+    </mtapp:setting>
+
+</mtapp:settinggroup>
+
+<mtapp:settinggroup
+    id="map_options">
+    <h2>Default Map Options</h2>
+
+    <mtapp:settinggroup
+        id="static_map">
+        <h3>Static Maps</h3>
+        
+        <mtapp:setting
+            id="static_map_dimensions"
+            label="Dimensions">
+            <input type="text" name="static_map_width" id="static_map_width" size="5" value="<$mt:var name="static_map_width" escape="html"$>" /> (width) x <input type="text" name="static_map_height" id="static_map_height" size="5" value="<$mt:var name="static_map_height" escape="html"$>" /> (height)
+        </mtapp:setting>
+        
+        <mtapp:setting
+            id="static_map_image_format"
+            label="Image Format">
+            <select name="static_map_image_format" id="static_map_image_format">
+                <option value="gif"<mt:if var="static_map_image_format_gif"> selected="selected"</mt:if>>GIF</option>
+                <option value="jpeg"<mt:if var="static_map_image_format_jpeg"> selected="selected"</mt:if>>JPEG</option>
+                <option value="jpeg-baseline"<mt:if var="static_map_image_format_jpeg-baseline"> selected="selected"</mt:if>>JPEG (non-progressive)</option>
+                <option value="png8"<mt:if var="static_map_image_format_png8"> selected="selected"</mt:if>>PNG (8 bit)</option>
+                <option value="png32"<mt:if var="static_map_image_format_png32"> selected="selected"</mt:if>>PNG (32 bit)</option>
+            </select>
+        </mtapp:setting>
+        
+        <mtapp:setting
+            id="static_map_type"
+            label="Type">
+            <select name="static_map_type" id="static_map_type">
+                <option value="roadmap"<mt:if var="static_map_type_roadmap"> selected="selected"</mt:if>>Roadmap</option>
+                <option value="mobile"<mt:if var="static_map_type_mobile"> selected="selected"</mt:if>>Mobile</option>
+                <option value="satellite"<mt:if var="static_map_type_satellite"> selected="selected"</mt:if>>Satellite</option>
+                <option value="terrain"<mt:if var="static_map_type_terrain"> selected="selected"</mt:if>>Terrain</option>
+                <option value="hybrid"<mt:if var="static_map_type_hybrid"> selected="selected"</mt:if>>Hybrid</option>
+            </select>
+        </mtapp:setting>
+        
+        <mtapp:setting
+            id="static_map_marker_color"
+            label="Marker Color">
+            <select name="static_map_marker_color" id="static_map_marker_color">
+                <option value="red"<mt:if var="static_map_marker_color" eq="red"> selected="selected"</mt:if>>Red</option>
+                <option value="black"<mt:if var="static_map_marker_color" eq="black"> selected="selected"</mt:if>>Black</option>
+                <option value="brown"<mt:if var="static_map_marker_color" eq="brown"> selected="selected"</mt:if>>Brown</option>
+                <option value="green"<mt:if var="static_map_marker_color" eq="green"> selected="selected"</mt:if>>Green</option>
+                <option value="purple"<mt:if var="static_map_marker_color" eq="purple"> selected="selected"</mt:if>>Purple</option>
+                <option value="yellow"<mt:if var="static_map_marker_color" eq="yellow"> selected="selected"</mt:if>>Yellow</option>
+                <option value="blue"<mt:if var="static_map_marker_color" eq="blue"> selected="selected"</mt:if>>Blue</option>
+                <option value="gray"<mt:if var="static_map_marker_color" eq="gray"> selected="selected"</mt:if>>Gray</option>
+                <option value="orange"<mt:if var="static_map_marker_color" eq="orange"> selected="selected"</mt:if>>Orange</option>
+                <option value="white"<mt:if var="static_map_marker_color" eq="white"> selected="selected"</mt:if>>White</option>
+            </select>
+        </mtapp:setting>
+        
+        <mtapp:setting
+            id="static_map_marker_size"
+            label="Marker Size"
+            hint="Markers sized tiny and small are not capable of displaying an alphanumeric-character."
+            show_hint="1">
+            <select name="static_map_marker_size" id="static_map_marker_size">
+                <option value=""<mt:if var="static_map_marker_size" eq=""> selected="selected"</mt:if>>Normal</option>
+                <option value="mid"<mt:if var="static_map_marker_size" eq="mid"> selected="selected"</mt:if>>Mid</option>
+                <option value="small"<mt:if var="static_map_marker_size" eq="small"> selected="selected"</mt:if>>Small</option>
+                <option value="tiny"<mt:if var="static_map_marker_size" eq="tiny"> selected="selected"</mt:if>>Tiny</option>
+            </select>
+        </mtapp:setting>
+    </mtapp:settinggroup>
+
+    <mtapp:settinggroup
+        id="interactive_map">
+        <h3>Interactive Maps</h3>
+
+        <mtapp:setting
+            id="interactive_map_dimensions"
+            label="Dimensions">
+            <input type="text" name="interactive_map_width" id="interactive_map_width" size="5" value="<$mt:var name="interactive_map_width" escape="html"$>" /> (width) x <input type="text" name="interactive_map_height" id="interactive_map_height" size="5" value="<$mt:var name="interactive_map_height" escape="html"$>" /> (height)
+        </mtapp:setting>
+
+        <mtapp:setting
+            id="interactive_map_type"
+            label="Type">
+            <select name="interactive_map_type" id="interactive_map_type">
+                <option value="roadmap"<mt:if var="interactive_map_type_roadmap"> selected="selected"</mt:if>>Roadmap</option>
+                <!-- <option value="mobile"<mt:if var="static_map_type_mobile"> selected="selected"</mt:if>>Mobile</option> -->
+                <option value="satellite"<mt:if var="interactive_map_type_satellite"> selected="selected"</mt:if>>Satellite</option>
+                <option value="terrain"<mt:if var="interactive_map_type_terrain"> selected="selected"</mt:if>>Terrain</option>
+                <option value="hybrid"<mt:if var="interactive_map_type_hybrid"> selected="selected"</mt:if>>Hybrid</option>
+            </select>
+        </mtapp:setting>
+
+        <mtapp:settinggroup
+            id="interactive_map_controls">
+            <h4>Map Controls</h4>
+
+            <mtapp:setting
+                id="interactive_map_type_control"
+                label="Type">
+                <input type="checkbox" class="cb" name="interactive_map_type_control" id="interactive_map_type_control" value="1"<mt:if var="interactive_map_type_control"> checked="checked"</mt:if> />
+            </mtapp:setting>
+        
+            <mtapp:setting
+                id="interactive_map_scale"
+                label="Scale">
+                <input type="checkbox" class="cb" name="interactive_map_scale" id="interactive_map_scale" value="1"<mt:if var="interactive_map_scale"> checked="checked"</mt:if> />
+            </mtapp:setting>
+        
+            <mtapp:setting
+                id="interactive_map_overview"
+                label="Overview">
+                <input type="checkbox" class="cb" name="interactive_map_overview" id="interactive_map_overview" value="1"<mt:if var="interactive_map_overview"> checked="checked"</mt:if> />
+            </mtapp:setting>
+            
+            <mtapp:setting
+                id="interactive_map_zoom_control"
+                label="Zoom and Pan Control">
+                <select name="interactive_map_zoom_control" id="interactive_map_zoom_control">
+                    <option value="none"<mt:if name="interactive_map_zoom_control" eq="none"> selected="selected"</mt:if>>None</option>
+                    <option value="small_zoom"<mt:if name="interactive_map_zoom_control" eq="small_zoom"> selected="selected"</mt:if>>Small (zoom only)</option>
+                    <option value="small"<mt:if name="interactive_map_zoom_control" eq="small"> selected="selected"</mt:if>>Small (zoom and pan)</option>
+                    <option value="large"<mt:if name="interactive_map_zoom_control" eq="large"> selected="selected"</mt:if>>Large</option>
+                </select>
+            </mtapp:setting>
+            
+        </mtapp:settinggroup>
+    </mtapp:settinggroup>
+</mtapp:settinggroup>
+<!-- <TMPL_VAR NAME=GEOTYPE_HEADER>
+<div class="setting">
+    <p>Welcome to GeoType. To begin using GeoType, please obtain and enter a GoogleMaps as shown below. You can customize your default map view using the "GeoType" button to the left. Or just go and start writing your posts!</p>
+    <h2>Map</h2>
+    <table width="100%" cellspacing="2" cellpadding="5" class="editform">           
+        <tr valign="top"> 
+            <th scope="row"><div class="label"><label for="google_api_key"><MT_TRANS phrase="Google API Key:"></label></div></th> 
+            <td>
+                <div class="field">
+                    <input type="text" name="google_api_key" id="google_api_key" style="width: 95%" size="45" value="<TMPL_VAR NAME=google_api_key ESCAPE=HTML>" />
+                    <p><a href="http://www.google.com/apis/maps/signup.html" title="GoogleMaps API Registration"><MT_TRANS phrase="GoogleMaps API Registration"></a> - <MT_TRANS phrase="Enter your blog url as the GoogleMaps URL"></p>
+                </div>
+            </td> 
+        </tr>
+        <tr valign="top">
+            <th scope="row"><div class="label"><label for="site_api_key"><MT_TRANS phrase="Site Google API Key:"></label></div></th>
+            <td>
+                <div class="field">
+                    <input type="text" name="site_api_key" id="site_api_key" style="width: 95%" size="45" value="<TMPL_VAR NAME=site_api_key ESCAPE=HTML>" />
+                    <p>API key to use for the site, defaults to using the key above.  Useful if the site is on a different domain than MT.</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <h2>Entry Display</h2>
+    <table width="100%" cellspacing="2" cellpadding="5" class="editform">           
+        <tr valign="top">
+            <th scope="row"><div class="label"><label for="hide_saved_locations"><MT_TRANS phrase="Hide saved locations:"></label></div></th>
+            <td>
+                <div class="field">
+                     <input type="checkbox" name="hide_saved_locations" id="hide_saved_locations" value="1" <TMPL_IF NAME=hide_saved_locations>checked="checked"</TMPL_IF> /> <br />
+                    <p>Suppress the dropdown menu of all saved locations on the Edit Entry screen.</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <h2>Extended Fields</h2>
+    <table width="100%" cellspacing="2" cellpadding="5" class="editform">           
+        <tr valign="top"> 
+            <th scope="row"><div class="label"><label for="use_extended_attributes"><MT_TRANS phrase="Activate Extensions:"></label></div></th> 
+            <td>
+                <div class="field">
+                     <input type="checkbox" name="use_extended_attributes" id="use_extended_attributes" value="1" <TMPL_IF NAME=use_extended_attributes>checked="checked"</TMPL_IF> /> <br />
+                    <p>Use additional fields, such as cross street or phone number, in your locations.</p>
+                </div>
+            </td> 
+    </table>
+    <table width="100%" cellspacing="2" cellpadding="5" class="editform">
+
+        <h2>GeoRSS Feeds</h2>
+        <tr valign="top">
+            <th width="33%" scope="row">GeoRSS Feeds:</th>
+            <td>
+                <label for="georss_enable">
+                    <input name="georss_enable" type="checkbox" id="georss_enable" value="true" <TMPL_IF NAME=GEORSS_ENABLE>checked="checked"</TMPL_IF> /> Enable GeoRSS tags in feeds</label>
+                </td>
+            </tr>
+            <tr valign="top">
+                <th scope="row">Feed Format:</th>
+                <td>
+                    <select name="georss_format" id="georss_format">
+                        <option value='simple' <TMPL_IF NAME=GEORSS_FORMAT_SIMPLE>selected='selected'</TMPL_IF>>Simple &lt;georss:point&gt;</option>
+                        <option value='gml' <TMPL_IF NAME=GEORSS_FORMAT_GML>selected='selected'</TMPL_IF>>GML &lt;gml:pos&gt;</option>
+                        <option value='w3c' <TMPL_IF NAME=GEORSS_FORMAT_W3C>selected='selected'</TMPL_IF>>W3C &lt;geo:lat&gt;</option>
+                    </select><br/>
+                        The format of your syndication feeds (Simple is recommended) 
+                </td>
+            </tr>
+    </table>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+
+var map;
+var overview_control;
+var map_type_control;
+var scale_control;
+var small_zoom_control;
+var small_map_control;
+var large_map_control;
+
+function load() {
+   if (GBrowserIsCompatible()) {
+     map = new GMap2(getByID("geo_map"));
+     
+     overview_control = new GOverviewMapControl();
+     map_type_control = new GMapTypeControl();
+     scale_control    = new GScaleControl();
+     
+     small_zoom_control = new GSmallZoomControl();
+     small_map_control  = new GSmallMapControl();
+     large_map_control  = new GLargeMapControl();
+     update_map();
+     change_overview_control(getByID ('map_controls_overview'));
+     change_map_type_control(getByID ('map_controls_map_type'));
+     change_scale_control(getByID('map_controls_scale'));
+     change_map_control(getByID('map_controls_zoom'));
+   }
+}
+
+function update_map () {
+    var zoom_level = getByID ('default_zoom_level');
+    var new_zoom_value = parseInt(zoom_level.options[zoom_level.selectedIndex].value);
+    
+    var map_type = getByID ('default_map_type').options[getByID ('default_map_type').selectedIndex].value;
+    var new_map_type;
+    
+    if (map_type == "G_NORMAL_MAP") {
+        new_map_type = G_NORMAL_MAP;
+    }
+    else if (map_type == "G_SATELLITE_MAP") {
+        new_map_type = G_SATELLITE_MAP;
+    }
+    else if (map_type == "G_HYBRID_MAP") {
+        new_map_type = G_HYBRID_MAP;
+    }
+
+    map.setCenter(new GLatLng(37.779331,-122.397308), new_zoom_value, new_map_type);
+}
+
+function resize_map () {
+    var div = getByID ('geo_map');
+    div.style.height = getByID ('map_height').value + "px";
+    div.style.width  = getByID ('map_width').value + "px";
+    
+    map.checkResize();
+}
+
+function change_overview_control (setting) {
+    if (setting.checked) {
+        map.addControl (overview_control);
+    }
+    else {
+        map.removeControl (overview_control);
+    }
+}
+
+function change_map_type_control (setting) {
+    if (setting.checked) {
+        map.addControl (map_type_control);
+    }
+    else {
+        map.removeControl (map_type_control);
+    }
+}
+
+function change_scale_control (setting) {
+    if (setting.checked) {
+        map.addControl (scale_control);
+    }
+    else {
+        map.removeControl (scale_control);
+    }
+}
+
+function change_map_control (setting) {
+    var value = setting.options[setting.selectedIndex].value;
+    map.removeControl (small_zoom_control);
+    map.removeControl (small_map_control);
+    map.removeControl (large_map_control);
+
+    if (value == 'small') {
+        map.addControl (small_zoom_control);
+    }
+    else if (value == 'medium') {
+        map.addControl (small_map_control);
+    }
+    else if (value == 'large') {
+        map.addControl (large_map_control);
+    }
+}
+
+TC.attachLoadEvent (load);
+TC.attachBeforeUnloadEvent (GUnload);
+
+//]]>
+</script>
+
+<div class="setting grouped">
+    <div class="label"><label for="map_width">Map Width: </label></div>
+    <div class="field"><input type="text" name="map_width" id="map_width" size="5" value="<TMPL_VAR NAME=MAP_WIDTH>" onchange="resize_map()" /></div>
+</div>
+
+<div class="setting grouped">
+    <div class="label"><label for="map_height">Map Height: </label></div>
+    <div class="field"><input type="text" name="map_height" id="map_height" size="5" value="<TMPL_VAR NAME=MAP_HEIGHT>" onchange="resize_map()"/></div>
+</div>
+
+<div class="setting grouped">
+    <div class="label"><label for="default_zoom_level">Default Zoom Level: </label></div>
+    <div class="field"><select name='default_zoom_level' id='default_zoom_level' onchange="update_map()">
+        <option value='18'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_18> selected='selected'</TMPL_IF>>Zoomed In</option>
+        <option value='17'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_17> selected='selected'</TMPL_IF>>Single Block</option>
+        <option value='16'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_16> selected='selected'</TMPL_IF>>Neighborhood</option>
+        <option value='15'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_15> selected='selected'</TMPL_IF>>15</option>
+        <option value='14'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_14> selected='selected'</TMPL_IF>>Several blocks</option>
+        <option value='13'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_13> selected='selected'</TMPL_IF>>13</option>
+        <option value='12'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_12> selected='selected'</TMPL_IF>>12</option>
+        <option value='11'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_11> selected='selected'</TMPL_IF>>City</option>
+        <option value='10'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_10> selected='selected'</TMPL_IF>>10</option>
+        <option value='9'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_9> selected='selected'</TMPL_IF>>9</option>
+        <option value='8'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_8> selected='selected'</TMPL_IF>>8</option>
+        <option value='7'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_7> selected='selected'</TMPL_IF>>Region</option>
+        <option value='6'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_6> selected='selected'</TMPL_IF>>6</option>
+        <option value='5'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_5> selected='selected'</TMPL_IF>>5</option>
+        <option value='4'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_4> selected='selected'</TMPL_IF>>4</option>
+        <option value='3'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_3> selected='selected'</TMPL_IF>>Continent</option>
+        <option value='2'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_2> selected='selected'</TMPL_IF>>2</option>
+        <option value='1'<TMPL_IF NAME=DEFAULT_ZOOM_LEVEL_1> selected='selected'</TMPL_IF>>Zoomed Out</option>
+    </select></div>
+</div>
+
+<div class="setting grouped">
+    <div class="label"><label for="default_map_type">Default Map Type: </label></div>
+    <div class="field"><select name='default_map_type' id='default_map_type' onchange='update_map()'>
+        <option value='roadmap' <TMPL_IF NAME=DEFAULT_MAP_TYPE_ROADMAP> selected='selected'</TMPL_IF>>Road</option>
+        <option value='satellite' <TMPL_IF NAME=DEFAULT_MAP_TYPE_satellite> selected='selected'</TMPL_IF>>Satellite</option>
+        <option value='hybrid' <TMPL_IF NAME=DEFAULT_MAP_TYPE_hybrid> selected='selected'</TMPL_IF>>Hybrid</option>
+    </select>       
+    </div>
+</div>
+
+<div class="setting grouped">
+    <div class="label"><label for="map_controls_zoom">Zoom Controls: </label></div>
+    <div class="field"><select name='map_controls_zoom' id='map_controls_zoom' onchange='change_map_control(this)' >
+        <option value='false'<TMPL_IF NAME=MAP_CONTROLS_ZOOM_NONE> selected='selected'</TMPL_IF>>None</option>
+        <option value='small'<TMPL_IF NAME=MAP_CONTROLS_ZOOM_SMALL> selected='selected'</TMPL_IF>>Small</option>
+        <option value='medium'<TMPL_IF NAME=MAP_CONTROLS_ZOOM_MEDIUM> selected='selected'</TMPL_IF>>Medium</option>
+        <option value='large'<TMPL_IF NAME=MAP_CONTROLS_ZOOM_LARGE> selected='selected'</TMPL_IF>>Large</option>
+    </select>       
+    </div>
+</div>
+
+<div class="setting grouped">
+    <div class="label"><label for="map_controls_map_type">Map Type Control: </label></div>
+    <div class="field"><input name="map_controls_map_type" type="checkbox" id="map_controls_map_type" onchange="change_map_type_control(this)" value="true"<TMPL_IF NAME=MAP_CONTROLS_MAP_TYPE> checked="checked"</TMPL_IF> /></div>
+</div>
+
+<div class="setting grouped">
+    <div class="label"><label for="map_controls_overview">Overview Control: </label></div>
+    <div class="field"><input name="map_controls_overview" type="checkbox" id="map_controls_overview" onchange="change_overview_control(this)" value="true"<TMPL_IF NAME=MAP_CONTROLS_OVERVIEW> checked="checked"</TMPL_IF> /></div>
+</div>
+
+<div class="setting grouped">
+    <div class="label"><label for="map_controls_scale">Scale Control: </label></div>
+    <div class="field"><input name="map_controls_scale" type="checkbox" id="map_controls_scale" onchange="change_scale_control(this)" value="true"<TMPL_IF NAME=MAP_CONTROLS_SCALE> checked="checked"</TMPL_IF> /> </div>
+</div>
+
+<h4>Map Preview</h4>
+<div id="geo_map" style="height: <TMPL_VAR NAME=MAP_HEIGHT>px; width: <TMPL_VAR NAME=MAP_WIDTH>px; margin: 5px auto; overflow: auto"></div> -->
