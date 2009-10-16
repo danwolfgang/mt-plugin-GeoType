@@ -265,9 +265,9 @@ sub param_asset_insert {
 sub post_save_entry { 
     my ($cb, $app, $entry) = @_;
     
-    my $location_list = $app->param ('location_list');
+    my $location_list = $app->param ('location_list') || '[]';
     require JSON;
-    my $locations = JSON::jsonToObj ($location_list);
+    my $locations = JSON::from_json ($location_list);
     my %locations;
     foreach my $loc (@$locations) {
         $locations{$loc->{id}} = $loc->{options};
@@ -324,7 +324,7 @@ sub preview_locations {
     
     my $location_list = $app->param ('location_list');
     require JSON;
-    my $locations = JSON::jsonToObj ($location_list);
+    my $locations = JSON::from_json ($location_list);
     my @ids = map { $_->{id} } @$locations;
     my @locations;
     require MT::Asset;
@@ -373,7 +373,7 @@ sub location_options {
     my $options = $app->param ('location_options');
 
     require JSON;
-    $options = JSON::jsonToObj ($options);
+    $options = JSON::from_json ($options);
     
     require MT::Asset;
     my $location = MT::Asset->load ($id);
