@@ -121,6 +121,7 @@ tags:
     geotype:assetmap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:entrymap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:archivemap: $GeoType::GeoType::Tags::_hdlr_map
+    geotype:archivedetailmap: $GeoType::GeoType::Tags::_hdlr_archivedetailmap
     geotype:mapheader: $GeoType::GeoType::Tags::_hdlr_map_header
 
 # tags:
