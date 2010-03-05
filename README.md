@@ -4,9 +4,9 @@
 GeoType is a plugin for Movable Type that uses the GoogleMaps API to tie geographic coordinates to an MT object.
 
 ## Platform
-This release of GeoType is intended for Movable Type 4.3X, although it has similar functionality to the original [http://plugins.movabletype.org/geotype/ plugin on MT3].  
+This release of GeoType is intended for Movable Type 3. 
 
-It has not been tested in MT5. Since it modifies several visual elements of the Edit Entry screen in MT4, there is a good chance that it will not work as expected.
+It has not been tested in MT4 or MT5. Since it modifies several visual elements of the Edit Entry screen, there is a good chance that it will not work as expected.
 
 ## Installation
 When installed properly, GeoType will trigger an MT Upgrade screen, since it stores location data along with created entries in the database.
@@ -30,5 +30,5 @@ Once the code is in place, you can either start the upgrade in your browser by v
     perl tools/upgrade --name="adminuser"
 
 
-## Instructions
+## Usage
 Check out the docs/ directory of this project for typical usage of the plugin.
