@@ -12,15 +12,26 @@ It has not been tested in MT5. Since it modifies several visual elements of the 
 When installed properly, GeoType will trigger an MT Upgrade screen, since it stores location data along with created entries in the database.
 
 To install this plugin, place the
+<<<<<<< HEAD
+
+	plugins/GeoType
+
+directory in your MT plugins directory, and place the
+
+    mt-static/plugins/GeoType
+
+=======
    plugins/GeoType
 directory in your MT plugins directory, and place the
    mt-static/plugins/GeoType
+>>>>>>> 4178442c982b4125833c8702a459a62568acf480
 directory in your mt-static/plugins/ directory.
 
 Once the code is in place, you can either start the upgrade in your browser by visiting the URL to log into MT, or you can run it at the command line:
-  # where MT_DIR is the path where your MT installation exists (ie where mt.cgi lives)
-  cd MT_DIR 
+
+    # where MT_DIR is the path where your MT installation exists (ie where mt.cgi lives)
+    cd MT_DIR 
   
-  # where adminuser is the username of a Sys Admin user on that mt installation
-  perl tools/upgrade --name="adminuser"
+    # where adminuser is the username of a Sys Admin user on that mt installation
+    perl tools/upgrade --name="adminuser"
 
