@@ -29,3 +29,6 @@ Once the code is in place, you can either start the upgrade in your browser by v
     # where adminuser is the username of a Sys Admin user on that mt installation
     perl tools/upgrade --name="adminuser"
 
+
+## Instructions
+Check out the docs/ directory of this project for typical usage of the plugin.
