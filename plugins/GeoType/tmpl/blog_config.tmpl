@@ -20,6 +20,13 @@
     id="map_options">
     <h2>Default Map Options</h2>
 
+    <mtapp:setting
+        id="default_location"
+        label="Default Map Location">
+        <input type="text" name="default_location_address" id="default_location_address" class="full-width" value="<$mt:var name="default_location_address" escape="html"$>" />
+		<p>Default location for map display. Enter an address or zipcode &amp; the map will be centered on this when choosing locations.</p>
+    </mtapp:setting>
+
     <mtapp:settinggroup
         id="static_map">
         <h3>Static Maps</h3>
@@ -106,6 +113,30 @@
                 <option value="hybrid"<mt:if var="interactive_map_type_hybrid"> selected="selected"</mt:if>>Hybrid</option>
             </select>
         </mtapp:setting>
+		<mtapp:setting
+			id="default_zoom_level"
+			label="Default Zoom">
+		    <select name='default_zoom_level' id='default_zoom_level'>
+		        <option value='18'<mt:if var="default_zoom_level" eq="18">selected='selected'</mt:if>>Zoomed In</option>
+		        <option value='17'<mt:if var="default_zoom_level" eq="17">selected='selected'</mt:if>>Single Block</option>
+		        <option value='16'<mt:if var="default_zoom_level" eq="16">selected='selected'</mt:if>>Neighborhood</option>
+		        <option value='15'<mt:if var="default_zoom_level" eq="15">selected='selected'</mt:if>>15</option>
+		        <option value='14'<mt:if var="default_zoom_level" eq="14">selected='selected'</mt:if>>Several blocks</option>
+		        <option value='13'<mt:if var="default_zoom_level" eq="13">selected='selected'</mt:if>>13</option>
+		        <option value='12'<mt:if var="default_zoom_level" eq="12">selected='selected'</mt:if>>12</option>
+		        <option value='11'<mt:if var="default_zoom_level" eq="11">selected='selected'</mt:if>>City</option>
+		        <option value='10'<mt:if var="default_zoom_level" eq="10">selected='selected'</mt:if>>10</option>
+		        <option value='9'<mt:if var="default_zoom_level" eq="9">selected='selected'</mt:if>>9</option>
+		        <option value='8'<mt:if var="default_zoom_level" eq="8">selected='selected'</mt:if>>8</option>
+		        <option value='7'<mt:if var="default_zoom_level" eq="7">selected='selected'</mt:if>>Region</option>
+		        <option value='6'<mt:if var="default_zoom_level" eq="6">selected='selected'</mt:if>>6</option>
+		        <option value='5'<mt:if var="default_zoom_level" eq="5">selected='selected'</mt:if>>5</option>
+		        <option value='4'<mt:if var="default_zoom_level" eq="4">selected='selected'</mt:if>>4</option>
+		        <option value='3'<mt:if var="default_zoom_level" eq="3">selected='selected'</mt:if>>Continent</option>
+		        <option value='2'<mt:if var="default_zoom_level" eq="2">selected='selected'</mt:if>>2</option>
+		        <option value='1'<mt:if var="default_zoom_level" eq="1">selected='selected'</mt:if>>Zoomed Out</option>
+		    </select>
+		</mtapp:setting>
 
         <mtapp:settinggroup
             id="interactive_map_controls">

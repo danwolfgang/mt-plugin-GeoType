@@ -248,11 +248,10 @@ sub param_edit_entry {
         my @location_list = ();
         require MT::Asset;
         for my $oa (@non_embedded_assets) {
-            my $a = MT::Asset->load( $oa->asset_id );
-            next unless ( $a->isa('GeoType::LocationAsset') );
-            my $e = MT::Entry->load( $oa->object_id );
-            push @location_list,
-                { id => $a->id, name => $a->name, options => ( $e->location_options->{ $a->id } || {} ) };
+            my $a = MT::Asset->load ($oa->asset_id) or next;
+            next unless ($a->isa ('GeoType::LocationAsset'));
+            my $e = MT::Entry->load ($oa->object_id);
+            push @location_list, { id => $a->id, name => $a->name, options => ($e->location_options->{$a->id} || {}) };
         }
 
         $param->{location_list} = \@location_list;
@@ -279,66 +278,76 @@ sub param_asset_insert {
     }
 }
 
-sub post_save_entry {
-    my ( $cb, $app, $entry ) = @_;
+sub post_save_entry { 
+    my ($cb, $app, $entry) = @_;
 
-    my $location_list = $app->param('location_list') || '[]';
-    require JSON;
-    my $locations = JSON::from_json($location_list);
     my %locations;
-    foreach my $loc (@$locations) {
-        $locations{ $loc->{id} } = $loc->{options};
-    }
+    my $inline_location = $app->param('inline_location');
+	if ($inline_location) {
+		require GeoType::LocationAsset;
+		require GeoType::Util;
 
-#    foreach my $loc (split (/\s*,\s*/, $location_list)) {
-#        my ($id, $opts) = split (/\|\|/, $loc, 2);
-#        my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
-#        $locations{$id} = { %opts_hash };
-#    }
+		my @coords  = GeoType::Util::geocode ($app->blog, $inline_location);
+
+		my $la = GeoType::LocationAsset->new;
+	    $la->blog_id ($entry->blog_id);
+	    $la->name ($entry->title); # just using the entry title for the location name when it's inline
+	    $la->location ($inline_location);
+	    $la->latitude ($coords[1]);
+	    $la->longitude ($coords[0]);		
+	    $la->save or die $la->errstr;
+
+		# set options in location hash
+		$locations{$la->id} = $app->param('location_options');
+
+	} else {
+	    my $location_list = $app->param ('location_list');
+	    require JSON;
+	    my $locations = JSON::jsonToObj ($location_list);
+	    foreach my $loc (@$locations) {
+	        $locations{$loc->{id}} = $loc->{options};
+	    }
+	}
+
+    # foreach my $loc (split (/\s*,\s*/, $location_list)) {
+    #     my ($id, $opts) = split (/\|\|/, $loc, 2);
+    #     my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
+    #     $locations{$id} = { %opts_hash };
+    # }
     my @ids = keys %locations;
 
-    require MT::ObjectAsset;
-    my @assets = MT::ObjectAsset->load(
-        {
-            object_id => $entry->id,
-            blog_id   => $entry->blog_id,
-            object_ds => $entry->datasource,
-            embedded  => 0,
-        }
-    );
-    my %assets = map { $_->asset_id => $_->id } @assets;
+    my @asset_list = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on ('asset_id', {
+        object_id => $entry->id,
+        object_ds => $entry->datasource,
+        embedded  => 0,
+    })});
+	my %asset_ids = map { $_->id => 1 } @asset_list;
+	my @new_embeds;
+	# first go through & don't re-add anything that's on our list that's already there
+	for (@ids) {
+		push @new_embeds, $_ unless (defined $asset_ids{$_});
+		delete $asset_ids{$_} if (defined $asset_ids{$_});
+	}
 
     require GeoType::LocationAsset;
-    for my $id (@ids) {
-        my $la = GeoType::LocationAsset->load($id) or next;
-        my $oa = MT::ObjectAsset->set_by_key(
-            {
-                blog_id   => $entry->blog_id,
-                object_id => $entry->id,
-                object_ds => $entry->datasource,
-                asset_id  => $id,
-                embedded  => 0,
-            }
-        ) or return $cb->error( MT::ObjectAsset->errstr );
-        $assets{$id} = 0;
+    for my $id (@new_embeds) {
+        my $la = GeoType::LocationAsset->load ($id) or next;
+        my $oa = MT::ObjectAsset->set_by_key ({
+            blog_id => $entry->blog_id,
+            object_id => $entry->id,
+            object_ds => $entry->datasource,
+            asset_id => $id,
+            embedded => 0,
+        }) or return $cb->error (MT::ObjectAsset->errstr);
     }
 
-    if ( my @old_maps = grep { $assets{ $_->asset_id } } @assets ) {
-        my @old_ids;
-        for my $old_id (@old_maps) {
+	# remove any that got deleted
+	for my $id (keys %asset_ids) {
+		MT::ObjectAsset->remove({ blog_id => $entry->blog_id, object_id => $entry->id, object_ds => $entry->datasource, asset_id => $id });
+	}
 
-            # we want to make sure we're only removing old geotype assets here
-            my $asset = MT::Asset->load( $old_id->asset_id );
-            push( @old_ids, $old_id )
-                if ( $asset->isa('GeoType::LocationAsset') );
-        }
-
-        MT::ObjectAsset->remove( { id => \@old_ids } )
-            if @old_ids;
-    }
-
-    $entry->location_options( \%locations );
-    $entry->save or return $cb->error( $entry->errstr );
+    $entry->location_options (\%locations);
+    $entry->save or return $cb->error ($entry->errstr);
     1;
 }
 

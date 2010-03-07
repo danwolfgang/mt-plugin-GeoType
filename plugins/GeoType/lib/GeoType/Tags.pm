@@ -124,16 +124,17 @@ sub _hdlr_locations {
 }
 
 sub _hdlr_map_header {
-    my ( $ctx, $args, $cond ) = @_;
-
-    return '' if ( $ctx->var('geo_type_header') );
-
-    my $blog = $ctx->stash('blog');
-
-    $ctx->var( 'geo_type_header', 1 );
-    my $key      = GeoType::Util::get_google_api_key( $ctx->stash('blog'), 'site' );
-    my $plugin   = MT->component('geotype');
-    my $config   = $plugin->get_config_hash( 'blog:' . $ctx->stash('blog')->id );
+    my ($ctx, $args, $cond) = @_;
+    
+    return '' if ($ctx->var ('geo_type_header'));
+    
+    my $blog = $ctx->stash ('blog');
+    
+    $ctx->var ('geo_type_header', 1);
+	require GeoType::Util;
+    my $key = GeoType::Util::get_google_api_key ($ctx->stash ('blog'), 'site');
+    my $plugin = MT->component ('geotype');
+    my $config = $plugin->get_config_hash ('blog:' . $ctx->stash ('blog')->id);
     my $map_type = $config->{interactive_map_type};
     $map_type =
           $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
@@ -338,7 +339,6 @@ sub _locations_from_archive {
 
 sub _hdlr_archivedetailmap { # called from an archive, this will show entry details in the infowindow bubble
     my ($ctx, $args, $cond) = @_;
-	return $ctx->error("archivedetailmap must be called from an archive context") unless ($ctx->{archive_type} || $ctx->{current_archive_type});
 	
     my @assets;
     my @ids;
@@ -346,9 +346,16 @@ sub _hdlr_archivedetailmap { # called from an archive, this will show entry deta
     my $map_id;
     my $loc_options = {};
     my $entries = $ctx->stash ('entries') || [];
-	my $detail_text = $args->{tmpl};
-	my $tmpl = MT::Template->new;
-	$tmpl->text($detail_text);
+	my $tmpl;
+	if ($args->{tmpl_id}) {
+		$tmpl = MT::Template->load($args->{tmpl_id});
+	} else {
+		my $detail_text = $args->{tmpl};
+		$tmpl = MT::Template->new;
+		$tmpl->text($detail_text);
+	}
+	
+	return $ctx->error("Unable to load detail template for GeoType archivedetailmap tag") unless (defined $tmpl);
 	
     require MT::Util;
     my $title = $ctx->tag ('archivetitle', {}, $cond);
@@ -376,6 +383,95 @@ sub _hdlr_archivedetailmap { # called from an archive, this will show entry deta
 		$ctx->stash('entry', $e);
 		$ctx->stash('blog', $e->blog);
 		
+		my $location = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on(undef, {
+            asset_id => \'= asset_id', object_ds => 'entry', object_id => $e->id, $args->{all} ? () : ( embedded => 0 ) } )});
+		if ($location) {
+		    my $location_hash = { id => $location->id, name => $location->name, geometry => $location->geometry, lat => $location->latitude, lng => $location->longitude, html => $tmpl->build($ctx, $cond) };
+			push @locations, $location_hash;
+		}
+	}
+    require JSON;
+    my $location_json = @locations ? JSON::objToJson (\@locations) : '[]';
+    my $wikipedia = $args->{wikipedia} || '';
+    my $panoramio = $args->{panoramio} || 0;
+    $res .= qq{
+        <script type='text/javascript'>
+            geo_type_maps["$map_id"] = new Object();
+            geo_type_maps["$map_id"].locations = $location_json;
+            geo_type_maps["$map_id"].wikipedia = '$wikipedia';
+            geo_type_maps["$map_id"].panoramio = $panoramio; 
+        </script>
+        <div id='$map_id' geotype:map='$map_id' style="height: ${height}px; width: ${width}px"></div>
+    };
+ }
+
+sub _hdlr_detailmap { # this will show entry details in the infowindow bubble
+    my ($ctx, $args, $cond) = @_;
+
+    my @assets;
+    my @ids;
+    my $blog_id = $ctx->stash ('blog_id');
+    my $map_id;
+    my $loc_options = {};
+	my $entries;
+	if ($args->{tag}) {
+		my $n = $args->{lastn} || 15;
+        my (%blog_terms, %blog_args);
+        $ctx->set_blog_load_context($args, \%blog_terms, \%blog_args)
+            or return $ctx->error($ctx->errstr);
+        
+        require MT::Entry;
+		require MT::Tag;
+		require MT::ObjectTag;
+		my $tag = MT::Tag->load({ name => $args->{tag} }) or return $ctx->error("Cannot find tag " . $args->{tag});
+        my @load_entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', limit => $n, join => MT::ObjectTag->join_on('object_id', { object_datasource => 'entry', tag_id => $tag->id }) });
+		$entries = \@load_entries;
+	} else {
+		my $n = $args->{lastn} || 15;
+        my (%blog_terms, %blog_args);
+        $ctx->set_blog_load_context($args, \%blog_terms, \%blog_args)
+            or return $ctx->error($ctx->errstr);
+        
+        require MT::Entry;
+        my @load_entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', limit => $n });
+		$entries = \@load_entries;
+	}
+
+	my $tmpl;
+	if ($args->{tmpl_id}) {
+		$tmpl = MT::Template->load($args->{tmpl_id});
+	} else {
+		my $detail_text = $args->{tmpl};
+		$tmpl = MT::Template->new;
+		$tmpl->text($detail_text);
+	}
+
+	return $ctx->error("Unable to load detail template for GeoType archivedetailmap tag") unless (defined $tmpl);
+
+    require MT::Util;
+    $map_id = 'detailmap';
+
+
+    require GeoType::LocationAsset;
+
+    my $width = $args->{width};
+    my $height = $args->{height};
+    my $square = $args->{square};
+    require GeoType::Util;
+    my $res = '';
+    unless ($ctx->var ('google_maps_header')) {
+        $res .= $ctx->tag ('geotype:mapheader', { infowindow => 1 }, { });
+    }
+    my $plugin = MT->component ('geotype');
+    my $config = $plugin->get_config_hash ('blog:' . $blog_id);
+    $height = $config->{interactive_map_height} unless ($height);
+    $width  = $config->{interactive_map_width}  unless ($width);
+	my @locations;
+	for my $e (@$entries) {
+		my $ctx = MT::Template::Context->new;
+		$ctx->stash('entry', $e);
+		$ctx->stash('blog', $e->blog);
+
 		my $location = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on(undef, {
             asset_id => \'= asset_id', object_ds => 'entry', object_id => $e->id, $args->{all} ? () : ( embedded => 0 ) } )});
 		if ($location) {
@@ -540,6 +636,89 @@ sub _hdlr_map {
         };
     }
 }
+
+sub _hdlr_clickable_map {
+	my ($ctx, $args) = @_;
+
+	my $blog_id = $ctx->stash('blog_id');
+	my $plugin = MT->component('geotype');
+	my $default_location = $plugin->get_config_value('default_location', 'blog:'.$blog_id);
+	
+	my $config = $plugin->get_config_hash('blog:' . $blog_id);    
+
+	our $useManager = 0;
+	my $map_width  = $args->{width} || $config->{map_width};
+	my $map_height = $args->{height} ||  $config->{map_height};
+	my $clickfunction = $args->{clickfunction};
+	
+	require MT::App;
+	our $static_path;
+	eval {
+		$static_path = MT::App->instance->static_path;
+	};
+	if ( $@ ) {
+		if ( $ctx->stash('static_uri') ) {
+			$static_path = $ctx->stash('static_uri');
+		} elsif ( MT::ConfigMgr->instance->StaticWebPath ) {
+			$static_path = MT::ConfigMgr->instance->StaticWebPath;
+		} else {
+			die "Unable to locate STATIC_PATH";
+		}
+	}
+
+
+	require GeoType::Util;
+    my $key = GeoType::Util::get_google_api_key ($ctx->stash ('blog'), 'site');
+	my $html = qq@
+		<script type="text/javascript" src="${static_path}js/mt_core_compact.js"></script>
+		<script type="text/javascript" src="${static_path}plugins/GeoType/js/Clusterer2.js"></script>
+	    <script type="text/javascript" src="${static_path}plugins/GeoType/js/OverlayMessage.js"></script>
+       
+	    <script type="text/javascript" src="http://www.google.com/jsapi?key=$key"></script>
+		<div id="geo_map" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
+		<script type="text/javascript"> //<![CDATA[ 
+	    google.load ('maps', '2.x', { callback: maps_loaded });
+	@;
+	# default location is ('address', 'lat', 'long');
+	
+	my $lat = @$default_location[2];
+	my $lon = @$default_location[1];
+	my $default_map_type   = $config->{default_map_type};
+	my $default_zoom_level = $args->{zoom} || $config->{default_zoom_level};
+	
+	$html .= qq@
+	function maps_loaded() {
+		geo_map = new GMap2 (document.getElementById('geo_map'));
+		geo_icon = new GIcon(G_DEFAULT_ICON)
+		geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
+		geo_map.setCenter(new GLatLng($lat, $lon));
+		geo_map.setMapType($default_map_type);
+		geo_map.setZoom($default_zoom_level);
+	@;
+
+	require MT::Util;
+	my $i = 1;
+	$html .= qq{GEvent.addListener(geo_map, 'click', $clickfunction);} if (defined $clickfunction);
+	$html .= qq{geo_map.addControl (new GOverviewMapControl());} if $plugin->get_config_value ('map_controls_overview', 'blog:' . $blog_id);
+	$html .= qq{geo_map.addControl (new GScaleControl());} if $plugin->get_config_value ('map_controls_scale', 'blog:' . $blog_id);
+	$html .= qq{geo_map.addControl (new GMapTypeControl());} if $plugin->get_config_value ('map_controls_map_type', 'blog:' . $blog_id);
+	my $zoom = $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog_id);
+	if ($zoom eq 'small') {
+		$html .= qq{geo_map.addControl (new GSmallZoomControl());};
+	}
+	elsif ($zoom eq 'medium') {
+		$html .= qq{geo_map.addControl (new GSmallMapControl());};
+	}
+	elsif ($zoom eq 'large') {
+		$html .= qq{geo_map.addControl (new GLargeMapControl());};
+	}
+	$html .= qq!};
+	// ]]> 
+	</script>!;
+
+	return $html;
+}
+
 
 sub geo_type_id_tag {
     my $ctx      = shift;

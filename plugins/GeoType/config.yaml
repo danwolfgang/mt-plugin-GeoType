@@ -40,6 +40,8 @@ applications:
       preview_locations: $GeoType::GeoType::CMS::preview_locations
       location_options: $GeoType::GeoType::CMS::location_options
 
+init: sub { my $p = shift; require GeoType::Plugin; bless $p, 'GeoType::Plugin'; }
+
 settings:
   google_api_key:
     Default: ''
@@ -97,12 +99,15 @@ settings:
   hide_saved_locations:
     Default: 0
     Scope: blog
+  default_location:
+    Scope: blog
 
 callbacks:
   MT::App::CMS::template_source.edit_entry: $GeoType::GeoType::CMS::source_edit_entry
   MT::App::CMS::template_param.edit_entry: $GeoType::GeoType::CMS::param_edit_entry
   MT::App::CMS::AppTemplateSource.blog-left-nav: $GeoType::GeoType::CMS::left_nav
   cms_post_save.entry: $GeoType::GeoType::CMS::post_save_entry
+  api_post_save.entry: $GeoType::GeoType::CMS::post_save_entry
   CMSPostDelete.geotype_location: $GeoType::GeoType::CMS::post_delete_location
   MT::App::CMS::template_source.asset_options: $GeoType::GeoType::CMS::source_asset_options
   MT::App::CMS::template_param.asset_options: $GeoType::GeoType::CMS::param_asset_options
@@ -118,11 +123,13 @@ tags:
     geotype:locationlongitude: $GeoType::GeoType::Tags::_hdlr_location_longitude
     geotype:locationthumbnail: $GeoType::GeoType::Tags::_hdlr_location_thumbnail
     geotype:map: $GeoType::GeoType::Tags::_hdlr_map
+    geotype:detailmap: $GeoType::GeoType::Tags::_hdlr_detailmap
     geotype:assetmap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:entrymap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:archivemap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:archivedetailmap: $GeoType::GeoType::Tags::_hdlr_archivedetailmap
     geotype:mapheader: $GeoType::GeoType::Tags::_hdlr_map_header
+    geotype:clickablemap: $GeoType::GeoType::Tags::_hdlr_clickable_map
 
 # tags:
 #   block:
