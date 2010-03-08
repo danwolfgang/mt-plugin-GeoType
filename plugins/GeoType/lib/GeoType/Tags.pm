@@ -150,8 +150,12 @@ sub _hdlr_map_header {
     my $static_path = $ctx->tag ('StaticWebPath', {}, $cond);
 
 	my $infowindow_js = '';
+	my $zoomtofit = 0;
 	if ($args->{infowindow}) {
 		$infowindow_js = "GEvent.addListener(marker, 'click', function() { marker.openInfoWindowHtml(location.html); });";
+	}
+	if ($args->{zoomtofit}) {
+		$zoomtofit = 1;
 	}
 	
     my $res = '';
@@ -180,6 +184,7 @@ sub _hdlr_map_header {
 
         /* figure out the center */
         var center = geo_type_maps[map_id].center;
+		var zoomlevel;
         if (!center) {
             var bounds = new google.maps.LatLngBounds();
             var locations = geo_type_maps[map_id].locations;
@@ -187,6 +192,7 @@ sub _hdlr_map_header {
                 bounds.extend (new google.maps.LatLng (locations[i].lat, locations[i].lng));
             }
             center = bounds.getCenter();
+			zoomlevel = geo_type_maps[map_id].map.getBoundsZoomLevel(bounds);
         }
         else {
             center = new google.maps.LatLng (center[0], center[1]);
@@ -202,9 +208,11 @@ sub _hdlr_map_header {
 
         /* figure out the zoom */
         var zoom = geo_type_maps[map_id].zoom;
-        if (!zoom) {
+        if (!zoom && !$zoomtofit) {
             zoom = $zoom;
-        }
+        } else if ($zoomtofit) {
+			zoom = zoomlevel;
+		}
         geo_type_maps[map_id].map.setZoom(zoom);
 
         /* setup the controls */
@@ -279,9 +287,9 @@ sub _hdlr_map_header {
                             clusterIcon.infoWindowAnchor = new GPoint( 13, 3 );
                             clusterIcon.iconShadowAnchor = new GPoint( 27, 37 );
                             cluster_ARCH.SetIcon( clusterIcon );*/
-        geo_map.clusterer.SetMaxVisibleMarkers( 20 );
-
-        var locations = geo_map.locations;
+//		geo_map.clusterer.SetMaxVisibleMarkers( 20 );
+		
+		var locations = geo_map.locations;
         for (var i = 0; i < locations.length; i++) {
             //map.addOverlay (markerForLocation (locations[i]));
             geo_map.clusterer.AddMarker (markerForLocation (locations[i]), locations[i].name);
@@ -371,7 +379,7 @@ sub _hdlr_archivedetailmap { # called from an archive, this will show entry deta
     require GeoType::Util;
     my $res = '';
     unless ($ctx->var ('google_maps_header')) {
-        $res .= $ctx->tag ('geotype:mapheader', { infowindow => 1 }, { });
+        $res .= $ctx->tag ('geotype:mapheader', { infowindow => 1, zoomtofit => $args->{zoomtofit} }, { });
     }
     my $plugin = MT->component ('geotype');
     my $config = $plugin->get_config_hash ('blog:' . $blog_id);
@@ -415,7 +423,7 @@ sub _hdlr_detailmap { # this will show entry details in the infowindow bubble
     my $loc_options = {};
 	my $entries;
 	if ($args->{tag}) {
-		my $n = $args->{lastn} || 15;
+		my $n = $args->{lastn};
         my (%blog_terms, %blog_args);
         $ctx->set_blog_load_context($args, \%blog_terms, \%blog_args)
             or return $ctx->error($ctx->errstr);
@@ -424,16 +432,16 @@ sub _hdlr_detailmap { # this will show entry details in the infowindow bubble
 		require MT::Tag;
 		require MT::ObjectTag;
 		my $tag = MT::Tag->load({ name => $args->{tag} }) or return $ctx->error("Cannot find tag " . $args->{tag});
-        my @load_entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', limit => $n, join => MT::ObjectTag->join_on('object_id', { object_datasource => 'entry', tag_id => $tag->id }) });
+        my @load_entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', ($n) ? (limit => $n):( ), join => MT::ObjectTag->join_on('object_id', { object_datasource => 'entry', tag_id => $tag->id }) });
 		$entries = \@load_entries;
 	} else {
-		my $n = $args->{lastn} || 15;
+		my $n = $args->{lastn};
         my (%blog_terms, %blog_args);
         $ctx->set_blog_load_context($args, \%blog_terms, \%blog_args)
             or return $ctx->error($ctx->errstr);
         
         require MT::Entry;
-        my @load_entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', limit => $n });
+        my @load_entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', ($n) ? (limit => $n):( ) });
 		$entries = \@load_entries;
 	}
 
@@ -460,7 +468,7 @@ sub _hdlr_detailmap { # this will show entry details in the infowindow bubble
     require GeoType::Util;
     my $res = '';
     unless ($ctx->var ('google_maps_header')) {
-        $res .= $ctx->tag ('geotype:mapheader', { infowindow => 1 }, { });
+        $res .= $ctx->tag ('geotype:mapheader', { infowindow => 1, zoomtofit => $args->{zoomtofit} }, { });
     }
     my $plugin = MT->component ('geotype');
     my $config = $plugin->get_config_hash ('blog:' . $blog_id);
