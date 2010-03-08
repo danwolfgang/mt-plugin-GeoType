@@ -1,3 +1,15 @@
+##########################################################################
+# Copyright C 2007-2010 Six Apart Ltd.
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of version 2 of the GNU General Public License as published
+# by the Free Software Foundation, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details.  You should have received a copy of the GNU
+# General Public License version 2 along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+# CMS.pm 20010-03-08  nataliepo
 
 package GeoType::CMS;
 
@@ -10,59 +22,63 @@ use GeoType::Util;
 sub create_location {
     my $app = shift;
 
-    my $entry_insert = $app->param ('entry_insert');
-    my $edit_field   = $app->param ('edit_field');
-    $app->load_tmpl ('dialog/create_location.tmpl', { entry_insert => $entry_insert, edit_field => $edit_field });
+    my $entry_insert = $app->param('entry_insert');
+    my $edit_field   = $app->param('edit_field');
+    $app->load_tmpl( 'dialog/create_location.tmpl',
+        { entry_insert => $entry_insert, edit_field => $edit_field } );
 }
 
 sub verify_location {
     my $app = shift;
 
-    my $address = $app->param ('location_address');
-    my @coords  = GeoType::Util::geocode ($app->blog, $address);
+    my $address = $app->param('location_address');
+    my @coords = GeoType::Util::geocode( $app->blog, $address );
 
-    my $entry_insert = $app->param ('entry_insert');
-    my $edit_field   = $app->param ('edit_field');
+    my $entry_insert = $app->param('entry_insert');
+    my $edit_field   = $app->param('edit_field');
 
     require GeoType::LocationAsset;
     my $la = GeoType::LocationAsset->new;
-    $la->blog_id ($app->blog->id);
-    $la->latitude ($coords[1]);
-    $la->longitude ($coords[0]);
+    $la->blog_id( $app->blog->id );
+    $la->latitude( $coords[1] );
+    $la->longitude( $coords[0] );
 
-    my $url = $la->thumbnail_url (Width => 600, Height => int(600 / 1.61));
+    my $url = $la->thumbnail_url( Width => 600, Height => int( 600 / 1.61 ) );
 
-    $app->load_tmpl ('dialog/verify_location.tmpl', {
-        edit_field  => $edit_field,
-        entry_insert    => $entry_insert,
-        location_address => $address,
-        gecoded_url => $url,
-        location_latitude => $coords[1],
-        location_longitude => $coords[0],
-    });
+    $app->load_tmpl(
+        'dialog/verify_location.tmpl',
+        {
+            edit_field         => $edit_field,
+            entry_insert       => $entry_insert,
+            location_address   => $address,
+            gecoded_url        => $url,
+            location_latitude  => $coords[1],
+            location_longitude => $coords[0],
+        }
+    );
 }
 
 sub insert_location {
-    my $app = shift;
-    my $address = $app->param ('location_address');
-    my $name    = $app->param ('location_name');
-    my $latitude = $app->param ('location_latitude');
-    my $longitude = $app->param ('location_longitude');
+    my $app       = shift;
+    my $address   = $app->param('location_address');
+    my $name      = $app->param('location_name');
+    my $latitude  = $app->param('location_latitude');
+    my $longitude = $app->param('location_longitude');
 
     require GeoType::LocationAsset;
     my $la = GeoType::LocationAsset->new;
-    $la->blog_id ($app->blog->id);
-    $la->name ($name);
-    $la->location ($address);
-    $la->latitude ($latitude);
-    $la->longitude ($longitude);
+    $la->blog_id( $app->blog->id );
+    $la->name($name);
+    $la->location($address);
+    $la->latitude($latitude);
+    $la->longitude($longitude);
 
     $la->save or die $la->errstr;
 
-    if ($app->param ('entry_insert')) {
+    if ( $app->param('entry_insert') ) {
         require MT::CMS::Asset;
-        $app->param ('id', $la->id);
-        return MT::CMS::Asset::insert ($app)
+        $app->param( 'id', $la->id );
+        return MT::CMS::Asset::insert($app);
     }
     return $app->redirect(
         $app->uri(
@@ -73,26 +89,27 @@ sub insert_location {
 }
 
 sub source_asset_options {
-    my ($cb, $app, $tmpl) = @_;
+    my ( $cb, $app, $tmpl ) = @_;
 
     my $old = q{<__trans phrase="File Options">};
-    my $new = q{<mt:unless name="asset_is_location"><__trans phrase="File Options"><mt:else>Location Options</mt:else></mt:unless>};
+    my $new =
+q{<mt:unless name="asset_is_location"><__trans phrase="File Options"><mt:else>Location Options</mt:else></mt:unless>};
 
     $$tmpl =~ s/\Q$old\E/$new/;
 }
 
 sub param_asset_options {
-    my ($cb, $app, $param, $tmpl) = @_;
+    my ( $cb, $app, $param, $tmpl ) = @_;
 
     my $asset_id = $param->{asset_id};
 
     require MT::Asset;
-    my $asset = MT::Asset->load ($asset_id);
-    $param->{asset_is_location} = $asset->isa ('GeoType::LocationAsset');
+    my $asset = MT::Asset->load($asset_id);
+    $param->{asset_is_location} = $asset->isa('GeoType::LocationAsset');
 }
 
 sub source_edit_entry {
-    my ($cb, $app, $tmpl) = @_;
+    my ( $cb, $app, $tmpl ) = @_;
     my $old = q{<div id="feedback-field"};
     my $new = q{<div id="location-field">
     <mt:setvarblock name="location_header_action">
@@ -110,12 +127,13 @@ sub source_edit_entry {
     $$tmpl =~ s/\Q$old\E/$new$old/;
 }
 
-
 sub param_edit_entry {
-    my ($cb, $app, $param, $tmpl) = @_;
+    my ( $cb, $app, $param, $tmpl ) = @_;
     my $blog_id = $app->blog->id;
-    my $header = $tmpl->getElementById('header_include');
-    my $html_head = $tmpl->createElement('setvarblock', { name => 'html_head', append => 1 });
+    my $header  = $tmpl->getElementById('header_include');
+    my $html_head =
+      $tmpl->createElement( 'setvarblock',
+        { name => 'html_head', append => 1 } );
     my $innerHTML = q{
         <link rel='stylesheet' href="<mt:var name="static_uri">plugins/GeoType/geotype.css" />
         <script type="text/javascript">
@@ -213,7 +231,7 @@ sub param_edit_entry {
         </script>
 };
     $html_head->innerHTML($innerHTML);
-    $tmpl->insertBefore($html_head, $header);
+    $tmpl->insertBefore( $html_head, $header );
 
     $param->{location_setting} = q{
 <ul class='category-list pkg' id='location-list'>
@@ -222,20 +240,27 @@ sub param_edit_entry {
 <input type="hidden" name="location_list" id="location_list" />
 };
 
-    if ($param->{id}) {
+    if ( $param->{id} ) {
         require MT::ObjectAsset;
-        my @non_embedded_assets = MT::ObjectAsset->load ({
-            object_id => $param->{id},
-            object_ds => 'entry',
-            embedded  => 0,
-        });
+        my @non_embedded_assets = MT::ObjectAsset->load(
+            {
+                object_id => $param->{id},
+                object_ds => 'entry',
+                embedded  => 0,
+            }
+        );
         my @location_list = ();
         require MT::Asset;
         for my $oa (@non_embedded_assets) {
-            my $a = MT::Asset->load ($oa->asset_id);
-            next unless ($a->isa ('GeoType::LocationAsset'));
-            my $e = MT::Entry->load ($oa->object_id);
-            push @location_list, { id => $a->id, name => $a->name, options => ($e->location_options->{$a->id} || {}) };
+            my $a = MT::Asset->load( $oa->asset_id );
+            next unless ( $a->isa('GeoType::LocationAsset') );
+            my $e = MT::Entry->load( $oa->object_id );
+            push @location_list,
+              {
+                id      => $a->id,
+                name    => $a->name,
+                options => ( $e->location_options->{ $a->id } || {} )
+              };
         }
 
         $param->{location_list} = \@location_list;
@@ -243,7 +268,7 @@ sub param_edit_entry {
 }
 
 sub param_asset_insert {
-    my ($cb, $app, $param, $tmpl) = @_;
+    my ( $cb, $app, $param, $tmpl ) = @_;
     my $plugin = $cb->plugin;
 
     # proceed as normal unless we detect the simple association type
@@ -252,107 +277,131 @@ sub param_asset_insert {
     my $block = $tmpl->getElementById('insert_script');
     return 1 unless $block;
     my $preview_html = '';
-    my $ctx = $tmpl->context;
-    if (my $asset = $ctx->stash('asset')) {
-        my $asset_id = $asset->id;
+    my $ctx          = $tmpl->context;
+    if ( my $asset = $ctx->stash('asset') ) {
+        my $asset_id   = $asset->id;
         my $asset_name = $asset->name;
         require MT::Util;
-        $asset_name = MT::Util::encode_js ($asset_name);
+        $asset_name = MT::Util::encode_js($asset_name);
         $block->innerHTML(qq{top.insertLocation($asset_id, '$asset_name');});
     }
 }
 
 sub post_save_entry {
-    my ($cb, $app, $entry) = @_;
+    my ( $cb, $app, $entry ) = @_;
 
-    my $location_list = $app->param ('location_list') || '[]';
+    my $location_list = $app->param('location_list') || '[]';
     require JSON;
-    my $locations = JSON::from_json ($location_list);
+    my $locations = JSON::from_json($location_list);
     my %locations;
     foreach my $loc (@$locations) {
-        $locations{$loc->{id}} = $loc->{options};
+        $locations{ $loc->{id} } = $loc->{options};
     }
-    # foreach my $loc (split (/\s*,\s*/, $location_list)) {
-    #     my ($id, $opts) = split (/\|\|/, $loc, 2);
-    #     my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
-    #     $locations{$id} = { %opts_hash };
-    # }
+
+ # foreach my $loc (split (/\s*,\s*/, $location_list)) {
+ #     my ($id, $opts) = split (/\|\|/, $loc, 2);
+ #     my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
+ #     $locations{$id} = { %opts_hash };
+ # }
     my @ids = keys %locations;
 
     require MT::ObjectAsset;
-    my @assets = MT::ObjectAsset->load({
-        object_id => $entry->id,
-        blog_id => $entry->blog_id,
-        object_ds => $entry->datasource,
-        embedded => 0,
-    });
+    my @assets = MT::ObjectAsset->load(
+        {
+            object_id => $entry->id,
+            blog_id   => $entry->blog_id,
+            object_ds => $entry->datasource,
+            embedded  => 0,
+        }
+    );
     my %assets = map { $_->asset_id => $_->id } @assets;
 
     require GeoType::LocationAsset;
     for my $id (@ids) {
-        my $la = GeoType::LocationAsset->load ($id) or next;
-        my $oa = MT::ObjectAsset->set_by_key ({
-            blog_id => $entry->blog_id,
-            object_id => $entry->id,
-            object_ds => $entry->datasource,
-            asset_id => $id,
-            embedded => 0,
-        }) or return $cb->error (MT::ObjectAsset->errstr);
+        my $la = GeoType::LocationAsset->load($id) or next;
+        my $oa = MT::ObjectAsset->set_by_key(
+            {
+                blog_id   => $entry->blog_id,
+                object_id => $entry->id,
+                object_ds => $entry->datasource,
+                asset_id  => $id,
+                embedded  => 0,
+            }
+        ) or return $cb->error( MT::ObjectAsset->errstr );
         $assets{$id} = 0;
     }
 
-    if (my @old_maps = grep { $assets{$_->asset_id} } @assets) {
+    if ( my @old_maps = grep { $assets{ $_->asset_id } } @assets ) {
         my @old_ids;
         for my $old_id (@old_maps) {
+
             # we want to make sure we're only removing old geotype assets here
-            my $asset = MT::Asset->load($old_id->asset_id);
-            push (@old_ids, $old_id) if ($asset->isa('GeoType::LocationAsset'));
+            my $asset = MT::Asset->load( $old_id->asset_id );
+            push( @old_ids, $old_id )
+              if ( $asset->isa('GeoType::LocationAsset') );
         }
 
-        MT::ObjectAsset->remove( { id => \@old_ids })
-            if @old_ids;
+        MT::ObjectAsset->remove( { id => \@old_ids } )
+          if @old_ids;
     }
 
-    $entry->location_options (\%locations);
-    $entry->save or return $cb->error ($entry->errstr);
+    $entry->location_options( \%locations );
+    $entry->save or return $cb->error( $entry->errstr );
     1;
 }
 
 sub preview_locations {
-    my $app = shift;
+    my $app  = shift;
     my $blog = $app->blog;
 
-    my $location_list = $app->param ('location_list');
+    my $location_list = $app->param('location_list');
     require JSON;
-    my $locations = JSON::from_json ($location_list);
+    my $locations = JSON::from_json($location_list);
     my @ids = map { $_->{id} } @$locations;
     my @locations;
     require MT::Asset;
     for my $id (@ids) {
         next unless $id;
-        my $asset = MT::Asset->load ($id) or next;
-        push @locations, $asset if ($asset->isa ('GeoType::LocationAsset'));
+        my $asset = MT::Asset->load($id) or next;
+        push @locations, $asset if ( $asset->isa('GeoType::LocationAsset') );
     }
 
-    @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->latitude, lng => $_->longitude } } @locations;
+    @locations = map {
+        {
+            id       => $_->id,
+            name     => $_->name,
+            geometry => $_->geometry,
+            lat      => $_->latitude,
+            lng      => $_->longitude
+        }
+    } @locations;
 
-    my $plugin = MT->component ('geotype');
-    my $map_type = $plugin->get_config_value ('interactive_map_type', 'blog:' . $blog->id);
-    my $config = $plugin->get_config_hash ('blog:' . $blog->id);
-    $map_type = $map_type eq 'roadmap' ? 'G_NORMAL_MAP' : $map_type eq 'satellite' ? 'G_SATELLITE_MAP' : $map_type eq 'hybrid' ? 'G_HYBRID_MAP' : $map_type eq 'terrain' ? 'G_PHYSICAL_MAP' : 'G_NORMAL_MAP';
-    my $key = GeoType::Util::get_google_api_key ($blog);
-    return $app->load_tmpl ('dialog/preview_locations.tmpl', {
-        map_type    => $map_type,
-        google_api_key  => $key,
-        location_list   => \@locations,
-        %$config,
-    });
+    my $plugin = MT->component('geotype');
+    my $map_type =
+      $plugin->get_config_value( 'interactive_map_type', 'blog:' . $blog->id );
+    my $config = $plugin->get_config_hash( 'blog:' . $blog->id );
+    $map_type =
+        $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
+      : $map_type eq 'satellite' ? 'G_SATELLITE_MAP'
+      : $map_type eq 'hybrid'    ? 'G_HYBRID_MAP'
+      : $map_type eq 'terrain'   ? 'G_PHYSICAL_MAP'
+      :                            'G_NORMAL_MAP';
+    my $key = GeoType::Util::get_google_api_key($blog);
+    return $app->load_tmpl(
+        'dialog/preview_locations.tmpl',
+        {
+            map_type       => $map_type,
+            google_api_key => $key,
+            location_list  => \@locations,
+            %$config,
+        }
+    );
 }
 
 sub source_asset_list {
-    my ($cb, $app, $tmpl) = @_;
+    my ( $cb, $app, $tmpl ) = @_;
 
-    return 1 unless ($app->param ('edit_field') eq 'location_list');
+    return 1 unless ( $app->param('edit_field') eq 'location_list' );
 
     my $new = q{
         <img src="<mt:var name="static_uri">images/status_icons/create.gif" alt="<__trans phrase="Add New Location">" width="9" height="9" />
@@ -360,44 +409,63 @@ sub source_asset_list {
         <a href="<mt:var name="script_url">?__mode=create_location&amp;blog_id=<mt:var name="blog_id">&amp;dialog_view=1&amp;entry_insert=1&amp;edit_field=<mt:var name="edit_field" escape="url">&amp;upload_mode=<mt:var name="upload_mode" escape="url">&amp;<mt:if name="require_type">require_type=<mt:var name="require_type">&amp;</mt:if>return_args=<mt:var name="return_args" escape="url"><mt:if name="user_id">&amp;user_id=<mt:var name="user_id" escape="url"></mt:if>" ><__trans phrase="Add New Location"></a>
     };
 
-    $$tmpl =~ s{\Q<mt:setvarblock name="upload_new_file_link">\E.*\Q</mt:setvarblock>\E}{<mt:setvarblock name="upload_new_file_link">$new</mt:setvarblock>}ms;
+    $$tmpl =~
+s{\Q<mt:setvarblock name="upload_new_file_link">\E.*\Q</mt:setvarblock>\E}{<mt:setvarblock name="upload_new_file_link">$new</mt:setvarblock>}ms;
 }
 
 sub location_options {
-    my $app = shift;
+    my $app  = shift;
     my $blog = $app->blog;
 
-    my $loc = $app->param ('location');
+    my $loc = $app->param('location');
+
     # my ($id, $options) = split (/\|\|/, $loc, 2);
-    my $id = $app->param ('location_id');
-    my $options = $app->param ('location_options');
+    my $id      = $app->param('location_id');
+    my $options = $app->param('location_options');
 
     require JSON;
-    $options = JSON::from_json ($options);
+    $options = JSON::from_json($options);
 
     require MT::Asset;
-    my $location = MT::Asset->load ($id);
+    my $location = MT::Asset->load($id);
 
-    my $location_hash = { id => $location->id, name => $location->name, geometry => $location->geometry, lat => $location->latitude, lng => $location->longitude, options => $options };
+    my $location_hash = {
+        id       => $location->id,
+        name     => $location->name,
+        geometry => $location->geometry,
+        lat      => $location->latitude,
+        lng      => $location->longitude,
+        options  => $options
+    };
     $location_hash->{options}->{contents} ||= $location->description;
-    # my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
-    # $location_opts->{location_marker_opt_contents} ||= $location->description;
 
-    my $plugin = MT->component ('geotype');
-    my $map_type = $plugin->get_config_value ('interactive_map_type', 'blog:' . $blog->id);
-    my $config = $plugin->get_config_hash ('blog:' . $blog->id);
-    $map_type = $map_type eq 'roadmap' ? 'G_NORMAL_MAP' : $map_type eq 'satellite' ? 'G_SATELLITE_MAP' : $map_type eq 'hybrid' ? 'G_HYBRID_MAP' : $map_type eq 'terrain' ? 'G_PHYSICAL_MAP' : 'G_NORMAL_MAP';
-    my $key = GeoType::Util::get_google_api_key ($blog);
+# my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
+# $location_opts->{location_marker_opt_contents} ||= $location->description;
 
-    return $app->load_tmpl ('dialog/location_options.tmpl', {
-        location => $location_hash,
-        map_type    => $map_type,
-        google_api_key  => $key,
-        %$config,
-        %{$location_hash->{options}},
-        # %$location_opts,
-    });
+    my $plugin = MT->component('geotype');
+    my $map_type =
+      $plugin->get_config_value( 'interactive_map_type', 'blog:' . $blog->id );
+    my $config = $plugin->get_config_hash( 'blog:' . $blog->id );
+    $map_type =
+        $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
+      : $map_type eq 'satellite' ? 'G_SATELLITE_MAP'
+      : $map_type eq 'hybrid'    ? 'G_HYBRID_MAP'
+      : $map_type eq 'terrain'   ? 'G_PHYSICAL_MAP'
+      :                            'G_NORMAL_MAP';
+    my $key = GeoType::Util::get_google_api_key($blog);
+
+    return $app->load_tmpl(
+        'dialog/location_options.tmpl',
+        {
+            location       => $location_hash,
+            map_type       => $map_type,
+            google_api_key => $key,
+            %$config,
+            %{ $location_hash->{options} },
+
+            # %$location_opts,
+        }
+    );
 }
-
 
 1;

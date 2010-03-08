@@ -1,3 +1,15 @@
+##########################################################################
+# Copyright C 2007-2010 Six Apart Ltd.
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of version 2 of the GNU General Public License as published
+# by the Free Software Foundation, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details.  You should have received a copy of the GNU
+# General Public License version 2 along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+# CMS.pm 20010-03-08  nataliepo
 
 package GeoType::Tags;
 
@@ -7,36 +19,41 @@ use warnings;
 use GeoType::Util;
 
 sub geo_type_location_container {
-    my $ctx = shift;
-    my $res = '';
+    my $ctx     = shift;
+    my $res     = '';
     my $builder = $ctx->stash('builder');
-    my $tokens = $ctx->stash('tokens');
-    my $entry = $ctx->stash('entry');
+    my $tokens  = $ctx->stash('tokens');
+    my $entry   = $ctx->stash('entry');
     my @locations;
-    if ( ! $entry ) {                # Discover our context
+    if ( !$entry ) {    # Discover our context
         my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
-        if ( $at ) {
+        if ($at) {
             @locations = get_locations_for_archive($ctx);
-        } elsif ( $ctx->stash('locations') ) {
-        @locations = @{$ctx->stash('locations')};
-    } else {
+        }
+        elsif ( $ctx->stash('locations') ) {
+            @locations = @{ $ctx->stash('locations') };
+        }
+        else {
             return;
         }
-    } else {
-    @locations = get_locations_for_entry($entry);
     }
-    foreach my $location ( @locations ) {
-        $ctx->stash('geotype_location', $location);
-    my @extended = GeoType::ExtendedLocation->load({ location_id => $location->id });
-    my $extended;
-    ( scalar @extended > 0 ) && ( $extended = $extended[0] );
-    if ( $extended ) {
-        $ctx->stash('geotype_extended_location', $extended);
-    } else {
-        $ctx->stash('geotype_extended_location', 0 );
+    else {
+        @locations = get_locations_for_entry($entry);
     }
-        defined(my $out = $builder->build($ctx, $tokens))
-            or return $ctx->error($builder->errstr);
+    foreach my $location (@locations) {
+        $ctx->stash( 'geotype_location', $location );
+        my @extended =
+          GeoType::ExtendedLocation->load( { location_id => $location->id } );
+        my $extended;
+        ( scalar @extended > 0 ) && ( $extended = $extended[0] );
+        if ($extended) {
+            $ctx->stash( 'geotype_extended_location', $extended );
+        }
+        else {
+            $ctx->stash( 'geotype_extended_location', 0 );
+        }
+        defined( my $out = $builder->build( $ctx, $tokens ) )
+          or return $ctx->error( $builder->errstr );
         $res .= $out;
     }
     $res;
@@ -44,79 +61,95 @@ sub geo_type_location_container {
 
 sub geo_type_if_location_extended {
     my $ctx = shift;
-    if ( $ctx->stash('geotype_extended_location') && $ctx->stash('geotype_extended_location') ne '0' ) {
-    return 1;
-    } else {
+    if (   $ctx->stash('geotype_extended_location')
+        && $ctx->stash('geotype_extended_location') ne '0' )
+    {
+        return 1;
+    }
+    else {
         return 0;
     }
 }
 
 sub _hdlr_location_name {
-    return $_[0]->tag ('assetlabel', $_[1], $_[2]);
+    return $_[0]->tag( 'assetlabel', $_[1], $_[2] );
 }
 
 sub _hdlr_location_description {
-    return $_[0]->tag ('assetdescription', $_[1], $_[2]);
+    return $_[0]->tag( 'assetdescription', $_[1], $_[2] );
 }
 
 sub _hdlr_location_latitude {
-    my ($ctx, $args, $cond) = @_;
-    my $asset = $ctx->stash ('asset') or return $ctx->_no_asset_error();
-    return '' unless ($asset->isa ('GeoType::LocationAsset'));
+    my ( $ctx, $args, $cond ) = @_;
+    my $asset = $ctx->stash('asset') or return $ctx->_no_asset_error();
+    return '' unless ( $asset->isa('GeoType::LocationAsset') );
     return $asset->latitude ? $asset->latitude : '';
 }
 
 sub _hdlr_location_longitude {
-    my ($ctx, $args, $cond) = @_;
-    my $asset = $ctx->stash ('asset') or return $ctx->_no_asset_error();
-    return '' unless ($asset->isa ('GeoType::LocationAsset'));
+    my ( $ctx, $args, $cond ) = @_;
+    my $asset = $ctx->stash('asset') or return $ctx->_no_asset_error();
+    return '' unless ( $asset->isa('GeoType::LocationAsset') );
     return $asset->longitude ? $asset->longitude : '';
 }
 
 sub _hdlr_location_thumbnail {
-    return $_[0]->tag ('assetthumbnailurl', $_[1], $_[2]);
+    return $_[0]->tag( 'assetthumbnailurl', $_[1], $_[2] );
 }
 
 sub _hdlr_locations {
-    my ($ctx, $args, $cond) = @_;
-    my $tag = lc $ctx->stash ('tag');
+    my ( $ctx, $args, $cond ) = @_;
+    my $tag = lc $ctx->stash('tag');
     my $assets;
-    if ($tag eq 'entrylocations') {
-        my $e = $ctx->stash ('entry') or return $ctx->_no_entry_error();
+    if ( $tag eq 'entrylocations' ) {
+        my $e = $ctx->stash('entry') or return $ctx->_no_entry_error();
         require MT::ObjectAsset;
         require MT::Asset;
-        my @assets = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on(undef, {
-            asset_id => \'= asset_id', object_ds => 'entry', object_id => $e->id })});
+        my @assets = MT::Asset->load(
+            { class => 'location' },
+            {
+                join => MT::ObjectAsset->join_on(
+                    undef,
+                    {
+                        asset_id  => \'= asset_id',
+                        object_ds => 'entry',
+                        object_id => $e->id
+                    }
+                )
+            }
+        );
         return '' unless @assets;
         $assets = \@assets;
     }
     local $ctx->{__stash}{assets} = $assets if ($assets);
-    return $ctx->tag ('assets', { %$args, class_type => 'asset.location' }, $cond);
+    return $ctx->tag( 'assets', { %$args, class_type => 'asset.location' },
+        $cond );
 }
 
 sub _hdlr_map_header {
-    my ($ctx, $args, $cond) = @_;
+    my ( $ctx, $args, $cond ) = @_;
 
-    return '' if ($ctx->var ('geo_type_header'));
+    return '' if ( $ctx->var('geo_type_header') );
 
-    my $blog = $ctx->stash ('blog');
+    my $blog = $ctx->stash('blog');
 
-    $ctx->var ('geo_type_header', 1);
-    my $key = GeoType::Util::get_google_api_key ($ctx->stash ('blog'), 'site');
-    my $plugin = MT->component ('geotype');
-    my $config = $plugin->get_config_hash ('blog:' . $ctx->stash ('blog')->id);
+    $ctx->var( 'geo_type_header', 1 );
+    my $key = GeoType::Util::get_google_api_key( $ctx->stash('blog'), 'site' );
+    my $plugin = MT->component('geotype');
+    my $config = $plugin->get_config_hash( 'blog:' . $ctx->stash('blog')->id );
     my $map_type = $config->{interactive_map_type};
-    $map_type = $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
-              : $map_type eq 'satellite' ? 'G_SATELLITE_MAP'
-              : $map_type eq 'hybrid'    ? 'G_HYBRID_MAP'
-              : $map_type eq 'terrain'   ? 'G_PHYSICAL_MAP'
-              :                            'G_NORMAL_MAP';
-    my $zoom = $config->{interactive_map_zoom} || 13;
-    my $overview = $config->{interactive_map_overview} || 0;
-    my $scale    = $config->{interactive_map_scale} || 0;
-    my $type     = $config->{interactive_map_type_control} || 0;
+    $map_type =
+        $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
+      : $map_type eq 'satellite' ? 'G_SATELLITE_MAP'
+      : $map_type eq 'hybrid'    ? 'G_HYBRID_MAP'
+      : $map_type eq 'terrain'   ? 'G_PHYSICAL_MAP'
+      :                            'G_NORMAL_MAP';
+    my $zoom          = $config->{interactive_map_zoom}         || 13;
+    my $overview      = $config->{interactive_map_overview}     || 0;
+    my $scale         = $config->{interactive_map_scale}        || 0;
+    my $type          = $config->{interactive_map_type_control} || 0;
     my $zoom_controls = $config->{interactive_map_zoom_control} || 'none';
-    my $static_path = $ctx->tag ('StaticWebPath', {}, $cond);
+    my $static_path = $ctx->tag( 'StaticWebPath', {}, $cond );
     my $res = '';
     $res .= qq{
     <script type="text/javascript" src="${static_path}plugins/GeoType/js/Clusterer2.js"></script>
@@ -297,99 +330,136 @@ sub _hdlr_map_header {
 }
 
 sub _locations_from_archive {
-    my ($ctx)
+    my ($ctx);
 }
 
 sub _hdlr_map {
-    my ($ctx, $args, $cond) = @_;
+    my ( $ctx, $args, $cond ) = @_;
 
     my @assets;
     my @ids;
-    my $blog_id = $ctx->stash ('blog_id');
+    my $blog_id = $ctx->stash('blog_id');
     my $map_id;
     my $loc_options = {};
-    if ($ctx->stash ('tag') eq 'geotype:map' && $args->{lastnentries}) {
+    if ( $ctx->stash('tag') eq 'geotype:map' && $args->{lastnentries} ) {
         my $n = $args->{lastnentries};
-        my (%blog_terms, %blog_args);
-        $ctx->set_blog_load_context($args, \%blog_terms, \%blog_args)
-            or return $ctx->error($ctx->errstr);
+        my ( %blog_terms, %blog_args );
+        $ctx->set_blog_load_context( $args, \%blog_terms, \%blog_args )
+          or return $ctx->error( $ctx->errstr );
 
         require MT::Entry;
-        my @entries = MT::Entry->load ({ %blog_terms, status => MT::Entry::RELEASE }, { %blog_args, sort => 'authored_on', direction => 'descend', limit => $n });
+        my @entries = MT::Entry->load(
+            { %blog_terms, status => MT::Entry::RELEASE },
+            {
+                %blog_args,
+                sort      => 'authored_on',
+                direction => 'descend',
+                limit     => $n
+            }
+        );
         $map_id = 'last-' . $n;
         push @ids, map { $_->id } @entries;
 
     }
-    elsif ($ctx->stash ('tag') eq 'geotype:assetmap' ||
-        ($ctx->stash ('tag') eq 'geotype:map' && $ctx->stash ('asset'))) {
-        my $asset = $ctx->stash ('asset') or return $ctx->_no_asset_error();
-        return '' unless ($asset->isa ('GeoType::LocationAsset'));
+    elsif ( $ctx->stash('tag') eq 'geotype:assetmap'
+        || ( $ctx->stash('tag') eq 'geotype:map' && $ctx->stash('asset') ) )
+    {
+        my $asset = $ctx->stash('asset') or return $ctx->_no_asset_error();
+        return '' unless ( $asset->isa('GeoType::LocationAsset') );
 
         $map_id = 'asset-' . $asset->id;
         push @assets, $asset;
-        if (my $e = $ctx->stash ('entry')) {
+        if ( my $e = $ctx->stash('entry') ) {
             $loc_options = $e->location_options;
         }
     }
-    elsif ($ctx->stash ('tag') eq 'geotype:entrymap' ||
-        ($ctx->stash ('tag') eq 'geotype:map' && $ctx->stash ('entry'))) {
-        my $e = $ctx->stash ('entry') or return $ctx->_no_entry_error();
+    elsif ( $ctx->stash('tag') eq 'geotype:entrymap'
+        || ( $ctx->stash('tag') eq 'geotype:map' && $ctx->stash('entry') ) )
+    {
+        my $e = $ctx->stash('entry') or return $ctx->_no_entry_error();
         push @ids, $e->id;
 
-        $map_id = 'entry-' . $e->id;
+        $map_id      = 'entry-' . $e->id;
         $loc_options = $e->location_options;
     }
-    elsif ($ctx->stash ('tag') eq 'geotype:archivemap' ||
-        ($ctx->stash ('tag') eq 'geotype:map' && ($ctx->{archive_type} || $ctx->{current_archive_type}))) {
-        my $entries = $ctx->stash ('entries') || [];
+    elsif (
+        $ctx->stash('tag') eq 'geotype:archivemap'
+        || ( $ctx->stash('tag') eq 'geotype:map'
+            && ( $ctx->{archive_type} || $ctx->{current_archive_type} ) )
+      )
+    {
+        my $entries = $ctx->stash('entries') || [];
         push @ids, map { $_->id } @$entries;
 
         require MT::Util;
-        my $title = $ctx->tag ('archivetitle', {}, $cond);
-        $title = MT::Util::dirify ($title);
+        my $title = $ctx->tag( 'archivetitle', {}, $cond );
+        $title  = MT::Util::dirify($title);
         $map_id = 'archive-' . $title;
     }
     else {
-        return $ctx->error ('No context from which to extract locations');
+        return $ctx->error('No context from which to extract locations');
     }
 
     require GeoType::LocationAsset;
     unless (@assets) {
         require MT::ObjectAsset;
         require MT::Asset;
-        @assets = MT::Asset->load({ class => 'location' }, { join => MT::ObjectAsset->join_on(undef, {
-            asset_id => \'= asset_id', object_ds => 'entry', object_id => \@ids, $args->{all} ? () : ( embedded => 0 ) } )});
+        @assets = MT::Asset->load(
+            { class => 'location' },
+            {
+                join => MT::ObjectAsset->join_on(
+                    undef,
+                    {
+                        asset_id  => \'= asset_id',
+                        object_ds => 'entry',
+                        object_id => \@ids,
+                        $args->{all} ? () : ( embedded => 0 )
+                    }
+                )
+            }
+        );
     }
     return '' unless @assets;
 
-    my $width = $args->{width};
+    my $width  = $args->{width};
     my $height = $args->{height};
     my $square = $args->{square};
-    if ($args->{static}) {
+    if ( $args->{static} ) {
         require GeoType::Util;
         my $params;
         $params->{Height} = $height if ($height);
         $params->{Width}  = $width  if ($width);
 
-        $params->{Square} = $square;
+        $params->{Square}  = $square;
         $params->{blog_id} = $blog_id;
 
-        my ($url, $w, $h) = GeoType::Util::static_url_for_locations ($params, @assets);
-        return sprintf qq(<img src="%s" width="%d" height="%d" alt="" /></a>), $url, $w, $h;
+        my ( $url, $w, $h ) =
+          GeoType::Util::static_url_for_locations( $params, @assets );
+        return sprintf qq(<img src="%s" width="%d" height="%d" alt="" /></a>),
+          $url, $w, $h;
     }
     else {
         require GeoType::Util;
         my $res = '';
-        unless ($ctx->var ('google_maps_header')) {
-            $res .= $ctx->tag ('geotype:mapheader', {}, {});
+        unless ( $ctx->var('google_maps_header') ) {
+            $res .= $ctx->tag( 'geotype:mapheader', {}, {} );
         }
-        my $plugin = MT->component ('geotype');
-        my $config = $plugin->get_config_hash ('blog:' . $blog_id);
+        my $plugin = MT->component('geotype');
+        my $config = $plugin->get_config_hash( 'blog:' . $blog_id );
         $height = $config->{interactive_map_height} unless ($height);
         $width  = $config->{interactive_map_width}  unless ($width);
-        my @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->latitude, lng => $_->longitude, options => $loc_options->{$_->id} } } @assets;
+        my @locations = map {
+            {
+                id       => $_->id,
+                name     => $_->name,
+                geometry => $_->geometry,
+                lat      => $_->latitude,
+                lng      => $_->longitude,
+                options  => $loc_options->{ $_->id }
+            }
+        } @assets;
         require JSON;
-        my $location_json = @locations ? JSON::objToJson (\@locations) : '[]';
+        my $location_json = @locations ? JSON::objToJson( \@locations ) : '[]';
         my $wikipedia = $args->{wikipedia} || '';
         my $panoramio = $args->{panoramio} || 0;
         $res .= qq{
@@ -408,9 +478,8 @@ sub _hdlr_map {
     }
 }
 
-
 sub geo_type_id_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $location = $ctx->stash('geotype_location');
     return '' unless $location;
     return '' unless $location->id;
@@ -418,7 +487,7 @@ sub geo_type_id_tag {
 }
 
 sub geo_type_GUID_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $location = $ctx->stash('geotype_location');
     return '' unless $location;
     return '' unless $location->id;
@@ -426,29 +495,29 @@ sub geo_type_GUID_tag {
 }
 
 sub geo_type_latitude_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $location = $ctx->stash('geotype_location');
     return '' unless $location;
     return '' unless $location->id;
     my $geometry = $location->geometry;
     return '' unless $location->geometry;
-    my @coords = split(/, ?/, $geometry);
+    my @coords = split( /, ?/, $geometry );
     return $coords[0];
 }
 
 sub geo_type_longitude_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $location = $ctx->stash('geotype_location');
     return '' unless $location;
     return '' unless $location->id;
     my $geometry = $location->geometry;
     return '' unless $location->geometry;
-    my @coords = split(/, ?/, $geometry);
+    my @coords = split( /, ?/, $geometry );
     return $coords[1];
 }
 
 sub geo_type_cross_street_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -456,7 +525,7 @@ sub geo_type_cross_street_tag {
 }
 
 sub geo_type_hours_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -464,7 +533,7 @@ sub geo_type_hours_tag {
 }
 
 sub geo_type_description_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -472,7 +541,7 @@ sub geo_type_description_tag {
 }
 
 sub geo_type_phone_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -480,7 +549,7 @@ sub geo_type_phone_tag {
 }
 
 sub geo_type_place_id_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -488,7 +557,7 @@ sub geo_type_place_id_tag {
 }
 
 sub geo_type_rating_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -496,7 +565,7 @@ sub geo_type_rating_tag {
 }
 
 sub geo_type_thumbnail_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -504,7 +573,7 @@ sub geo_type_thumbnail_tag {
 }
 
 sub geo_type_URL_tag {
-    my $ctx = shift;
+    my $ctx      = shift;
     my $extended = $ctx->stash('geotype_extended_location');
     return '' unless $extended;
     return '' unless $extended->id;
@@ -513,45 +582,53 @@ sub geo_type_URL_tag {
 
 # Creates an actual map for an entry
 sub geo_type_map_tag {
-    my ($ctx, $args) = @_;
+    my ( $ctx, $args ) = @_;
     my $entry = $ctx->stash('entry');
     my $entry_id;
     my $blog_id = $ctx->stash('blog_id');
     my @locations;
     my $zoom;
-    my ($maxLat, $minLat, $maxLon, $minLon); # For archive maps w/no defined zoom
+    my ( $maxLat, $minLat, $maxLon, $minLon )
+      ;    # For archive maps w/no defined zoom
 
-    if ( ! $entry ) {
+    if ( !$entry ) {
+
         # Discover our context
         my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
-        if ( $at ) {
+        if ($at) {
             @locations = get_locations_for_archive($ctx);
-            ($maxLat, $minLat, $maxLon, $minLon) = &get_bounds_for_locations(@locations);
+            ( $maxLat, $minLat, $maxLon, $minLon ) =
+              &get_bounds_for_locations(@locations);
             $entry_id = 'ARCH';
         }
-        elsif (my $n = $args->{lastnentries}) {
+        elsif ( my $n = $args->{lastnentries} ) {
             require MT::Entry;
-            my @entries = MT::Entry->load ({ blog_id => $blog_id, status => MT::Entry::RELEASE() }, { sort => 'created_on', direction => 'descend', limit => $n });
+            my @entries = MT::Entry->load(
+                { blog_id => $blog_id, status => MT::Entry::RELEASE() },
+                { sort => 'created_on', direction => 'descend', limit => $n }
+            );
             local $ctx->{__stash}{entries} = \@entries;
-            @locations = get_locations_for_archive ($ctx);
+            @locations = get_locations_for_archive($ctx);
         }
         else {
+
             # No entry, no archive
             return;
         }
-    } else {
-            @locations = get_locations_for_entry($entry);
-            $zoom = get_zoom_for_entry ($entry);
-            $entry_id = $entry->id;
     }
-    my $plugin = MT->component ('geotype');
-    my $config = $plugin->get_config_hash('blog:' . $blog_id);
+    else {
+        @locations = get_locations_for_entry($entry);
+        $zoom      = get_zoom_for_entry($entry);
+        $entry_id  = $entry->id;
+    }
+    my $plugin = MT->component('geotype');
+    my $config = $plugin->get_config_hash( 'blog:' . $blog_id );
 
     our $useManager = 0;
-    if (scalar @locations) {
+    if ( scalar @locations ) {
         my $map_width  = $config->{map_width};
         my $map_height = $config->{map_height};
-        my $html = qq@
+        my $html       = qq@
             <div id="geo_map_$entry_id" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
             <script type="text/javascript"> //<![CDATA[
             var geo_map_$entry_id;
@@ -567,15 +644,15 @@ sub geo_type_map_tag {
         }
         require MT::App;
         our $static_path;
-        eval {
-            $static_path = MT::App->instance->static_path;
-        };
-        if ( $@ ) {
+        eval { $static_path = MT::App->instance->static_path; };
+        if ($@) {
             if ( $ctx->stash('static_uri') ) {
                 $static_path = $ctx->stash('static_uri');
-            } elsif ( MT::ConfigMgr->instance->StaticWebPath ) {
+            }
+            elsif ( MT::ConfigMgr->instance->StaticWebPath ) {
                 $static_path = MT::ConfigMgr->instance->StaticWebPath;
-            } else {
+            }
+            else {
                 die "Unable to locate STATIC_PATH";
             }
         }
@@ -586,8 +663,12 @@ sub geo_type_map_tag {
                 geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
 
         @;
-        my $default_map_type   = $config->{default_map_type};
-        if ( defined($maxLat) && defined($minLat) && defined($maxLon) && defined($minLon) ) {
+        my $default_map_type = $config->{default_map_type};
+        if (   defined($maxLat)
+            && defined($minLat)
+            && defined($maxLon)
+            && defined($minLon) )
+        {
             $html .= qq@
             var SW = new GLatLng($minLat, $minLon);
             var NE = new GLatLng($maxLat, $maxLon);
@@ -617,12 +698,14 @@ sub geo_type_map_tag {
         foreach my $location (@locations) {
             my $marker_html;
             my $marker_title;
-            if ( $entry ) {
+            if ($entry) {
                 $marker_title = $entry->title;
                 $marker_title =~ s/'/\\'/g;
                 $marker_html = $marker_title;
-            } else {
-                my @le = GeoType::EntryLocation->load({ location_id => $location->id });
+            }
+            else {
+                my @le = GeoType::EntryLocation->load(
+                    { location_id => $location->id } );
                 my $dummy_entry = MT::Entry->load( $le[0]->entry_id );
 
                 $marker_title = $dummy_entry->title;
@@ -630,19 +713,21 @@ sub geo_type_map_tag {
                 my $entry_link = $dummy_entry->permalink;
                 $marker_html = "<a href=\"$entry_link\">$marker_title</a>";
             }
-            $marker_html = "<div class=\"GeoTypeMarkerContent\">$marker_html</div>";
-            my $geom = $location->geometry;
-            my $title_js = MT::Util::encode_js ($location->name);
+            $marker_html =
+              "<div class=\"GeoTypeMarkerContent\">$marker_html</div>";
+            my $geom     = $location->geometry;
+            my $title_js = MT::Util::encode_js( $location->name );
             $html .= qq!
             var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js', icon: geo_icon });
             GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
             !;
-            if ( $useManager ) {
-            $html .= qq!
+            if ($useManager) {
+                $html .= qq!
             cluster_${entry_id}.AddMarker(marker_$i, '$marker_title');
             !;
-            } else {
-            $html .= qq!
+            }
+            else {
+                $html .= qq!
             geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);
             geo_map_${entry_id}.addOverlay (marker_$i);
             !;
@@ -650,17 +735,25 @@ sub geo_type_map_tag {
             $i++;
         }
 
-        $html .= qq{geo_map_$entry_id.addControl (new GOverviewMapControl());} if $plugin->get_config_value ('map_controls_overview', 'blog:' . $blog_id);
-        $html .= qq{geo_map_$entry_id.addControl (new GScaleControl());} if $plugin->get_config_value ('map_controls_scale', 'blog:' . $blog_id);
-        $html .= qq{geo_map_$entry_id.addControl (new GMapTypeControl());} if $plugin->get_config_value ('map_controls_map_type', 'blog:' . $blog_id);
-        my $zoom = $plugin->get_config_value ('map_controls_zoom', 'blog:' . $blog_id);
-        if ($zoom eq 'small') {
-            $html .= qq{geo_map_$entry_id.addControl (new GSmallZoomControl());};
+        $html .= qq{geo_map_$entry_id.addControl (new GOverviewMapControl());}
+          if $plugin->get_config_value( 'map_controls_overview',
+                  'blog:' . $blog_id );
+        $html .= qq{geo_map_$entry_id.addControl (new GScaleControl());}
+          if $plugin->get_config_value( 'map_controls_scale',
+                  'blog:' . $blog_id );
+        $html .= qq{geo_map_$entry_id.addControl (new GMapTypeControl());}
+          if $plugin->get_config_value( 'map_controls_map_type',
+                  'blog:' . $blog_id );
+        my $zoom =
+          $plugin->get_config_value( 'map_controls_zoom', 'blog:' . $blog_id );
+        if ( $zoom eq 'small' ) {
+            $html .=
+              qq{geo_map_$entry_id.addControl (new GSmallZoomControl());};
         }
-        elsif ($zoom eq 'medium') {
+        elsif ( $zoom eq 'medium' ) {
             $html .= qq{geo_map_$entry_id.addControl (new GSmallMapControl());};
         }
-        elsif ($zoom eq 'large') {
+        elsif ( $zoom eq 'large' ) {
             $html .= qq{geo_map_$entry_id.addControl (new GLargeMapControl());};
         }
         $html .= qq!});
