@@ -302,12 +302,12 @@ sub post_save_entry {
     }
 
     if (my @old_maps = grep { $assets{$_->asset_id} } @assets) {
-		my @old_ids;
-		for my $old_id (@old_maps) {
-			# we want to make sure we're only removing old geotype assets here
-			my $asset = MT::Asset->load($old_id->asset_id);
-			push (@old_ids, $old_id) if ($asset->isa('GeoType::LocationAsset'));
-		}
+        my @old_ids;
+        for my $old_id (@old_maps) {
+            # we want to make sure we're only removing old geotype assets here
+            my $asset = MT::Asset->load($old_id->asset_id);
+            push (@old_ids, $old_id) if ($asset->isa('GeoType::LocationAsset'));
+        }
 
         MT::ObjectAsset->remove( { id => \@old_ids })
             if @old_ids;

@@ -7,16 +7,16 @@ use GeoType::EntryLocation;
 use GeoType::ExtendedLocation;
 
 __PACKAGE__->install_properties({
-	column_defs => {
-	        'id' => 'integer not null auto_increment',
-	        'blog_id' => 'integer not null',
-	        'name' => 'string(255)',
-	        'location' => 'string(255)',
-	        'mapurl' => 'string(255)',
-	        'geometry' => 'text',
-	        'basename' => 'string(255)',
-	        'visible' => 'integer not null default 1'
-	},
+    column_defs => {
+            'id' => 'integer not null auto_increment',
+            'blog_id' => 'integer not null',
+            'name' => 'string(255)',
+            'location' => 'string(255)',
+            'mapurl' => 'string(255)',
+            'geometry' => 'text',
+            'basename' => 'string(255)',
+            'visible' => 'integer not null default 1'
+    },
     indexes => {
         name => 1,
         blog_id => 1
@@ -53,7 +53,7 @@ sub make_guid {
     my $l = shift;
     my $blog = MT::Blog->load($l->blog_id);
     die "Unable to load blog " . $l->blog_id unless $blog;
-	my ($host, $year, $path, $blog_id, $basename);
+    my ($host, $year, $path, $blog_id, $basename);
     $blog_id = $l->blog_id;
     $basename = $l->basename;
     die "No basename for location " . $l->id unless $basename;

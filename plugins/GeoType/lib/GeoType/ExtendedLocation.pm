@@ -4,7 +4,7 @@ use strict;
 use base qw(MT::Object);
 
 __PACKAGE__->install_properties({
-	column_defs => {
+    column_defs => {
                 'id' => 'integer not null auto_increment',
                 'location_id' => 'integer not null',
                 'cross_street' => 'string(255)',
