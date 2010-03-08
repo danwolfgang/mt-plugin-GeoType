@@ -4,6 +4,8 @@ package GeoType::Tags;
 use strict;
 use warnings;
 
+use GeoType::Util;
+
 sub geo_type_location_container {
     my $ctx = shift;
     my $res = '';
@@ -285,7 +287,8 @@ sub _hdlr_map_header {
         }
     }
     
-    google.load ('maps', '2.x', { callback: maps_loaded });
+	if(google)
+    	google.load ('maps', '2.x', { callback: maps_loaded });
     
     </script>
     };
@@ -390,13 +393,17 @@ sub _hdlr_map {
         my $wikipedia = $args->{wikipedia} || '';
         my $panoramio = $args->{panoramio} || 0;
         $res .= qq{
+            <div id='$map_id' geotype:map='$map_id' style="height: ${height}px; width: ${width}px"></div>
+
             <script type='text/javascript'>
                 geo_type_maps["$map_id"] = new Object();
                 geo_type_maps["$map_id"].locations = $location_json;
                 geo_type_maps["$map_id"].wikipedia = '$wikipedia';
                 geo_type_maps["$map_id"].panoramio = $panoramio; 
+				
+				if(google)
+			    	google.load ('maps', '2.x', { callback: maps_loaded });
             </script>
-            <div id='$map_id' geotype:map='$map_id' style="height: ${height}px; width: ${width}px"></div>
         };
     }
 }

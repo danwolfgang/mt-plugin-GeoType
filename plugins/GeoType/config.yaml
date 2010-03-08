@@ -112,11 +112,11 @@ callbacks:
 
 tags:
   function:
-    "geotype:locationname": $GeoType::GeoType::Tags::_hdlr_location_name
-    "geotype:locationdescription": $GeoType::GeoType::Tags::_hdlr_location_description
-    "geotype:locationlatitude": $GeoType::GeoType::Tags::_hdlr_location_latitude
-    "geotype:locationlongitude": $GeoType::GeoType::Tags::_hdlr_location_longitude
-    "geotype:locationthumbnail": $GeoType::GeoType::Tags::_hdlr_location_thumbnail
+    geotype:locationname: $GeoType::GeoType::Tags::_hdlr_location_name
+    geotype:locationdescription: $GeoType::GeoType::Tags::_hdlr_location_description
+    geotype:locationlatitude: $GeoType::GeoType::Tags::_hdlr_location_latitude
+    geotype:locationlongitude: $GeoType::GeoType::Tags::_hdlr_location_longitude
+    geotype:locationthumbnail: $GeoType::GeoType::Tags::_hdlr_location_thumbnail
     geotype:map: $GeoType::GeoType::Tags::_hdlr_map
     geotype:assetmap: $GeoType::GeoType::Tags::_hdlr_map
     geotype:entrymap: $GeoType::GeoType::Tags::_hdlr_map
