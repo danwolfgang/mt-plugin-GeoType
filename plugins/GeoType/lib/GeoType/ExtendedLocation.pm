@@ -22,3 +22,6 @@ __PACKAGE__->install_properties({
     datasource => 'extendedlocation',
     primary_key => 'id'
 });
+
+
+1;

@@ -1,0 +1,59 @@
+<$mt:setvar name="screen_type" value="dialog-screen"$>
+<mt:setvarblock name="page_title"><__trans phrase="Verify Location"></mt:setvarblock>
+<mt:setvarblock name="html_head" append="1">
+<script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
+<script type="text/javascript" src="<mt:var name="static_uri">js/tc/json.js"></script>
+<script type="text/javascript" src="<mt:var name="static_uri">js/dialog.js"></script>
+</mt:setvarblock>
+
+<mt:include name="dialog/header.tmpl">
+
+<form method="post" action="<$mt:var name="script_url"$>" id="location-form"<mt:unless name="entry_insert"> target="_top"</mt:unless>>
+    <input type="hidden" name="__mode" value="insert_location" />
+    <input type="hidden" name="blog_id" value="<mt:var name="blog_id">" />
+    <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+    <input type="hidden" name="entry_insert" value="<$mt:var name="entry_insert"$>" />
+    <input type="hidden" name="edit_field" value="<$mt:var name="edit_field"$>" />
+    <mt:if name="user_id">
+    <input type="hidden" name="user_id" value="<mt:var name="user_id" escape="html">" />
+    </mt:if>
+    
+<mtapp:setting
+    id="location_name"
+    label_class="top-label"
+    label="Name"
+    required="1">
+    <input type="text" class="full-width" name="location_name" id="location_name" value="" />
+</mtapp:setting>
+
+<mtapp:setting
+    id="location_address"
+    label_class="top-label"
+    label="Address">
+    <$mt:var name="location_address" escape="html"$>
+    <input type="hidden" name="location_address" value="<$mt:var name="location_address" escape="html"$>" />
+    <input type="hidden" name="location_latitude" value="<$mt:var name="location_latitude" escape="html"$>" />
+    <input type="hidden" name="location_longitude" value="<$mt:var name="location_longitude" escape="html"$>" />
+</mtapp:setting>
+
+<img src="<mt:var name="gecoded_url">" />
+
+<div class="actions-bar">
+    <div class="actions-bar-inner pkg actions">
+        <button
+            type="submit"
+            title="<__trans phrase="Create Asset">"
+            class="primary-button"
+            ><__trans phrase="Create Asset"></button>
+        <button
+            onclick="closeDialog(); return false"
+            type="submit"
+            accesskey="x"
+            title="<__trans phrase="Cancel (x)">"
+            ><__trans phrase="Cancel"></button>
+    </div>
+</div>
+
+</form>
+
+<mt:include name="dialog/footer.tmpl">

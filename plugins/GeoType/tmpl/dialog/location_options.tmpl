@@ -1,0 +1,67 @@
+<$mt:setvar name="screen_type" value="dialog-screen"$>
+<mt:setvarblock name="page_title"><__trans phrase="Preview Locations"></mt:setvarblock>
+<mt:setvarblock name="html_head" append="1">
+<script type="text/javascript" scr="<mt:var name="statuc_url">js/tc.js"></script>
+<script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
+<script type="text/javascript" src="<mt:var name="static_uri">js/tc/json.js"></script>
+<script type="text/javascript" src="<mt:var name="static_uri">js/dialog.js"></script>
+
+<script type="text/javascript" src="http://www.google.com/jsapi?key=<$mt:var name="google_api_key"$>"></script>
+<link rel='stylesheet' href="<mt:var name="static_uri">plugins/GeoType/geotype.css" />
+
+<script type="text/javascript">
+    var gt_location = <mt:var name="location" to_json="1">;
+    
+    function initLocationOptions () {
+        getByID('location_marker_char')
+        var contents = getByID('location_marker_contents').value;
+        contents = contents.replace (/<br \/>/g, "\n");
+        getByID('location_marker_contents').value = contents;
+    }
+    
+    function updateLocationOptions () {
+        var contents = getByID('location_marker_contents').value;
+        contents = contents.replace (/\r?\n/g, "<br />");
+        var options = { 'marker_char': getByID ('location_marker_char').value, 'contents': contents };
+        top.updateLocationOptions (gt_location.id, options);
+        closeDialog();
+    }
+    
+    TC.attachLoadEvent (initLocationOptions);
+</script>
+</mt:setvarblock>
+<mt:include name="dialog/header.tmpl">
+
+<mtapp:setting
+    id="location_marker_char"
+    label="Marker Character">
+    <input type="text" size="3" name="location_marker_char" id="location_marker_char" value="<$mt:var name="marker_char" escape="html"$>"/>
+</mtapp:setting>
+
+<mtapp:setting
+    id="location_marker_contents"
+    label="Marker Window Contents"
+    label_class="top-label">
+    <div class="textarea-wrapper">
+    <textarea name="location_marker_contents" id="location_marker_contents" rows="" cols="" class='full-width short'><mt:var name="contents" escape="html"></textarea>
+    </div>
+</mtapp:setting>
+
+<div class="actions-bar">
+    <div class="actions-bar-inner pkg actions">
+        <button
+            onclick="updateLocationOptions(); return false"
+            type="submit"
+            title="<__trans phrase="Continue">"
+            class="primary-button"
+            ><__trans phrase="Continue"></button>
+        <button
+            onclick="closeDialog(); return false"
+            type="submit"
+            accesskey="x"
+            title="<__trans phrase="Cancel">"
+            ><__trans phrase="Cancel"></button>
+    </div>
+</div>
+
+<mt:include name="dialog/footer.tmpl">

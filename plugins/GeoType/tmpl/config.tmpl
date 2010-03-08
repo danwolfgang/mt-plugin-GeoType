@@ -1,16 +1,8 @@
 
-<div class="setting">
-    <p>Welcome to GeoType. To begin using GeoType, please obtain and enter a GoogleMaps as shown below. You can customize your default map view using the "GeoType" button to the left. Or just go and start writing your posts!</p>
-    <h2>Map</h2>
-    <table width="100%" cellspacing="2" cellpadding="5" class="editform">			
-        <tr valign="top"> 
-            <th scope="row"><div class="label"><label for="google_api_key"><MT_TRANS phrase="Google API Key:"></label></div></th> 
-            <td>
-                <div class="field">
-                    <input type="text" name="google_api_key" id="google_api_key" style="width: 95%" size="45" value="<TMPL_VAR NAME=google_api_key ESCAPE=HTML>" />
-                    <p><a href="http://www.google.com/apis/maps/signup.html" title="GoogleMaps API Registration"><MT_TRANS phrase="GoogleMaps API Registration"></a> - <MT_TRANS phrase="Enter your blog url as the GoogleMaps URL"></p>
-                </div>
-            </td> 
-        </tr> 
-    </table>
-</div>
+<mtapp:setting
+    id="google_api_key"
+    label="Google API Key"
+    hint="<a href="http://www.google.com/apis/maps/signup.html" target="_blank" title="Google Maps API Registration"><__trans phrase="Google Maps API Registration"></a> - Enter either the base url for MT or the hostname/directory combination that MT and most/all of the blogs in the system share."
+    show_hint="1">
+    <input type="text" name="google_api_key" id="google_api_key" class="full-width" value="<$mt:var name="google_api_key" escape="html"$>" />
+</mtapp:setting>
