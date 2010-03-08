@@ -53,7 +53,7 @@ sub _get_api_key {
 sub static_url_for_locations {
     my $plugin = MT->component ('geotype');
     my ($params, @locs) = @_;
-    
+
     my $blog_id = $params->{blog_id} || $locs[0]->blog->id;
     require MT::Blog;
     my $blog = MT::Blog->load ($blog_id) or die "No blog_id: $blog_id";
@@ -68,33 +68,33 @@ sub static_url_for_locations {
     }
     my $width  = $params->{Width} || $plugin->get_config_value ('static_map_width', 'blog:' . $blog_id);
     my $height = $params->{Height} || $plugin->get_config_value ('static_map_height', 'blog:' . $blog_id);
-    
+
     my $key = get_google_api_key ($blog, 'interface');
-    
+
     my $marker_str = $params->{marker_size} . $params->{marker_color};
-    
+
     my $url = 'http://maps.google.com/staticmap?';
     $url .= "size=${width}x${height}";
     $url .= "&markers=" . join ("|", map { my $char = lc (delete $params->{marker_char}); join (',', $_->geometry, $marker_str . $char) } @locs);
     $url .= "&key=$key";
-    
+
     $url .= "&maptype=" . ($params->{MapType} || $plugin->get_config_value ('static_map_type', 'blog:' . $blog_id));
-    
+
     return wantarray ? ($url, $width, $height) : $url;
 }
 
 sub geocode {
     my $plugin = MT->component ('geotype');
     my ($blog, $address) = @_;
-    
+
     my $key = get_google_api_key ($blog);
     my $url = 'http://maps.google.com/maps/geo?';
-    
+
     require MT::Util;
     $url .= 'q=' . MT::Util::encode_url ($address);
     $url .= '&output=json';
     $url .= "&key=$key";
-    
+
     my $ua = MT->new_ua;
     my $res = $ua->get ($url);
 
@@ -108,14 +108,14 @@ sub geocode {
 sub asset_from_address {
     my $plugin = MT->component ('geotype');
     my ($blog, $address, $name) = @_;
-    
+
     require GeoType::LocationAsset;
     my $la = GeoType::LocationAsset->new;
     $la->blog_id ($blog->id);
     $la->geometry (scalar geocode ($blog, $address));
     $la->location ($address);
     $la->name ($name) if ($name);
-    
+
     return $la;
 }
 

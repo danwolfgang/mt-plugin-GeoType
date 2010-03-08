@@ -11,14 +11,14 @@
 
 <script type="text/javascript">
     var gt_location = <mt:var name="location" to_json="1">;
-    
+
     function initLocationOptions () {
         getByID('location_marker_char')
         var contents = getByID('location_marker_contents').value;
         contents = contents.replace (/<br \/>/g, "\n");
         getByID('location_marker_contents').value = contents;
     }
-    
+
     function updateLocationOptions () {
         var contents = getByID('location_marker_contents').value;
         contents = contents.replace (/\r?\n/g, "<br />");
@@ -26,7 +26,7 @@
         top.updateLocationOptions (gt_location.id, options);
         closeDialog();
     }
-    
+
     TC.attachLoadEvent (initLocationOptions);
 </script>
 </mt:setvarblock>

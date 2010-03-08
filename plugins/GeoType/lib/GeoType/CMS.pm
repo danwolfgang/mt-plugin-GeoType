@@ -9,7 +9,7 @@ use GeoType::Util;
 
 sub create_location {
     my $app = shift;
-    
+
     my $entry_insert = $app->param ('entry_insert');
     my $edit_field   = $app->param ('edit_field');
     $app->load_tmpl ('dialog/create_location.tmpl', { entry_insert => $entry_insert, edit_field => $edit_field });
@@ -17,22 +17,22 @@ sub create_location {
 
 sub verify_location {
     my $app = shift;
-    
+
     my $address = $app->param ('location_address');
     my @coords  = GeoType::Util::geocode ($app->blog, $address);
-    
+
     my $entry_insert = $app->param ('entry_insert');
     my $edit_field   = $app->param ('edit_field');
-    
+
     require GeoType::LocationAsset;
     my $la = GeoType::LocationAsset->new;
     $la->blog_id ($app->blog->id);
     $la->latitude ($coords[1]);
     $la->longitude ($coords[0]);
-    
+
     my $url = $la->thumbnail_url (Width => 600, Height => int(600 / 1.61));
-    
-    $app->load_tmpl ('dialog/verify_location.tmpl', { 
+
+    $app->load_tmpl ('dialog/verify_location.tmpl', {
         edit_field  => $edit_field,
         entry_insert    => $entry_insert,
         location_address => $address,
@@ -48,7 +48,7 @@ sub insert_location {
     my $name    = $app->param ('location_name');
     my $latitude = $app->param ('location_latitude');
     my $longitude = $app->param ('location_longitude');
-    
+
     require GeoType::LocationAsset;
     my $la = GeoType::LocationAsset->new;
     $la->blog_id ($app->blog->id);
@@ -56,9 +56,9 @@ sub insert_location {
     $la->location ($address);
     $la->latitude ($latitude);
     $la->longitude ($longitude);
-    
+
     $la->save or die $la->errstr;
-    
+
     if ($app->param ('entry_insert')) {
         require MT::CMS::Asset;
         $app->param ('id', $la->id);
@@ -74,18 +74,18 @@ sub insert_location {
 
 sub source_asset_options {
     my ($cb, $app, $tmpl) = @_;
-    
+
     my $old = q{<__trans phrase="File Options">};
     my $new = q{<mt:unless name="asset_is_location"><__trans phrase="File Options"><mt:else>Location Options</mt:else></mt:unless>};
-    
+
     $$tmpl =~ s/\Q$old\E/$new/;
 }
 
 sub param_asset_options {
     my ($cb, $app, $param, $tmpl) = @_;
-    
+
     my $asset_id = $param->{asset_id};
-    
+
     require MT::Asset;
     my $asset = MT::Asset->load ($asset_id);
     $param->{asset_is_location} = $asset->isa ('GeoType::LocationAsset');
@@ -98,7 +98,7 @@ sub source_edit_entry {
     <mt:setvarblock name="location_header_action">
         <a href="javascript:void(0)" class="add-new-category-link button" onclick="openDialog(this.form, 'list_assets', 'filter=class&filter_val=location&edit_field=location_list&blog_id=<$mt:var name="blog_id"$>&dialog_view=1')" title="<__trans phrase="Add location">"><__trans phrase="add"/></a>
     </mt:setvarblock>
-    
+
     <mtapp:widget
         id="entry-location-widget"
         label="Locations"
@@ -136,15 +136,15 @@ sub param_edit_entry {
             var html = '';
             for (var i = 0; i < locations.length; i++) {
                 html = html + "<li class='pkg' onmouseover='DOM.addClassName(this, \"focus\")' onmouseout='DOM.removeClassName(this, \"focus\")' mt:id='" + locations[i].id + "'><strong><a href='javascript:void(0)' onclick='openLocationOptionsDialog(this.form, " + locations[i].id + ")'>" + locations[i].name + '</a></strong><a href="javascript:void(0);" onclick="removeLocation (' + locations[i].id + ')" mt:command="remove" class="delete" title="Remove">&nbsp;<span>Remove</span></a></li>';
-            }        
+            }
             elem.innerHTML = html;
             var value_elem = getByID ('location_list');
-            
+
             value_elem.value = locations.toJSON();
             /*value_elem.value = locations.map (locationToStr).join ('==');
             # alert ("Value set to " + value_elem.value);
             # for (var i = 0; i < locations.length; i++) {
-            #     
+            #
             # }*/
             if (locations.length) {
                 DOM.removeClassName ('location-list-preview', 'hidden');
@@ -169,7 +169,7 @@ sub param_edit_entry {
 
             buildLocationList();
         }
-        
+
         function updateLocationOptions (id, options) {
             for (var i = 0; i < locations.length; i++) {
                 if (locations[i].id == id) {
@@ -178,7 +178,7 @@ sub param_edit_entry {
             }
             buildLocationList();
         }
-        
+
         function removeLocation (id) {
             var new_locations = new Array();
             for (var i = 0; i < locations.length; i++) {
@@ -186,17 +186,17 @@ sub param_edit_entry {
                     new_locations[new_locations.length] = locations[i];
                 }
             }
-            
+
             locations = new_locations;
             buildLocationList();
         }
-        
+
         function openLocationPreview (f) {
             var location_list = getByID ('location_list').value;
             alert (location_list);
             return openDialog (f, 'preview_locations', 'blog_id=<$mt:var name="blog_id"$>&location_list=' + escape (location_list));
         }
-        
+
         function openLocationOptionsDialog (f, id) {
             var location;
             for (var i = 0; i < locations.length; i++) {
@@ -210,18 +210,18 @@ sub param_edit_entry {
         TC.attachLoadEvent (buildLocationList);
         /* ]]> */
 
-        </script>        
+        </script>
 };
     $html_head->innerHTML($innerHTML);
     $tmpl->insertBefore($html_head, $header);
-    
+
     $param->{location_setting} = q{
 <ul class='category-list pkg' id='location-list'>
 </ul>
 <a href="javascript:void(0)" id="location-list-preview" class="pkg center button" style="text-align: center" onclick="openLocationPreview(this.form)" title="<__trans phrase="Preview Locations">"><__trans phrase="preview"/></a>
 <input type="hidden" name="location_list" id="location_list" />
 };
-    
+
     if ($param->{id}) {
         require MT::ObjectAsset;
         my @non_embedded_assets = MT::ObjectAsset->load ({
@@ -237,7 +237,7 @@ sub param_edit_entry {
             my $e = MT::Entry->load ($oa->object_id);
             push @location_list, { id => $a->id, name => $a->name, options => ($e->location_options->{$a->id} || {}) };
         }
-        
+
         $param->{location_list} = \@location_list;
     }
 }
@@ -262,9 +262,9 @@ sub param_asset_insert {
     }
 }
 
-sub post_save_entry { 
+sub post_save_entry {
     my ($cb, $app, $entry) = @_;
-    
+
     my $location_list = $app->param ('location_list') || '[]';
     require JSON;
     my $locations = JSON::from_json ($location_list);
@@ -300,7 +300,7 @@ sub post_save_entry {
         }) or return $cb->error (MT::ObjectAsset->errstr);
         $assets{$id} = 0;
     }
-    
+
     if (my @old_maps = grep { $assets{$_->asset_id} } @assets) {
 		my @old_ids;
 		for my $old_id (@old_maps) {
@@ -312,7 +312,7 @@ sub post_save_entry {
         MT::ObjectAsset->remove( { id => \@old_ids })
             if @old_ids;
     }
-    
+
     $entry->location_options (\%locations);
     $entry->save or return $cb->error ($entry->errstr);
     1;
@@ -321,7 +321,7 @@ sub post_save_entry {
 sub preview_locations {
     my $app = shift;
     my $blog = $app->blog;
-    
+
     my $location_list = $app->param ('location_list');
     require JSON;
     my $locations = JSON::from_json ($location_list);
@@ -333,9 +333,9 @@ sub preview_locations {
         my $asset = MT::Asset->load ($id) or next;
         push @locations, $asset if ($asset->isa ('GeoType::LocationAsset'));
     }
-    
+
     @locations = map { { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->latitude, lng => $_->longitude } } @locations;
-    
+
     my $plugin = MT->component ('geotype');
     my $map_type = $plugin->get_config_value ('interactive_map_type', 'blog:' . $blog->id);
     my $config = $plugin->get_config_hash ('blog:' . $blog->id);
@@ -353,20 +353,20 @@ sub source_asset_list {
     my ($cb, $app, $tmpl) = @_;
 
     return 1 unless ($app->param ('edit_field') eq 'location_list');
-    
+
     my $new = q{
         <img src="<mt:var name="static_uri">images/status_icons/create.gif" alt="<__trans phrase="Add New Location">" width="9" height="9" />
         <mt:unless name="asset_select"><mt:setvar name="entry_insert" value="1"></mt:unless>
         <a href="<mt:var name="script_url">?__mode=create_location&amp;blog_id=<mt:var name="blog_id">&amp;dialog_view=1&amp;entry_insert=1&amp;edit_field=<mt:var name="edit_field" escape="url">&amp;upload_mode=<mt:var name="upload_mode" escape="url">&amp;<mt:if name="require_type">require_type=<mt:var name="require_type">&amp;</mt:if>return_args=<mt:var name="return_args" escape="url"><mt:if name="user_id">&amp;user_id=<mt:var name="user_id" escape="url"></mt:if>" ><__trans phrase="Add New Location"></a>
     };
-    
+
     $$tmpl =~ s{\Q<mt:setvarblock name="upload_new_file_link">\E.*\Q</mt:setvarblock>\E}{<mt:setvarblock name="upload_new_file_link">$new</mt:setvarblock>}ms;
 }
 
 sub location_options {
     my $app = shift;
     my $blog = $app->blog;
-    
+
     my $loc = $app->param ('location');
     # my ($id, $options) = split (/\|\|/, $loc, 2);
     my $id = $app->param ('location_id');
@@ -374,10 +374,10 @@ sub location_options {
 
     require JSON;
     $options = JSON::from_json ($options);
-    
+
     require MT::Asset;
     my $location = MT::Asset->load ($id);
-    
+
     my $location_hash = { id => $location->id, name => $location->name, geometry => $location->geometry, lat => $location->latitude, lng => $location->longitude, options => $options };
     $location_hash->{options}->{contents} ||= $location->description;
     # my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };

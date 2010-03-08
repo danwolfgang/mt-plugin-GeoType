@@ -21,7 +21,7 @@ function maps_loaded () {
     preview_map.setCenter (bounds.getCenter());
     preview_map.setMapType (<$mt:var name="map_type"$>);
     preview_map.setZoom (preview_map.getBoundsZoomLevel(bounds));
-    
+
     for (var i = 0; i < locations.length; i++) {
         var m = new google.maps.LatLng (locations[i].lat, locations[i].lng);
         preview_map.addOverlay (new google.maps.Marker (m, { title: locations[i].name }));

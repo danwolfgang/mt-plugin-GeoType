@@ -15,7 +15,7 @@ object_types:
   asset.location: GeoType::LocationAsset
   entry:
     location_options: hash meta
-    
+
 upgrade_functions:
   location_to_asset:
     version_limit: 2.0

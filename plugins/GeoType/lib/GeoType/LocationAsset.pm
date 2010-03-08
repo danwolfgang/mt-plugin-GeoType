@@ -48,7 +48,7 @@ sub on_upload     { 1; }
 sub thumbnail_url {
     my $obj = shift;
     my (%params) = @_;
-    
+
     require GeoType::Util;
     return GeoType::Util::static_url_for_locations (\%params, $obj);
 }
@@ -56,7 +56,7 @@ sub thumbnail_url {
 sub url {
     my $obj = shift;
     my (%params) = @_;
-    
+
     require GeoType::Util;
     return GeoType::Util::static_url_for_locations (\%params, $obj);
 }
@@ -64,7 +64,7 @@ sub url {
 sub as_html {
     my $obj = shift;
     my ($params) = @_;
-    
+
     my $text = sprintf '<img src="%s" title="%s"/>',
         MT::Util::encode_html($obj->url (%$params)),
         MT::Util::encode_html($obj->name);
@@ -81,7 +81,7 @@ sub insert_options {
     my $perms = $app->{perms};
     my $blog  = $asset->blog or return;
     my $plugin = MT->component ('geotype');
-    
+
     my $cfg = $plugin->get_config_hash ('blog:' . $blog->id);
     $param->{MapType} = $cfg->{static_map_type};
     $param->{Height}   = $cfg->{static_map_height};

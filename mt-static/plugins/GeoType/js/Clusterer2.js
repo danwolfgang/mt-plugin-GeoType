@@ -59,7 +59,7 @@ Clusterer = function ( map )
     this.clusters = [];
     this.timeout = null;
     this.currentZoomLevel = map.getZoom();
-    
+
     if (!Clusterer.defaultIcon) {
         Clusterer.defaultIcon = new GIcon();
         Clusterer.defaultIcon.image = 'http://www.acme.com/resources/images/markers/blue_large.PNG';
@@ -69,12 +69,12 @@ Clusterer = function ( map )
         Clusterer.defaultIcon.iconAnchor = new GPoint( 13, 34 );
         Clusterer.defaultIcon.infoWindowAnchor = new GPoint( 13, 3 );
         Clusterer.defaultIcon.infoShadowAnchor = new GPoint( 27, 37 );
-        
+
         Clusterer.defaultMaxVisibleMarkers = 150;
         Clusterer.defaultGridSize = 5;
         Clusterer.defaultMinMarkersPerCluster = 5;
         Clusterer.defaultMaxLinesPerInfoBox = 10;
-        
+
         // Augment GMarker so it handles markers that have been created but
         // not yet addOverlayed.
 
