@@ -80,8 +80,8 @@ sub as_html {
     my ($params) = @_;
 
     my $text = sprintf '<img src="%s" title="%s"/>',
-      MT::Util::encode_html( $obj->url(%$params) ),
-      MT::Util::encode_html( $obj->name );
+        MT::Util::encode_html( $obj->url(%$params) ),
+        MT::Util::encode_html( $obj->name );
     return $obj->enclose($text);
 }
 
@@ -105,8 +105,8 @@ sub insert_options {
     $param->{marker_char}  = '';
 
     my $tmpl =
-      $plugin->load_tmpl( 'dialog/location_insert_options.tmpl', $param )
-      or MT->log( $plugin->errstr );
+        $plugin->load_tmpl( 'dialog/location_insert_options.tmpl', $param )
+        or MT->log( $plugin->errstr );
     my $html = $app->build_page( $tmpl, $param );
     if ( !$html ) {
         MT->log( $app->errstr );
