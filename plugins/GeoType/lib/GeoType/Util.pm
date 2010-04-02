@@ -57,8 +57,7 @@ sub get_google_api_key {
     my ( $blog, $which ) = @_;
 
     my $interface_api_key = _get_api_key( $blog, 'google' );
-    my $site_api_key = $plugin->get_config_value( 'site_api_key', 'blog:' . $blog->id )
-        || $interface_api_key;
+    my $site_api_key = $plugin->get_config_value( 'site_api_key', 'blog:' . $blog->id ) || $interface_api_key;
 
     return $which && $which eq 'site' ? $site_api_key : $interface_api_key;
 }
@@ -89,10 +88,8 @@ sub static_url_for_locations {
             $params->{Width} = $params->{Height};
         }
     }
-    my $width = $params->{Width}
-        || $plugin->get_config_value( 'static_map_width', 'blog:' . $blog_id );
-    my $height = $params->{Height}
-        || $plugin->get_config_value( 'static_map_height', 'blog:' . $blog_id );
+    my $width  = $params->{Width}  || $plugin->get_config_value( 'static_map_width',  'blog:' . $blog_id );
+    my $height = $params->{Height} || $plugin->get_config_value( 'static_map_height', 'blog:' . $blog_id );
 
     my $key = get_google_api_key( $blog, 'interface' );
 
@@ -100,13 +97,10 @@ sub static_url_for_locations {
 
     my $url = 'http://maps.google.com/staticmap?';
     $url .= "size=${width}x${height}";
-    $url .= "&markers=" . join(
-        "|",
-        map {
-            my $char = lc( delete $params->{marker_char} );
-            join( ',', $_->geometry, $marker_str . $char )
-            } @locs
-    );
+    $url .= "&markers="
+        . join( "|",
+        map { my $char = lc( delete $params->{marker_char} ); join( ',', $_->geometry, $marker_str . $char ) }
+            @locs );
     $url .= "&key=$key";
 
     $url .=
@@ -134,9 +128,7 @@ sub geocode {
     require JSON;
     my $obj    = JSON::jsonToObj( $res->content );
     my $coords = $obj->{Placemark}->[0]->{Point}->{coordinates};
-    return wantarray
-        ? ( $coords->[0], $coords->[1] )
-        : join( ',', $coords->[0], $coords->[1] );
+    return wantarray ? ( $coords->[0], $coords->[1] ) : join( ',', $coords->[0], $coords->[1] );
 }
 
 sub asset_from_address {
