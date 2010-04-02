@@ -178,7 +178,7 @@ sub _hdlr_map_header {
 
         /* figure out the center */
         var center = geo_type_maps[map_id].center;
-		var zoomlevel;
+        var zoomlevel;
         if (!center) {
             var bounds = new google.maps.LatLngBounds();
             var locations = geo_type_maps[map_id].locations;
@@ -186,7 +186,7 @@ sub _hdlr_map_header {
                 bounds.extend (new google.maps.LatLng (locations[i].lat, locations[i].lng));
             }
             center = bounds.getCenter();
-			zoomlevel = geo_type_maps[map_id].map.getBoundsZoomLevel(bounds);
+            zoomlevel = geo_type_maps[map_id].map.getBoundsZoomLevel(bounds);
         }
         else {
             center = new google.maps.LatLng (center[0], center[1]);
@@ -205,8 +205,8 @@ sub _hdlr_map_header {
         if (!zoom && !$zoomtofit) {
             zoom = $zoom;
         } else if ($zoomtofit) {
-			zoom = zoomlevel;
-		}
+            zoom = zoomlevel;
+        }
         geo_type_maps[map_id].map.setZoom(zoom);
 
         /* setup the controls */
@@ -281,9 +281,9 @@ sub _hdlr_map_header {
                             clusterIcon.infoWindowAnchor = new GPoint( 13, 3 );
                             clusterIcon.iconShadowAnchor = new GPoint( 27, 37 );
                             cluster_ARCH.SetIcon( clusterIcon );*/
-//		geo_map.clusterer.SetMaxVisibleMarkers( 20 );
-		
-		var locations = geo_map.locations;
+//      geo_map.clusterer.SetMaxVisibleMarkers( 20 );
+
+        var locations = geo_map.locations;
         for (var i = 0; i < locations.length; i++) {
             //map.addOverlay (markerForLocation (locations[i]));
             geo_map.clusterer.AddMarker (markerForLocation (locations[i]), locations[i].name);
@@ -420,7 +420,7 @@ sub _hdlr_archivedetailmap {    # called from an archive, this will show entry d
             geo_type_maps["$map_id"] = new Object();
             geo_type_maps["$map_id"].locations = $location_json;
             geo_type_maps["$map_id"].wikipedia = '$wikipedia';
-            geo_type_maps["$map_id"].panoramio = $panoramio; 
+            geo_type_maps["$map_id"].panoramio = $panoramio;
         </script>
         <div id='$map_id' geotype:map='$map_id' style="height: ${height}px; width: ${width}px"></div>
     };
@@ -540,7 +540,7 @@ sub _hdlr_detailmap {    # this will show entry details in the infowindow bubble
             geo_type_maps["$map_id"] = new Object();
             geo_type_maps["$map_id"].locations = $location_json;
             geo_type_maps["$map_id"].wikipedia = '$wikipedia';
-            geo_type_maps["$map_id"].panoramio = $panoramio; 
+            geo_type_maps["$map_id"].panoramio = $panoramio;
         </script>
         <div id='$map_id' geotype:map='$map_id' style="height: ${height}px; width: ${width}px"></div>
     };
@@ -711,15 +711,15 @@ sub _hdlr_clickable_map {
     require GeoType::Util;
     my $key = GeoType::Util::get_google_api_key( $ctx->stash('blog'), 'site' );
     my $html = qq@
-		<script type="text/javascript" src="${static_path}js/mt_core_compact.js"></script>
-		<script type="text/javascript" src="${static_path}plugins/GeoType/js/Clusterer2.js"></script>
-	    <script type="text/javascript" src="${static_path}plugins/GeoType/js/OverlayMessage.js"></script>
-       
-	    <script type="text/javascript" src="http://www.google.com/jsapi?key=$key"></script>
-		<div id="geo_map" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
-		<script type="text/javascript"> //<![CDATA[ 
-	    google.load ('maps', '2.x', { callback: maps_loaded });
-	@;
+        <script type="text/javascript" src="${static_path}js/mt_core_compact.js"></script>
+        <script type="text/javascript" src="${static_path}plugins/GeoType/js/Clusterer2.js"></script>
+        <script type="text/javascript" src="${static_path}plugins/GeoType/js/OverlayMessage.js"></script>
+
+        <script type="text/javascript" src="http://www.google.com/jsapi?key=$key"></script>
+        <div id="geo_map" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
+        <script type="text/javascript"> //<![CDATA[
+        google.load ('maps', '2.x', { callback: maps_loaded });
+    @;
 
     # default location is ('address', 'lat', 'long');
 
@@ -729,14 +729,14 @@ sub _hdlr_clickable_map {
     my $default_zoom_level = $args->{zoom} || $config->{default_zoom_level};
 
     $html .= qq@
-	function maps_loaded() {
-		geo_map = new GMap2 (document.getElementById('geo_map'));
-		geo_icon = new GIcon(G_DEFAULT_ICON)
-		geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
-		geo_map.setCenter(new GLatLng($lat, $lon));
-		geo_map.setMapType($default_map_type);
-		geo_map.setZoom($default_zoom_level);
-	@;
+    function maps_loaded() {
+        geo_map = new GMap2 (document.getElementById('geo_map'));
+        geo_icon = new GIcon(G_DEFAULT_ICON)
+        geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
+        geo_map.setCenter(new GLatLng($lat, $lon));
+        geo_map.setMapType($default_map_type);
+        geo_map.setZoom($default_zoom_level);
+    @;
 
     require MT::Util;
     my $i = 1;
@@ -759,8 +759,8 @@ sub _hdlr_clickable_map {
         $html .= qq{geo_map.addControl (new GLargeMapControl());};
     }
     $html .= qq!};
-	// ]]> 
-	</script>!;
+    // ]]>
+    </script>!;
 
     return $html;
 }
@@ -915,18 +915,18 @@ sub geo_type_map_tag {
         my $map_width  = $config->{map_width};
         my $map_height = $config->{map_height};
         my $html       = qq@
-			<div id="geo_map_$entry_id" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
-			<script type="text/javascript"> //<![CDATA[ 
-			var geo_map_$entry_id;
-		@;
+            <div id="geo_map_$entry_id" style="width: ${map_width}px; height: ${map_height}px; float: left;"></div>
+            <script type="text/javascript"> //<![CDATA[
+            var geo_map_$entry_id;
+        @;
         if ( scalar @locations > 10 ) {
             $html .= qq@
-			var om = new OverlayMessage(document.getElementById('geo_map_${entry_id}'));
-			om.Set('Please wait while data loads from Google Maps.');
-			TC.attachLoadEvent (function() {
-				        om.Clear();
-			});
-			@;
+            var om = new OverlayMessage(document.getElementById('geo_map_${entry_id}'));
+            om.Set('Please wait while data loads from Google Maps.');
+            TC.attachLoadEvent (function() {
+                        om.Clear();
+            });
+            @;
         }
         require MT::App;
         our $static_path;
@@ -943,24 +943,24 @@ sub geo_type_map_tag {
             }
         }
         $html .= qq@
-			TC.attachLoadEvent (function() {
-				geo_map_$entry_id = new GMap2 (getByID ('geo_map_$entry_id'));
-				geo_icon = new GIcon(G_DEFAULT_ICON)
-				geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
+            TC.attachLoadEvent (function() {
+                geo_map_$entry_id = new GMap2 (getByID ('geo_map_$entry_id'));
+                geo_icon = new GIcon(G_DEFAULT_ICON)
+                geo_icon.image = '${static_path}/plugins/GeoType/images/markericon.png';
 
-		@;
+        @;
         my $default_map_type = $config->{default_map_type};
         if ( defined($maxLat) && defined($minLat) && defined($maxLon) && defined($minLon) ) {
             $html .= qq@
-			var SW = new GLatLng($minLat, $minLon);
-			var NE = new GLatLng($maxLat, $maxLon);
-			var bounds = new GLatLngBounds( SW, NE );
-			geo_map_$entry_id.setCenter(bounds.getCenter());
-			geo_map_$entry_id.setZoom(geo_map_$entry_id.getBoundsZoomLevel(bounds));
-			geo_map_$entry_id.setMapType($default_map_type);
-			var marker_array_$entry_id = new Array();
-			var cluster_$entry_id = new Clusterer(geo_map_${entry_id});
-			clusterIcon = new GIcon(G_DEFAULT_ICON);
+            var SW = new GLatLng($minLat, $minLon);
+            var NE = new GLatLng($maxLat, $maxLon);
+            var bounds = new GLatLngBounds( SW, NE );
+            geo_map_$entry_id.setCenter(bounds.getCenter());
+            geo_map_$entry_id.setZoom(geo_map_$entry_id.getBoundsZoomLevel(bounds));
+            geo_map_$entry_id.setMapType($default_map_type);
+            var marker_array_$entry_id = new Array();
+            var cluster_$entry_id = new Clusterer(geo_map_${entry_id});
+            clusterIcon = new GIcon(G_DEFAULT_ICON);
                         clusterIcon.image = '${static_path}/plugins/GeoType/images/clustermarker.png';
                         clusterIcon.shadow = '${static_path}/plugins/GeoType/images/clustershadow.png';
                         clusterIcon.iconSize = new GSize( 30, 51 );
@@ -969,8 +969,8 @@ sub geo_type_map_tag {
                         clusterIcon.infoWindowAnchor = new GPoint( 13, 3 );
                         clusterIcon.iconShadowAnchor = new GPoint( 27, 37 );
                         cluster_ARCH.SetIcon( clusterIcon );
-			cluster_${entry_id}.SetMaxVisibleMarkers( 20 );
-			@;
+            cluster_${entry_id}.SetMaxVisibleMarkers( 20 );
+            @;
             $useManager = 1;
         }
 
@@ -998,19 +998,19 @@ sub geo_type_map_tag {
             my $geom     = $location->geometry;
             my $title_js = MT::Util::encode_js( $location->name );
             $html .= qq!
-			var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js', icon: geo_icon });
-			GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
-			!;
+            var marker_$i = new GMarker (new GLatLng ($geom), { title: '$title_js', icon: geo_icon });
+            GEvent.addListener(marker_$i, "click", function() { marker_$i.openInfoWindowHtml('$marker_html'); });
+            !;
             if ($useManager) {
                 $html .= qq!
-			cluster_${entry_id}.AddMarker(marker_$i, '$marker_title');
-			!;
+            cluster_${entry_id}.AddMarker(marker_$i, '$marker_title');
+            !;
             }
             else {
                 $html .= qq!
-			geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);    
-			geo_map_${entry_id}.addOverlay (marker_$i);
-			!;
+            geo_map_${entry_id}.setCenter (new GLatLng($geom), $default_zoom_level, $default_map_type);
+            geo_map_${entry_id}.addOverlay (marker_$i);
+            !;
             }
             $i++;
         }
@@ -1032,8 +1032,8 @@ sub geo_type_map_tag {
             $html .= qq{geo_map_$entry_id.addControl (new GLargeMapControl());};
         }
         $html .= qq!});
-		// ]]> 
-		</script>!;
+        // ]]>
+        </script>!;
 
         return $html;
     }
