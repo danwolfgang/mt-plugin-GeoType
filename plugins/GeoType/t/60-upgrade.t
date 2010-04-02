@@ -40,37 +40,29 @@ $entry_loc->location_id( $loc->id );
 
 ok( $entry_loc->save, "Saving entry location" );
 
-is( GeoType::EntryLocation->count,
-    1, "There should be only one entry location" );
+is( GeoType::EntryLocation->count, 1, "There should be only one entry location" );
 
 require MT::Asset;
-is( MT::Asset->count( { class => 'location' } ),
-    0, "There should be no assets" );
+is( MT::Asset->count( { class => 'location' } ), 0, "There should be no assets" );
 
 require_ok('GeoType::Upgrade');
 &GeoType::Upgrade::location_to_asset();
 
-is( MT::Asset->count( { class => 'location' } ),
-    1, "There should be one asset now" );
+is( MT::Asset->count( { class => 'location' } ), 1, "There should be one asset now" );
 my $loc_asset = MT::Asset->load( { class => 'location' } );
 
 ok( $loc_asset,                                "Asset loaded" );
 ok( $loc_asset->isa('GeoType::LocationAsset'), "As the right class" );
 
-is( $loc_asset->name, "Testing location", "Name upgraded correctly" );
-is(
-    $loc_asset->location,
-    "Somewhere in testing land",
-    "Location upgraded correctly"
-);
-is( $loc_asset->geometry,  "1,4", "Geometry ugpraded correctly" );
-is( $loc_asset->latitude,  1,     "Latitude correct" );
-is( $loc_asset->longitude, 4,     "Longitude correct" );
-is( $loc_asset->blog_id,   1,     "blog_id correct" );
+is( $loc_asset->name,      "Testing location",          "Name upgraded correctly" );
+is( $loc_asset->location,  "Somewhere in testing land", "Location upgraded correctly" );
+is( $loc_asset->geometry,  "1,4",                       "Geometry ugpraded correctly" );
+is( $loc_asset->latitude,  1,                           "Latitude correct" );
+is( $loc_asset->longitude, 4,                           "Longitude correct" );
+is( $loc_asset->blog_id,   1,                           "blog_id correct" );
 
 require MT::ObjectAsset;
-is( MT::ObjectAsset->count( { asset_id => $loc_asset->id } ),
-    1, "There should be one asset association" );
+is( MT::ObjectAsset->count( { asset_id => $loc_asset->id } ), 1, "There should be one asset association" );
 my $oa = MT::ObjectAsset->load( { asset_id => $loc_asset->id } );
 
 ok( $oa, "ObjectAsset loaded" );

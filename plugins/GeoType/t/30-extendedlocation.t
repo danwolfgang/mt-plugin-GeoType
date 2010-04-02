@@ -20,5 +20,4 @@ use MT::Test qw( :db );
 use Test::More tests => 1;
 
 require GeoType::ExtendedLocation;
-ok( MT::Object->driver->table_exists('GeoType::ExtendedLocation'),
-    "Table for GeoType::Location" );
+ok( MT::Object->driver->table_exists('GeoType::ExtendedLocation'), "Table for GeoType::Location" );
