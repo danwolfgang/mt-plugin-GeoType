@@ -41,8 +41,7 @@ sub geo_type_location_container {
     }
     foreach my $location (@locations) {
         $ctx->stash( 'geotype_location', $location );
-        my @extended = GeoType::ExtendedLocation->load(
-            { location_id => $location->id } );
+        my @extended = GeoType::ExtendedLocation->load( { location_id => $location->id } );
         my $extended;
         ( scalar @extended > 0 ) && ( $extended = $extended[0] );
         if ($extended) {
@@ -121,8 +120,7 @@ sub _hdlr_locations {
         $assets = \@assets;
     }
     local $ctx->{__stash}{assets} = $assets if ($assets);
-    return $ctx->tag( 'assets', { %$args, class_type => 'asset.location' },
-        $cond );
+    return $ctx->tag( 'assets', { %$args, class_type => 'asset.location' }, $cond );
 }
 
 sub _hdlr_map_header {
@@ -133,11 +131,9 @@ sub _hdlr_map_header {
     my $blog = $ctx->stash('blog');
 
     $ctx->var( 'geo_type_header', 1 );
-    my $key =
-        GeoType::Util::get_google_api_key( $ctx->stash('blog'), 'site' );
-    my $plugin = MT->component('geotype');
-    my $config =
-        $plugin->get_config_hash( 'blog:' . $ctx->stash('blog')->id );
+    my $key      = GeoType::Util::get_google_api_key( $ctx->stash('blog'), 'site' );
+    my $plugin   = MT->component('geotype');
+    my $config   = $plugin->get_config_hash( 'blog:' . $ctx->stash('blog')->id );
     my $map_type = $config->{interactive_map_type};
     $map_type =
           $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
@@ -434,10 +430,8 @@ sub _hdlr_map {
         $params->{Square}  = $square;
         $params->{blog_id} = $blog_id;
 
-        my ( $url, $w, $h ) =
-            GeoType::Util::static_url_for_locations( $params, @assets );
-        return sprintf qq(<img src="%s" width="%d" height="%d" alt="" /></a>),
-            $url, $w, $h;
+        my ( $url, $w, $h ) = GeoType::Util::static_url_for_locations( $params, @assets );
+        return sprintf qq(<img src="%s" width="%d" height="%d" alt="" /></a>), $url, $w, $h;
     }
     else {
         require GeoType::Util;
@@ -460,8 +454,7 @@ sub _hdlr_map {
             }
         } @assets;
         require JSON;
-        my $location_json =
-            @locations ? JSON::objToJson( \@locations ) : '[]';
+        my $location_json = @locations ? JSON::objToJson( \@locations ) : '[]';
         my $wikipedia = $args->{wikipedia} || '';
         my $panoramio = $args->{panoramio} || 0;
         $res .= qq{
@@ -590,8 +583,8 @@ sub geo_type_map_tag {
     my $blog_id = $ctx->stash('blog_id');
     my @locations;
     my $zoom;
-    my ( $maxLat, $minLat, $maxLon, $minLon )
-        ;    # For archive maps w/no defined zoom
+    # For archive maps w/ no defined zoom
+    my ( $maxLat, $minLat, $maxLon, $minLon );
 
     if ( !$entry ) {
 
@@ -599,8 +592,7 @@ sub geo_type_map_tag {
         my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
         if ($at) {
             @locations = get_locations_for_archive($ctx);
-            ( $maxLat, $minLat, $maxLon, $minLon ) =
-                &get_bounds_for_locations(@locations);
+            ( $maxLat, $minLat, $maxLon, $minLon ) = &get_bounds_for_locations(@locations);
             $entry_id = 'ARCH';
         }
         elsif ( my $n = $args->{lastnentries} ) {
@@ -706,8 +698,7 @@ sub geo_type_map_tag {
                 $marker_html = $marker_title;
             }
             else {
-                my @le = GeoType::EntryLocation->load(
-                    { location_id => $location->id } );
+                my @le = GeoType::EntryLocation->load( { location_id => $location->id } );
                 my $dummy_entry = MT::Entry->load( $le[0]->entry_id );
 
                 $marker_title = $dummy_entry->title;
@@ -715,8 +706,7 @@ sub geo_type_map_tag {
                 my $entry_link = $dummy_entry->permalink;
                 $marker_html = "<a href=\"$entry_link\">$marker_title</a>";
             }
-            $marker_html =
-                "<div class=\"GeoTypeMarkerContent\">$marker_html</div>";
+            $marker_html = "<div class=\"GeoTypeMarkerContent\">$marker_html</div>";
             my $geom     = $location->geometry;
             my $title_js = MT::Util::encode_js( $location->name );
             $html .= qq!
@@ -738,27 +728,20 @@ sub geo_type_map_tag {
         }
 
         $html .= qq{geo_map_$entry_id.addControl (new GOverviewMapControl());}
-            if $plugin->get_config_value( 'map_controls_overview',
-            'blog:' . $blog_id );
+            if $plugin->get_config_value( 'map_controls_overview', 'blog:' . $blog_id );
         $html .= qq{geo_map_$entry_id.addControl (new GScaleControl());}
-            if $plugin->get_config_value( 'map_controls_scale',
-            'blog:' . $blog_id );
+            if $plugin->get_config_value( 'map_controls_scale', 'blog:' . $blog_id );
         $html .= qq{geo_map_$entry_id.addControl (new GMapTypeControl());}
-            if $plugin->get_config_value( 'map_controls_map_type',
-            'blog:' . $blog_id );
-        my $zoom = $plugin->get_config_value( 'map_controls_zoom',
-            'blog:' . $blog_id );
+            if $plugin->get_config_value( 'map_controls_map_type', 'blog:' . $blog_id );
+        my $zoom = $plugin->get_config_value( 'map_controls_zoom', 'blog:' . $blog_id );
         if ( $zoom eq 'small' ) {
-            $html .=
-                qq{geo_map_$entry_id.addControl (new GSmallZoomControl());};
+            $html .= qq{geo_map_$entry_id.addControl (new GSmallZoomControl());};
         }
         elsif ( $zoom eq 'medium' ) {
-            $html .=
-                qq{geo_map_$entry_id.addControl (new GSmallMapControl());};
+            $html .= qq{geo_map_$entry_id.addControl (new GSmallMapControl());};
         }
         elsif ( $zoom eq 'large' ) {
-            $html .=
-                qq{geo_map_$entry_id.addControl (new GLargeMapControl());};
+            $html .= qq{geo_map_$entry_id.addControl (new GLargeMapControl());};
         }
         $html .= qq!});
         // ]]>

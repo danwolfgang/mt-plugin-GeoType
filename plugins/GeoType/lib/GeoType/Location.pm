@@ -38,8 +38,7 @@ __PACKAGE__->install_properties(
         primary_key => 'id',
         audit       => 1,
 
-        child_classes =>
-            [ 'GeoType::EntryLocation', 'GeoType::ExtendedLocation' ],
+        child_classes => [ 'GeoType::EntryLocation', 'GeoType::ExtendedLocation' ],
     }
 );
 
@@ -48,8 +47,7 @@ sub remove {
 
     require MT::Request;
     my $r = MT::Request->instance;
-    my @objs =
-        GeoType::EntryLocation->load( { location_id => $location->id } );
+    my @objs = GeoType::EntryLocation->load( { location_id => $location->id } );
     $r->cache( 'entry_location_objs', [@objs] );
 
     $location->remove_children( { key => 'location_id' } );

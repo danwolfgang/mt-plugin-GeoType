@@ -23,8 +23,7 @@ sub create_location {
 
     my $entry_insert = $app->param('entry_insert');
     my $edit_field   = $app->param('edit_field');
-    $app->load_tmpl( 'dialog/create_location.tmpl',
-        { entry_insert => $entry_insert, edit_field => $edit_field } );
+    $app->load_tmpl( 'dialog/create_location.tmpl', { entry_insert => $entry_insert, edit_field => $edit_field } );
 }
 
 sub verify_location {
@@ -128,11 +127,9 @@ sub source_edit_entry {
 
 sub param_edit_entry {
     my ( $cb, $app, $param, $tmpl ) = @_;
-    my $blog_id = $app->blog->id;
-    my $header  = $tmpl->getElementById('header_include');
-    my $html_head =
-        $tmpl->createElement( 'setvarblock',
-        { name => 'html_head', append => 1 } );
+    my $blog_id   = $app->blog->id;
+    my $header    = $tmpl->getElementById('header_include');
+    my $html_head = $tmpl->createElement( 'setvarblock', { name => 'html_head', append => 1 } );
     my $innerHTML = q{
         <link rel='stylesheet' href="<mt:var name="static_uri">plugins/GeoType/geotype.css" />
         <script type="text/javascript">
@@ -297,11 +294,11 @@ sub post_save_entry {
         $locations{ $loc->{id} } = $loc->{options};
     }
 
-# foreach my $loc (split (/\s*,\s*/, $location_list)) {
-#     my ($id, $opts) = split (/\|\|/, $loc, 2);
-#     my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
-#     $locations{$id} = { %opts_hash };
-# }
+#    foreach my $loc (split (/\s*,\s*/, $location_list)) {
+#        my ($id, $opts) = split (/\|\|/, $loc, 2);
+#        my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
+#        $locations{$id} = { %opts_hash };
+#    }
     my @ids = keys %locations;
 
     require MT::ObjectAsset;
@@ -376,9 +373,8 @@ sub preview_locations {
     } @locations;
 
     my $plugin   = MT->component('geotype');
-    my $map_type = $plugin->get_config_value( 'interactive_map_type',
-        'blog:' . $blog->id );
-    my $config = $plugin->get_config_hash( 'blog:' . $blog->id );
+    my $map_type = $plugin->get_config_value( 'interactive_map_type', 'blog:' . $blog->id );
+    my $config   = $plugin->get_config_hash( 'blog:' . $blog->id );
     $map_type =
           $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
         : $map_type eq 'satellite' ? 'G_SATELLITE_MAP'
@@ -438,13 +434,12 @@ sub location_options {
     };
     $location_hash->{options}->{contents} ||= $location->description;
 
-# my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
-# $location_opts->{location_marker_opt_contents} ||= $location->description;
+#    my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
+#    $location_opts->{location_marker_opt_contents} ||= $location->description;
 
     my $plugin   = MT->component('geotype');
-    my $map_type = $plugin->get_config_value( 'interactive_map_type',
-        'blog:' . $blog->id );
-    my $config = $plugin->get_config_hash( 'blog:' . $blog->id );
+    my $map_type = $plugin->get_config_value( 'interactive_map_type', 'blog:' . $blog->id );
+    my $config   = $plugin->get_config_hash( 'blog:' . $blog->id );
     $map_type =
           $map_type eq 'roadmap'   ? 'G_NORMAL_MAP'
         : $map_type eq 'satellite' ? 'G_SATELLITE_MAP'

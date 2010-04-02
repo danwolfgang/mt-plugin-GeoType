@@ -24,8 +24,8 @@ sub make_location_basename {
     my $blog_id = $l->blog_id;
     my $blog    = MT::Blog->load($blog_id);
     $blog or die "Blog #$blog_id cannot be loaded.";
-    my $location =
-        $l->location;    # "1600 Pennsylvania Ave NW, Washington DC", e.g.
+    # e.g. "1600 Pennsylvania Ave NW, Washington DC"
+    my $location = $l->location;
     $location = '' if !defined $location;
     $location =~ s/^\s+|\s+$//gs;
     $location = 'location' if $location eq '';
@@ -57,8 +57,7 @@ sub get_google_api_key {
     my ( $blog, $which ) = @_;
 
     my $interface_api_key = _get_api_key( $blog, 'google' );
-    my $site_api_key =
-           $plugin->get_config_value( 'site_api_key', 'blog:' . $blog->id )
+    my $site_api_key = $plugin->get_config_value( 'site_api_key', 'blog:' . $blog->id )
         || $interface_api_key;
 
     return $which && $which eq 'site' ? $site_api_key : $interface_api_key;
@@ -68,10 +67,8 @@ sub _get_api_key {
     my $plugin = MT->component('geotype');
     my ( $blog, $key ) = @_;
 
-    my $system_value =
-        $plugin->get_config_value( $key . '_api_key', 'system' );
-    my $blog_value =
-        $plugin->get_config_value( $key . '_api_key', 'blog:' . $blog->id );
+    my $system_value = $plugin->get_config_value( $key . '_api_key', 'system' );
+    my $blog_value   = $plugin->get_config_value( $key . '_api_key', 'blog:' . $blog->id );
 
     return $blog_value ? $blog_value : $system_value ? $system_value : undef;
 }
@@ -93,11 +90,9 @@ sub static_url_for_locations {
         }
     }
     my $width = $params->{Width}
-        || $plugin->get_config_value( 'static_map_width',
-        'blog:' . $blog_id );
+        || $plugin->get_config_value( 'static_map_width', 'blog:' . $blog_id );
     my $height = $params->{Height}
-        || $plugin->get_config_value( 'static_map_height',
-        'blog:' . $blog_id );
+        || $plugin->get_config_value( 'static_map_height', 'blog:' . $blog_id );
 
     my $key = get_google_api_key( $blog, 'interface' );
 
@@ -114,12 +109,8 @@ sub static_url_for_locations {
     );
     $url .= "&key=$key";
 
-    $url .= "&maptype="
-        . (
-        $params->{MapType} || $plugin->get_config_value(
-            'static_map_type', 'blog:' . $blog_id
-        )
-        );
+    $url .=
+        "&maptype=" . ( $params->{MapType} || $plugin->get_config_value( 'static_map_type', 'blog:' . $blog_id ) );
 
     return wantarray ? ( $url, $width, $height ) : $url;
 }

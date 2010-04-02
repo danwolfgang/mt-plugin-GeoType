@@ -47,9 +47,8 @@ sub location_to_asset {
                 blog_id   => $e->blog_id,
                 object_ds => 'entry',
                 object_id => $e->id,
-                asset_id =>
-                    $location_id_to_asset_id{ $entry_loc->location_id },
-                embedded => 0,
+                asset_id  => $location_id_to_asset_id{ $entry_loc->location_id },
+                embedded  => 0,
             }
         ) or die MT::ObjectAsset->errstr;
     }

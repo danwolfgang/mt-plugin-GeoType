@@ -104,8 +104,7 @@ sub insert_options {
     $param->{marker_size}  = '';
     $param->{marker_char}  = '';
 
-    my $tmpl =
-        $plugin->load_tmpl( 'dialog/location_insert_options.tmpl', $param )
+    my $tmpl = $plugin->load_tmpl( 'dialog/location_insert_options.tmpl', $param )
         or MT->log( $plugin->errstr );
     my $html = $app->build_page( $tmpl, $param );
     if ( !$html ) {
