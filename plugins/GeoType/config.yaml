@@ -114,7 +114,6 @@ callbacks:
   MT::App::CMS::template_param.asset_insert: $GeoType::GeoType::CMS::param_asset_insert
   MT::App::CMS::template_source.asset_list: $GeoType::GeoType::CMS::source_asset_list
 
-
 tags:
   function:
     geotype:locationname: $GeoType::GeoType::Tags::_hdlr_location_name
