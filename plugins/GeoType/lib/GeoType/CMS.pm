@@ -252,11 +252,7 @@ sub param_edit_entry {
             next unless ( $a->isa('GeoType::LocationAsset') );
             my $e = MT::Entry->load( $oa->object_id );
             push @location_list,
-                {
-                id      => $a->id,
-                name    => $a->name,
-                options => ( $e->location_options->{ $a->id } || {} )
-                };
+                { id => $a->id, name => $a->name, options => ( $e->location_options->{ $a->id } || {} ) };
         }
 
         $param->{location_list} = \@location_list;
