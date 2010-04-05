@@ -363,13 +363,7 @@ sub preview_locations {
     }
 
     @locations = map {
-        {
-            id       => $_->id,
-            name     => $_->name,
-            geometry => $_->geometry,
-            lat      => $_->latitude,
-            lng      => $_->longitude
-        }
+        { id => $_->id, name => $_->name, geometry => $_->geometry, lat => $_->latitude, lng => $_->longitude }
     } @locations;
 
     my $plugin   = MT->component('geotype');
