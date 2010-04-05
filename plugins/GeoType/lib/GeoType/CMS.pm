@@ -311,11 +311,11 @@ sub post_save_entry {
         }
     }
 
-    # foreach my $loc (split (/\s*,\s*/, $location_list)) {
-    #     my ($id, $opts) = split (/\|\|/, $loc, 2);
-    #     my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
-    #     $locations{$id} = { %opts_hash };
-    # }
+#    foreach my $loc (split (/\s*,\s*/, $location_list)) {
+#        my ($id, $opts) = split (/\|\|/, $loc, 2);
+#        my %opts_hash = map { my ($k, $v) = split (/=/, $_, 2); $k => $v } $opts;
+#        $locations{$id} = { %opts_hash };
+#    }
     my @ids = keys %locations;
 
     my @asset_list = MT::Asset->load(
