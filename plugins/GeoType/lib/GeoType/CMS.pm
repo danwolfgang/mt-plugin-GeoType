@@ -453,8 +453,8 @@ sub location_options {
     };
     $location_hash->{options}->{contents} ||= $location->description;
 
-    # my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
-    # $location_opts->{location_marker_opt_contents} ||= $location->description;
+#    my $location_opts = { map { "location_marker_opt_$_" => $options->{$_} } keys %$options };
+#    $location_opts->{location_marker_opt_contents} ||= $location->description;
 
     my $plugin   = MT->component('geotype');
     my $map_type = $plugin->get_config_value( 'interactive_map_type', 'blog:' . $blog->id );
