@@ -24,7 +24,8 @@ sub geo_type_location_container {
     my $tokens  = $ctx->stash('tokens');
     my $entry   = $ctx->stash('entry');
     my @locations;
-    if ( !$entry ) {    # Discover our context
+    # Discover our context
+    if ( !$entry ) {
         my $at = $ctx->{archive_type} || $ctx->{current_archive_type};
         if ($at) {
             @locations = get_locations_for_archive($ctx);
@@ -173,7 +174,7 @@ sub _hdlr_map_header {
         var map_id = elem.getAttribute ('geotype:map');
 
         var markers = geo_type_maps[map_id].markers;
-        /* first, setup the map itself */
+        /* first, set up the map itself */
         geo_type_maps[map_id].map = new google.maps.Map2 (elem);
 
         /* figure out the center */
@@ -209,7 +210,7 @@ sub _hdlr_map_header {
         }
         geo_type_maps[map_id].map.setZoom(zoom);
 
-        /* setup the controls */
+        /* set up the controls */
         /* starting with overview */
         var overview = geo_type_maps[map_id].overview;
         if (overview == undefined) {
@@ -339,7 +340,8 @@ sub _locations_from_archive {
     my ($ctx);
 }
 
-sub _hdlr_archivedetailmap {    # called from an archive, this will show entry details in the infowindow bubble
+# called from an archive, this will show entry details in the infowindow bubble
+sub _hdlr_archivedetailmap {
     my ( $ctx, $args, $cond ) = @_;
 
     my @assets;
@@ -426,7 +428,8 @@ sub _hdlr_archivedetailmap {    # called from an archive, this will show entry d
     };
 }
 
-sub _hdlr_detailmap {    # this will show entry details in the infowindow bubble
+# this will show entry details in the infowindow bubble
+sub _hdlr_detailmap {
     my ( $ctx, $args, $cond ) = @_;
 
     my @assets;
