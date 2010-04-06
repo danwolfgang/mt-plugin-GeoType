@@ -207,7 +207,6 @@ sub param_edit_entry {
 
         function openLocationPreview (f) {
             var location_list = getByID ('location_list').value;
-            alert (location_list);
             return openDialog (f, 'preview_locations', 'blog_id=<$mt:var name="blog_id"$>&location_list=' + escape (location_list));
         }
 
