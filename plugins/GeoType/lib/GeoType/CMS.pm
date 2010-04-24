@@ -282,32 +282,11 @@ sub post_save_entry {
     my ( $cb, $app, $entry ) = @_;
 
     my %locations;
-    my $inline_location = $app->param('inline_location');
-    if ($inline_location) {
-        require GeoType::LocationAsset;
-        require GeoType::Util;
-
-        my @coords = GeoType::Util::geocode( $app->blog, $inline_location );
-
-        my $la = GeoType::LocationAsset->new;
-        $la->blog_id( $entry->blog_id );
-        $la->name( $entry->title );    # just using the entry title for the location name when it's inline
-        $la->location($inline_location);
-        $la->latitude( $coords[1] );
-        $la->longitude( $coords[0] );
-        $la->save or die $la->errstr;
-
-        # set options in location hash
-        $locations{ $la->id } = $app->param('location_options');
-
-    }
-    else {
-        my $location_list = $app->param('location_list');
-        require JSON;
-        my $locations = JSON::jsonToObj($location_list);
-        foreach my $loc (@$locations) {
-            $locations{ $loc->{id} } = $loc->{options};
-        }
+    my $location_list = $app->param('location_list');
+    require JSON;
+    my $locations = JSON::jsonToObj($location_list);
+    foreach my $loc (@$locations) {
+        $locations{ $loc->{id} } = $loc->{options};
     }
 
 #    foreach my $loc (split (/\s*,\s*/, $location_list)) {

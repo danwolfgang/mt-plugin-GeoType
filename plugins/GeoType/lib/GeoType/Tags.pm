@@ -340,43 +340,17 @@ sub _locations_from_archive {
     my ($ctx);
 }
 
-# called from an archive, this will show entry details in the infowindow bubble
-sub _hdlr_archivedetailmap {
-    my ( $ctx, $args, $cond ) = @_;
 
-    my @assets;
-    my @ids;
-    my $blog_id = $ctx->stash('blog_id');
-    my $map_id;
-    my $loc_options = {};
-    my $entries = $ctx->stash('entries') || [];
-    my $tmpl;
-    if ( $args->{tmpl_id} ) {
-        $tmpl = MT::Template->load( $args->{tmpl_id} );
-    }
-    else {
-        my $detail_text = $args->{tmpl};
-        $tmpl = MT::Template->new;
-        $tmpl->text($detail_text);
-    }
-
-    return $ctx->error("Unable to load detail template for GeoType archivedetailmap tag") unless ( defined $tmpl );
-
-    require MT::Util;
-    my $title = $ctx->tag( 'archivetitle', {}, $cond );
-    $title  = MT::Util::dirify($title);
-    $map_id = 'archive-' . $title;
-
+sub detailmap_for_entries { # main detailmap handler
+    my ($args, $cond, $tmpl, $entries) = @_;
     require GeoType::LocationAsset;
-
+    require GeoType::Util;
+    
     my $width  = $args->{width};
     my $height = $args->{height};
     my $square = $args->{square};
-    require GeoType::Util;
-    my $res = '';
-    unless ( $ctx->var('google_maps_header') ) {
-        $res .= $ctx->tag( 'geotype:mapheader', { infowindow => 1, zoomtofit => $args->{zoomtofit} }, {} );
-    }
+
+    my $blog_id = $args->{blog_id};
     my $plugin = MT->component('geotype');
     my $config = $plugin->get_config_hash( 'blog:' . $blog_id );
     $height = $config->{interactive_map_height} unless ($height);
@@ -417,7 +391,8 @@ sub _hdlr_archivedetailmap {
     my $location_json = @locations ? JSON::objToJson( \@locations ) : '[]';
     my $wikipedia = $args->{wikipedia} || '';
     my $panoramio = $args->{panoramio} || 0;
-    $res .= qq{
+    my $map_id = 'detailmap';
+    my $res = qq{
         <script type='text/javascript'>
             geo_type_maps["$map_id"] = new Object();
             geo_type_maps["$map_id"].locations = $location_json;
@@ -426,6 +401,43 @@ sub _hdlr_archivedetailmap {
         </script>
         <div id='$map_id' geotype:map='$map_id' style="height: ${height}px; width: ${width}px"></div>
     };
+    return $res;
+}
+
+# called from an archive, this will show entry details in the infowindow bubble
+sub _hdlr_archivedetailmap {
+    my ( $ctx, $args, $cond ) = @_;
+
+    my @assets;
+    my @ids;
+    my $blog_id = $ctx->stash('blog_id');
+    my $map_id;
+    my $loc_options = {};
+    my $entries = $ctx->stash('entries') || [];
+    my $tmpl;
+    if ( $args->{tmpl_id} ) {
+        $tmpl = MT::Template->load( $args->{tmpl_id} );
+    }
+    else {
+        my $detail_text = $args->{tmpl};
+        $tmpl = MT::Template->new;
+        $tmpl->text($detail_text);
+    }
+
+    return $ctx->error("Unable to load detail template for GeoType archivedetailmap tag") unless ( defined $tmpl );
+
+    require MT::Util;
+    my $title = $ctx->tag( 'archivetitle', {}, $cond );
+    $title  = MT::Util::dirify($title);
+    $map_id = 'archive-' . $title;
+
+    my $res = '';
+    unless ( $ctx->var('google_maps_header') ) {
+        $res .= $ctx->tag( 'geotype:mapheader', { infowindow => 1, zoomtofit => $args->{zoomtofit} }, {} );
+    }
+    $args->{blog_id} = $blog_id;
+    $res .= detailmap_for_entries($args, $cond, $tmpl, $entries);
+    return $res;
 }
 
 # this will show entry details in the infowindow bubble
@@ -488,65 +500,13 @@ sub _hdlr_detailmap {
     require MT::Util;
     $map_id = 'detailmap';
 
-    require GeoType::LocationAsset;
-
-    my $width  = $args->{width};
-    my $height = $args->{height};
-    my $square = $args->{square};
-    require GeoType::Util;
     my $res = '';
     unless ( $ctx->var('google_maps_header') ) {
         $res .= $ctx->tag( 'geotype:mapheader', { infowindow => 1, zoomtofit => $args->{zoomtofit} }, {} );
     }
-    my $plugin = MT->component('geotype');
-    my $config = $plugin->get_config_hash( 'blog:' . $blog_id );
-    $height = $config->{interactive_map_height} unless ($height);
-    $width  = $config->{interactive_map_width}  unless ($width);
-    my @locations;
-    for my $e (@$entries) {
-        my $ctx = MT::Template::Context->new;
-        $ctx->stash( 'entry', $e );
-        $ctx->stash( 'blog',  $e->blog );
-
-        my $location = MT::Asset->load(
-            { class => 'location' },
-            {
-                join => MT::ObjectAsset->join_on(
-                    undef,
-                    {
-                        asset_id  => \'= asset_id',
-                        object_ds => 'entry',
-                        object_id => $e->id,
-                        $args->{all} ? () : ( embedded => 0 )
-                    }
-                )
-            }
-        );
-        if ($location) {
-            my $location_hash = {
-                id       => $location->id,
-                name     => $location->name,
-                geometry => $location->geometry,
-                lat      => $location->latitude,
-                lng      => $location->longitude,
-                html     => $tmpl->build( $ctx, $cond )
-            };
-            push @locations, $location_hash;
-        }
-    }
-    require JSON;
-    my $location_json = @locations ? JSON::objToJson( \@locations ) : '[]';
-    my $wikipedia = $args->{wikipedia} || '';
-    my $panoramio = $args->{panoramio} || 0;
-    $res .= qq{
-        <script type='text/javascript'>
-            geo_type_maps["$map_id"] = new Object();
-            geo_type_maps["$map_id"].locations = $location_json;
-            geo_type_maps["$map_id"].wikipedia = '$wikipedia';
-            geo_type_maps["$map_id"].panoramio = $panoramio;
-        </script>
-        <div id='$map_id' geotype:map='$map_id' style="height: ${height}px; width: ${width}px"></div>
-    };
+    $args->{blog_id} = $blog_id;
+    $res .= detailmap_for_entries($args, $cond, $tmpl, $entries);
+    return $res;
 }
 
 sub _hdlr_map {
