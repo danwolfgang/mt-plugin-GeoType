@@ -23,7 +23,14 @@ sub create_location {
 
     my $entry_insert = $app->param('entry_insert');
     my $edit_field   = $app->param('edit_field');
-    $app->load_tmpl( 'dialog/create_location.tmpl', { entry_insert => $entry_insert, edit_field => $edit_field } );
+    $app->load_tmpl(
+        'dialog/create_location.tmpl', 
+        { 
+            entry_insert   => $entry_insert, 
+            edit_field     => $edit_field,
+            google_api_key => GeoType::Util::get_google_api_key($app->blog)
+        }
+    );
 }
 
 sub verify_location {
