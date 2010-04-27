@@ -1,8 +1,8 @@
 id: GeoType
 name: GeoType
 key: GeoType
-version: 1.9.4
-description: GeoType allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth. GeoType settings are on a per-blog setting, so you'll need to set this up in each weblog you administer.
+version: 1.9.5
+description: "GeoType allows you to specify the location for any blog post and inserting maps, coordinates, location names in the post. You can also add GeoRSS to your RSS or Atom syndication feeds, and KML to visualize blog post locations in GoogleEarth. GeoType settings are on a per-blog setting, so you'll need to set this up in each weblog you administer."
 author_name: Six Apart, Ltd.
 author_link: http://www.sixapart.com/
 schema_version: 2.0

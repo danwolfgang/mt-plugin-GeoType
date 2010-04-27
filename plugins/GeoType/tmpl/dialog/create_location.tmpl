@@ -4,6 +4,28 @@
 <script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
 <script type="text/javascript" src="<mt:var name="static_uri">js/tc/json.js"></script>
 <script type="text/javascript" src="<mt:var name="static_uri">js/dialog.js"></script>
+<script src="http://maps.google.com/maps?file=api&amp;v=2" type="text/javascript"></script>
+<script type="text/javascript">
+    var map = null;
+    var geocoder = null;
+    function initialize() {
+        if (GBrowserIsCompatible()) {
+            map = new GMap2(document.getElementById("map_canvas"));
+            map.setCenter(new GLatLng(0,0),1);
+            geocoder = new GClientGeocoder();
+            map.addMapType(G_PHYSICAL_MAP);
+            map.addControl(new GSmallMapControl());
+            map.addControl(new GMapTypeControl());
+            //map.enableScrollWheelZoom();
+            GEvent.addListener(map, "moveend", function() {
+            });
+        }
+    }
+    function geoCode() {
+        var coords = map.getCenter();
+        document.getElementById('location_address').value = coords.lat() + ',' + coords.lng();
+    }
+</script>
 </mt:setvarblock>
 
 <mt:include name="dialog/header.tmpl">
@@ -21,14 +43,27 @@
 <mtapp:setting
     id="location_address"
     label_class="top-label"
-    label="Address">
+    label="Specify an address">
     <input type="text" class="full-width" name="location_address" id="location_address" value="" />
+</mtapp:setting>
+
+<mtapp:setting
+    id="location_map"
+    label_class="top-label"
+    label="Or center the map on the selected location">
+    <div id="mapstuff">
+        <div id="map_canvas" style="width:605px; height:298px; border:1px solid #333;"></div>
+        <script type="text/javascript">
+            initialize();
+        </script>
+    </div>
 </mtapp:setting>
 
 <div class="actions-bar">
     <div class="actions-bar-inner pkg actions">
         <button
             type="submit"
+            onclick="geoCode();"
             title="<__trans phrase="Geocode">"
             class="primary-button"
             ><__trans phrase="Geocode"></button>
