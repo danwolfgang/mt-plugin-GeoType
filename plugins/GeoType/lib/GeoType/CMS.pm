@@ -59,6 +59,7 @@ sub verify_location {
             #gecoded_url        => $url,
             location_latitude  => $coords[1],
             location_longitude => $coords[0],
+            google_api_key     => GeoType::Util::get_google_api_key($app->blog)
         }
     );
 }
