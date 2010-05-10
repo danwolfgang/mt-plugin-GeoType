@@ -4,6 +4,23 @@
 <script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
 <script type="text/javascript" src="<mt:var name="static_uri">js/tc/json.js"></script>
 <script type="text/javascript" src="<mt:var name="static_uri">js/dialog.js"></script>
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=<mt:Var name="google_api_key">" type="text/javascript"></script>
+<script type="text/javascript">
+    var map = null;
+    var geocoder = null;
+    function initialize() {
+        if (GBrowserIsCompatible()) {
+            map = new GMap2(document.getElementById("map_canvas"));
+            var point = new GLatLng(<mt:Var name="location_latitude">,<mt:Var name="location_longitude">);
+            map.setCenter(point,17);
+            map.addMapType(G_PHYSICAL_MAP);
+            map.addControl(new GSmallMapControl());
+            map.addControl(new GMapTypeControl());
+            var marker = new GMarker(point);
+            map.addOverlay(marker);
+        }
+    }
+</script>
 </mt:setvarblock>
 
 <mt:include name="dialog/header.tmpl">
@@ -36,7 +53,14 @@
     <input type="hidden" name="location_longitude" value="<$mt:var name="location_longitude" escape="html"$>" />
 </mtapp:setting>
 
-<img src="<mt:var name="gecoded_url">" />
+<mtapp:setting
+    id="location_map"
+    label_class="top-label">
+    <div id="map_canvas" style="width:605px; height:274px; border:1px solid #333;"></div>
+    <script type="text/javascript">
+        initialize();
+    </script>
+</mtapp:setting>
 
 <div class="actions-bar">
     <div class="actions-bar-inner pkg actions">

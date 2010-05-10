@@ -48,7 +48,7 @@ sub verify_location {
     $la->latitude( $coords[1] );
     $la->longitude( $coords[0] );
 
-    my $url = $la->thumbnail_url( Width => 600, Height => int( 600 / 1.61 ) );
+    #my $url = $la->thumbnail_url( Width => 600, Height => int( 600 / 1.61 ) );
 
     $app->load_tmpl(
         'dialog/verify_location.tmpl',
@@ -56,7 +56,7 @@ sub verify_location {
             edit_field         => $edit_field,
             entry_insert       => $entry_insert,
             location_address   => $address,
-            gecoded_url        => $url,
+            #gecoded_url        => $url,
             location_latitude  => $coords[1],
             location_longitude => $coords[0],
         }

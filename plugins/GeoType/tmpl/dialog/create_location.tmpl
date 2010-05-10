@@ -8,22 +8,54 @@
 <script type="text/javascript">
     var map = null;
     var geocoder = null;
+    var overlay = null;
+    var latlng = null;
     function initialize() {
         if (GBrowserIsCompatible()) {
             map = new GMap2(document.getElementById("map_canvas"));
             map.setCenter(new GLatLng(0,0),1);
-            geocoder = new GClientGeocoder();
             map.addMapType(G_PHYSICAL_MAP);
             map.addControl(new GSmallMapControl());
             map.addControl(new GMapTypeControl());
-            //map.enableScrollWheelZoom();
-            GEvent.addListener(map, "moveend", function() {
+            geocoder = new GClientGeocoder();
+
+            // Add a marker if a visitor clicks the map.
+            GEvent.addListener(map, "click", function(overlay,latlng) {
+                if (latlng) {
+                    map.clearOverlays();
+                    marker = new GMarker(latlng);
+                    map.addOverlay( marker );
+                    document.getElementById('location_address').value = latlng;
+                }
             });
         }
     }
-    function geoCode() {
-        var coords = map.getCenter();
-        document.getElementById('location_address').value = coords.lat() + ',' + coords.lng();
+
+    // If the user types an address into the location field, find the location.
+    function showLocation(address) {
+        geocoder.getLatLng(
+            address,
+            function(point) {
+                if (!point) {
+                    alert(address + " not found");
+                } else {
+                    map.clearOverlays();
+                    map.setCenter(point, 17);
+                    var marker = new GMarker(point);
+                    map.addOverlay(marker);
+                }
+            }
+        );
+    }
+    
+    function preSubmitCheck() {
+        if (document.getElementById('location_address').value != '') {
+            document.getElementById('location-form').submit();
+        }
+        else {
+            alert('Specify an address or click a map point to geocode a location.');
+            return false;
+        }
     }
 </script>
 </mt:setvarblock>
@@ -44,26 +76,24 @@
     id="location_address"
     label_class="top-label"
     label="Specify an address">
-    <input type="text" class="full-width" name="location_address" id="location_address" value="" />
+    <input type="text" class="full-width" name="location_address" id="location_address" value="" onkeyup="showLocation(this.value);return false;" />
 </mtapp:setting>
 
 <mtapp:setting
     id="location_map"
     label_class="top-label"
-    label="Or center the map on the selected location">
-    <div id="mapstuff">
-        <div id="map_canvas" style="width:605px; height:298px; border:1px solid #333;"></div>
-        <script type="text/javascript">
-            initialize();
-        </script>
-    </div>
+    label="Or click to specify a location">
+    <div id="map_canvas" style="width:605px; height:298px; border:1px solid #333;"></div>
+    <script type="text/javascript">
+        initialize();
+    </script>
 </mtapp:setting>
 
 <div class="actions-bar">
     <div class="actions-bar-inner pkg actions">
         <button
             type="submit"
-            onclick="geoCode();"
+            onclick="preSubmitCheck(); return false"
             title="<__trans phrase="Geocode">"
             class="primary-button"
             ><__trans phrase="Geocode"></button>
