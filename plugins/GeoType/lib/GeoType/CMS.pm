@@ -289,6 +289,8 @@ sub param_asset_insert {
 sub post_save_entry {
     my ( $cb, $app, $entry ) = @_;
 
+    return unless $app->param('location_list');
+
     my %locations;
     my $location_list = $app->param('location_list');
     require JSON;
